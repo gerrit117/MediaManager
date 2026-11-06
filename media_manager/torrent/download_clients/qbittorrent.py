@@ -57,45 +57,23 @@ class QbittorrentDownloadClient(AbstractDownloadClient):
             log.exception("Failed to log into qbittorrent")
             raise
 
-        categories = self.api_client.torrents_categories()
-        log.debug(f"Found following categories in qBittorrent: {categories}")
-        if self.config.category_name in categories:
-            category = categories.get(self.config.category_name)
-            if category.get("savePath") == self.config.category_save_path:
-                log.debug(
-                    f"Category '{self.config.category_name}' already exists in qBittorrent with the correct save path."
-                )
-                return
-            # category exists but with a different save path, attempt to update it
-            log.debug(
-                f"Category '{self.config.category_name}' already exists in qBittorrent but with a different save path. Attempting to update it."
+        try:
+            self.api_client.torrents_create_category(
+                name=self.config.category_name,
+                save_path=self.config.category_save_path
+                if self.config.category_save_path != ""
+                else None,
             )
+        except Conflict409Error:
             try:
                 self.api_client.torrents_edit_category(
                     name=self.config.category_name,
-                    save_path=self.config.category_save_path,
+                    save_path=self.config.category_save_path
+                    if self.config.category_save_path != ""
+                    else None,
                 )
-            except Conflict409Error:
-                log.exception(
-                    f"Attempt to update category '{self.config.category_name}' in qBittorrent with a different save"
-                    f" path failed. The configured save path and the save path saved in Qbittorrent differ,"
-                    f" manually update it in the qBittorrent WebUI or change the save path in the MediaManager"
-                    f" config to match the one in qBittorrent."
-                )
-        else:
-            # create category if it doesn't exist
-            log.debug(
-                f"Category '{self.config.category_name}' does not exist in qBittorrent. Attempting to create it."
-            )
-            try:
-                self.api_client.torrents_create_category(
-                    name=self.config.category_name,
-                    save_path=self.config.category_save_path,
-                )
-            except Conflict409Error:
-                log.exception(
-                    f"Attempt to create category '{self.config.category_name}' in qBittorrent failed. The category already exists but was not found in the initial category list, manually check if the category exists in the qBittorrent WebUI or change the category name in the MediaManager config."
-                )
+            except Exception:
+                log.exception("Error on updating MediaManager category in qBittorrent")
 
     def download_torrent(self, indexer_result: IndexerQueryResult) -> Torrent:
         """
@@ -117,16 +95,16 @@ class QbittorrentDownloadClient(AbstractDownloadClient):
         finally:
             self.api_client.auth_log_out()
 
-        # Check if torrent was successfully added or queued
-        success = (
-            answer == "Ok." or
-            (hasattr(answer, "success_count") and answer.success_count > 0) or
-            (hasattr(answer, "pending_count") and answer.pending_count > 0)
-        )
-
-        if not success:
-            log.error(f"Failed to download torrent, no success indicators in API Answer: {answer}")
-            msg = f"Failed to download torrent, no success indicators in API Answer: {answer}"
+        accepted = answer == "Ok." if isinstance(answer, str) else False
+        if isinstance(answer, dict):
+            accepted = any(isinstance(answer.get(key), (int, float)) and answer[key] > 0 for key in ('pending_count', 'success_count'))
+        elif not isinstance(answer, str):
+            accepted = any(isinstance(getattr(answer, key, None), (int, float)) and getattr(answer, key) > 0 for key in ('pending_count', 'success_count'))
+        if not accepted:
+            log.error(
+                f"Failed to download torrent, API-Answer isn't 'Ok.'; API Answer: {answer}"
+            )
+            msg = f"Failed to download torrent, API-Answer isn't 'Ok.'; API Answer: {answer}"
             raise RuntimeError(msg)
 
         log.info(f"Successfully processed torrent: {indexer_result.title}")
@@ -212,3 +190,23 @@ class QbittorrentDownloadClient(AbstractDownloadClient):
             self.api_client.torrents_resume(torrent_hashes=torrent.hash)
         finally:
             self.api_client.auth_log_out()
+
+    def get_progress(self, torrents: list[Torrent]) -> dict:
+        if not torrents:
+            return {}
+        self.api_client.auth_log_in()
+        try:
+            rows = self.api_client.torrents_info(torrent_hashes=[t.hash for t in torrents])
+        finally:
+            self.api_client.auth_log_out()
+        jobs = {t.hash.lower(): t for t in torrents}
+        result = {}
+        for row in rows:
+            job = jobs.get(row['hash'].lower())
+            if job is None:
+                continue
+            state = row['state']
+            status = 'Completed' if state in self.FINISHED_STATE else 'Failed' if state in self.ERROR_STATE else 'Paused' if state in {'pausedDL', 'stoppedDL'} else 'Queued' if state == 'queuedDL' else 'Downloading'
+            percent = row.get('progress')
+            result[str(job.id)] = {'percent': min(100.0, max(0.0, float(percent) * 100)) if percent is not None else None, 'state': status, 'client': 'qBittorrent', 'usenet': False}
+        return result

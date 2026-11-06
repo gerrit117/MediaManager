@@ -114,6 +114,8 @@ class TransmissionDownloadClient(AbstractDownloadClient):
                 log.warning(f"Torrent not found in Transmission: {torrent.hash}")
                 return TorrentStatus.unknown
 
+            if transmission_torrent.status == 'stopped' and transmission_torrent.percent_done >= 1:
+                return TorrentStatus.finished
             status = self.STATUS_MAPPING.get(
                 transmission_torrent.status, TorrentStatus.unknown
             )
@@ -156,3 +158,18 @@ class TransmissionDownloadClient(AbstractDownloadClient):
         except Exception:
             log.exception("Failed to resume torrent")
             raise
+
+    def get_progress(self, torrents: list[Torrent]) -> dict:
+        if not torrents:
+            return {}
+        rows = self._client.get_torrents(ids=[t.hash for t in torrents])
+        jobs = {t.hash.lower(): t for t in torrents}
+        result = {}
+        for row in rows:
+            job = jobs.get(row.hash_string.lower())
+            if job is None:
+                continue
+            percent = float(row.percent_done)
+            state = 'Failed' if row.error else 'Completed' if percent >= 1 else 'Paused' if row.status == 'stopped' else 'Queued' if row.status == 'download pending' else 'Downloading'
+            result[str(job.id)] = {'percent': min(100.0, max(0.0, percent * 100)), 'state': state, 'client': 'Transmission', 'usenet': False}
+        return result

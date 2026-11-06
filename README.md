@@ -1,7 +1,19 @@
+# MediaManager Usenet edition
+
+This fork extends the v1.12.3 release of [MediaManager](https://github.com/maxdorninger/MediaManager). It keeps the built-in movie/season requests, qBittorrent and Transmission clients, and adds direct Newznab support, reliable SABnzbd handling and a responsive download interface.
+
+**This is an independent fork, not an official upstream release.** Requests remain available here; the later upstream change removing them is intentionally excluded. Existing configuration and database schema are retained.
+
+- [Changes, reviewed upstream PRs and limitations](docs/usenet-edition.md)
+- [Build and configure](docs/usenet-edition.md#build-and-configure)
+- [Original project documentation below](#mediamanager)
+
+---
+
 <br />
 <div align="center">
   <a href="https://maxdorninger.github.io/MediaManager/">
-    <img src="https://raw.githubusercontent.com/maxdorninger/MediaManager/refs/heads/master/docs/assets/logo-with-text.svg" alt="Logo" width="800">
+    <img src="https://raw.githubusercontent.com/maxdorninger/MediaManager/refs/heads/master/web/static/logo.svg" alt="Logo" width="260" height="260">
   </a>
 
 <h3 align="center">MediaManager</h3>

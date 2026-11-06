@@ -38,7 +38,6 @@ dbname = "MediaManager"
 
 [auth]
 email_password_resets = false # if true, you also need to set up SMTP (notifications.smtp_config)
-registration_enabled = false # if false, the sign-up page is disabled and OIDC will not auto-create new users
 
 token_secret = "CHANGE_ME_GENERATE_RANDOM_STRING" # generate a random string with "openssl rand -hex 32", e.g. here https://www.cryptool.org/en/cto/openssl/
 session_lifetime = 86400  # this is how long you will be logged in after loggin in, in seconds
@@ -139,7 +138,7 @@ negate = false
 
 [[indexers.title_scoring_rules]]
 name = "avoid_cam"
-keywords = ["cam", "camrip", "bdscr", "ddc", "dvdscreener","dvdscr", "hdcam", "hdtc", "hdts", "scr", "screener","telesync", "ts", "webscreener", "tc", "telecine", "tvrip"]
+keywords = ["cam", "ts"]
 score_modifier = -10000
 negate = false
 

@@ -8,6 +8,7 @@ from dataclasses import dataclass
 import requests
 
 from media_manager.config import MediaManagerConfig
+from media_manager.indexer.categories import selected_categories
 from media_manager.indexer.indexers.generic import GenericIndexer
 from media_manager.indexer.indexers.torznab_mixin import TorznabMixin
 from media_manager.indexer.schemas import IndexerQueryResult
@@ -168,6 +169,9 @@ class Jackett(GenericIndexer, TorznabMixin):
         query_params = self.__get_optimal_query_parameters(
             indexer=indexer, session=session, params=params
         )
+        categories = selected_categories("jackett", indexer, params["t"] == "tvsearch")
+        if categories:
+            query_params["cat"] = ",".join(str(category) for category in categories)
         response = session.get(url, timeout=self.timeout_seconds, params=query_params)
         log.debug(f"Indexer {indexer} url: {response.url}")
 

@@ -5,14 +5,14 @@
 
 	import * as Table from '$lib/components/ui/table';
 	import client from '$lib/api';
-	import type { Movie } from '$lib/api/api';
+	import type { components } from '$lib/api/api';
 	import SelectFilePathSuffixDialog from '$lib/components/download-dialogs/select-file-path-suffix-dialog.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import TorrentTable from '$lib/components/download-dialogs/torrent-table.svelte';
 	import SearchTabs from '$lib/components/download-dialogs/search-tabs.svelte';
 	import DownloadDialogWrapper from '$lib/components/download-dialogs/download-dialog-wrapper.svelte';
 
-	let { movie }: { movie: Movie } = $props();
+	let { movie }: { movie: components['schemas']['Movie'] } = $props();
 	let dialogueState = $state(false);
 	let torrentsError: string | null = $state(null);
 	let queryOverride: string = $state('');
@@ -35,7 +35,7 @@
 
 	async function downloadTorrent(result_id: string) {
 		torrentsError = null;
-		const { data, response } = await client.POST(`/api/v1/movies/{movie_id}/torrents`, {
+		const { data, response, error } = await client.POST(`/api/v1/movies/{movie_id}/torrents`, {
 			params: {
 				path: {
 					movie_id: movie.id!
@@ -52,13 +52,13 @@
 			torrentsError = errorMessage;
 			if (dialogueState) toast.info(errorMessage);
 		} else if (!response.ok) {
-			const errorMessage = `Failed to download torrent for movie ${movie.id}: ${response.statusText}`;
+			const errorMessage = (error as { detail?: string } | undefined)?.detail ?? `Downloadmanager-Anfrage fehlgeschlagen: ${response.statusText}`;
 			console.error(errorMessage);
 			torrentsError = errorMessage;
 			toast.error(errorMessage);
 		} else {
-			console.log('Downloading torrent:', data);
-			toast.success('Torrent download started successfully!');
+			console.log('Download submitted:', data);
+			toast.success('Download an den Downloadmanager übergeben.');
 		}
 		await invalidateAll();
 	}
@@ -80,10 +80,10 @@
 			})
 			.then((data) => data?.data)
 			.finally(() => (isLoading = false));
-		toast.info('Searching for torrents...');
+		toast.info('Searching indexers...');
 
 		torrentsData = await torrentsPromise;
-		toast.info('Found ' + torrentsData?.length + ' torrents.');
+		toast.info('Found ' + torrentsData?.length + ' releases.');
 	}
 </script>
 
@@ -91,7 +91,7 @@
 	bind:open={dialogueState}
 	triggerText="Download Movie"
 	title="Download a Movie"
-	description="Search and download torrents for a specific season or season packs."
+	description="Search indexers and send releases to your download manager for a specific season or season packs."
 >
 	<SearchTabs
 		bind:tabState
@@ -101,7 +101,7 @@
 		advancedModeHelpText="The custom query will override the default search string like 'A Minecraft Movie (2025)'."
 	>
 		{#snippet basicModeContent()}
-			<Button disabled={isLoading} class="w-fit" onclick={search}>Search for Torrents</Button>
+			<Button disabled={isLoading} class="w-fit" onclick={search}>Search indexers</Button>
 		{/snippet}
 	</SearchTabs>
 	{#if torrentsError}

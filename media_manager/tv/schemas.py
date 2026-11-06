@@ -2,9 +2,9 @@ import typing
 import uuid
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from media_manager.common.schemas import BaseMedia, BaseMediaFile
+from media_manager.auth.schemas import UserRead
 from media_manager.torrent.models import Quality
 from media_manager.torrent.schemas import TorrentId, TorrentStatus
 
@@ -14,6 +14,7 @@ EpisodeId = typing.NewType("EpisodeId", UUID)
 
 SeasonNumber = typing.NewType("SeasonNumber", int)
 EpisodeNumber = typing.NewType("EpisodeNumber", int)
+SeasonRequestId = typing.NewType("SeasonRequestId", UUID)
 
 
 class Episode(BaseModel):
@@ -23,7 +24,6 @@ class Episode(BaseModel):
     number: EpisodeNumber
     external_id: int
     title: str
-    overview: str | None = None
 
 
 class Season(BaseModel):
@@ -40,20 +40,74 @@ class Season(BaseModel):
     episodes: list[Episode]
 
 
-class Show(BaseMedia):
+class Show(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: ShowId = Field(default_factory=lambda: ShowId(uuid.uuid4()))
 
+    name: str
+    overview: str
+    year: int | None
+
     ended: bool = False
+    external_id: int
+    metadata_provider: str
+
     continuous_download: bool = False
+    library: str = "Default"
+    original_language: str | None = None
+
+    imdb_id: str | None = None
 
     seasons: list[Season]
 
 
-class EpisodeFile(BaseMediaFile):
-    episode_id: EpisodeId
+class SeasonRequestBase(BaseModel):
+    min_quality: Quality
+    wanted_quality: Quality
+
+    @model_validator(mode="after")
+    def ensure_wanted_quality_is_eq_or_gt_min_quality(self) -> "SeasonRequestBase":
+        if self.min_quality.value < self.wanted_quality.value:
+            msg = "wanted_quality must be equal to or lower than minimum_quality."
+            raise ValueError(msg)
+        return self
 
 
-class PublicEpisodeFile(EpisodeFile):
+class CreateSeasonRequest(SeasonRequestBase):
+    season_id: SeasonId
+
+
+class UpdateSeasonRequest(SeasonRequestBase):
+    id: SeasonRequestId
+
+
+class SeasonRequest(SeasonRequestBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: SeasonRequestId = Field(default_factory=lambda: SeasonRequestId(uuid.uuid4()))
+
+    season_id: SeasonId
+    requested_by: UserRead | None = None
+    authorized: bool = False
+    authorized_by: UserRead | None = None
+
+
+class RichSeasonRequest(SeasonRequest):
+    show: Show
+    season: Season
+
+
+class SeasonFile(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    season_id: SeasonId
+    quality: Quality
+    torrent_id: TorrentId | None
+    file_path_suffix: str
+
+
+class PublicSeasonFile(SeasonFile):
     downloaded: bool = False
 
 
@@ -69,7 +123,6 @@ class RichSeasonTorrent(BaseModel):
 
     file_path_suffix: str
     seasons: list[SeasonNumber]
-    episodes: list[EpisodeNumber]
 
 
 class RichShowTorrent(BaseModel):
@@ -80,18 +133,6 @@ class RichShowTorrent(BaseModel):
     year: int | None
     metadata_provider: str
     torrents: list[RichSeasonTorrent]
-
-
-class PublicEpisode(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    id: EpisodeId
-    number: EpisodeNumber
-
-    downloaded: bool = False
-    title: str
-    overview: str | None = None
-
-    external_id: int
 
 
 class PublicSeason(BaseModel):
@@ -106,7 +147,7 @@ class PublicSeason(BaseModel):
 
     external_id: int
 
-    episodes: list[PublicEpisode]
+    episodes: list[Episode]
 
 
 class PublicShow(BaseModel):

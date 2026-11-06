@@ -2,7 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import FilePathSuffixSelector from '$lib/components/download-dialogs/file-path-suffix-selector.svelte';
-	import type { Movie, Show } from '$lib/api/api';
+	import type { components } from '$lib/api/api';
 
 	let {
 		filePathSuffix = $bindable(),
@@ -10,7 +10,7 @@
 		callback
 	}: {
 		filePathSuffix: string;
-		media: Movie | Show;
+		media: components['schemas']['Movie'] | components['schemas']['Show'];
 		callback: () => void;
 	} = $props();
 	let dialogOpen = $state(false);
@@ -29,13 +29,13 @@
 		<Dialog.Header>
 			<Dialog.Title class="mb-1 text-xl font-semibold">Set File Path Suffix</Dialog.Title>
 			<Dialog.Description class="mb-4 text-sm">
-				Set the filepath suffix for downloaded files of the torrent.
+				Set the filename suffix for the downloaded media files.
 			</Dialog.Description>
 		</Dialog.Header>
 		<FilePathSuffixSelector bind:filePathSuffix {media} />
 		<div class="mt-8 flex justify-between gap-2">
 			<Button onclick={() => (dialogOpen = false)} variant="secondary">Cancel</Button>
-			<Button onclick={() => onDownload()}>Download Torrent</Button>
+			<Button onclick={() => onDownload()}>An Downloadmanager senden</Button>
 		</div>
 	</Dialog.Content>
 </Dialog.Root>

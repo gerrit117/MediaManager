@@ -16,5 +16,5 @@ class Torrent(Base):
     hash: Mapped[str]
     usenet: Mapped[bool]
 
-    episode_files = relationship("EpisodeFile", back_populates="torrent")
+    season_files = relationship("SeasonFile", back_populates="torrent")
     movie_files = relationship("MovieFile", back_populates="torrent")

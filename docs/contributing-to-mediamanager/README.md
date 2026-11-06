@@ -1,2 +1,0 @@
-# contributing-to-mediamanager
-

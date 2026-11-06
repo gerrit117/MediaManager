@@ -32,8 +32,12 @@
 						url: resolve('/dashboard/tv/add-show', {})
 					},
 					{
-						title: 'Torrents',
+						title: 'Downloads',
 						url: resolve('/dashboard/tv/torrents', {})
+					},
+					{
+						title: 'Requests',
+						url: resolve('/dashboard/tv/requests', {})
 					}
 				]
 			},
@@ -48,8 +52,12 @@
 						url: resolve('/dashboard/movies/add-movie', {})
 					},
 					{
-						title: 'Torrents',
+						title: 'Downloads',
 						url: resolve('/dashboard/movies/torrents', {})
+					},
+					{
+						title: 'Requests',
+						url: resolve('/dashboard/movies/requests', {})
 					}
 				]
 			}

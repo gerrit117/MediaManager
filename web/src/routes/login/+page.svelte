@@ -1,8 +1,8 @@
 <script lang="ts">
 	import LoginCard from '$lib/components/auth/login-card.svelte';
 	import { page } from '$app/state';
-	import type { AuthMetadata } from '$lib/api/api';
-	let loginMetaData: AuthMetadata = $derived(page.data.loginData);
+	import type { components } from '$lib/api/api';
+	let loginMetaData: components['schemas']['AuthMetadata'] = $derived(page.data.loginData);
 </script>
 
 <svelte:head>
@@ -14,8 +14,5 @@
 </svelte:head>
 
 <main>
-	<LoginCard
-		oauthProviderNames={loginMetaData.oauth_providers}
-		registrationEnabled={loginMetaData.registration_enabled}
-	/>
+	<LoginCard oauthProviderNames={loginMetaData.oauth_providers} />
 </main>

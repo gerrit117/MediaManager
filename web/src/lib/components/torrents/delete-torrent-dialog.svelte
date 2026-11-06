@@ -7,7 +7,8 @@
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { invalidateAll } from '$app/navigation';
 
-	let { torrentId, torrentName }: { torrentId: string; torrentName: string } = $props();
+	let { torrentId, torrentName, usenet = false }: { torrentId: string; torrentName: string; usenet?: boolean } = $props();
+	let label = $derived(usenet ? 'NZB-Download' : 'Torrent');
 	let dialogueState = $state(false);
 	let deleteFiles = $state(false);
 
@@ -23,9 +24,9 @@
 			}
 		});
 		if (error) {
-			toast.error(`Failed to delete torrent: ${error}`);
+			toast.error(`Download konnte nicht gelöscht werden: ${error}`);
 		} else {
-			toast.success('Torrent deleted successfully!');
+			toast.success('Download gelöscht.');
 			dialogueState = false;
 		}
 		await invalidateAll();
@@ -33,12 +34,12 @@
 </script>
 
 <Dialog.Root bind:open={dialogueState}>
-	<Dialog.Trigger class={buttonVariants({ variant: 'destructive' })}>Delete Torrent</Dialog.Trigger>
+	<Dialog.Trigger aria-label={`${label} löschen`} class={buttonVariants({ variant: 'outline' }) + ' text-destructive hover:bg-destructive/10'}>Löschen</Dialog.Trigger>
 	<Dialog.Content>
 		<Dialog.Header>
-			<Dialog.Title>Delete a Torrent</Dialog.Title>
+			<Dialog.Title>{label} löschen</Dialog.Title>
 			<Dialog.Description>
-				Delete Torrent "{torrentName}". This action cannot be undone!
+				{label} löschen "{torrentName}". This action cannot be undone!
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="flex w-full max-w-sm items-center space-x-2">
@@ -55,7 +56,7 @@
 
 		<Dialog.Footer>
 			<Button onclick={() => (dialogueState = false)}>Cancel</Button>
-			<Button onclick={() => deleteTorrent()} variant="destructive">Delete Torrent</Button>
+			<Button onclick={() => deleteTorrent()} variant="destructive">{label} löschen</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>

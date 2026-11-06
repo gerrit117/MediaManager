@@ -5,21 +5,22 @@
 	import * as Table from '$lib/components/ui/table/index.js';
 	import { ImageOff } from 'lucide-svelte';
 	import { getContext } from 'svelte';
-	import type { PublicMovie, PublicMovieFile, UserRead } from '$lib/api/api';
+	import type { components } from '$lib/api/api';
 	import { getFullyQualifiedMediaName, getTorrentQualityString } from '$lib/utils';
 	import { page } from '$app/state';
 	import TorrentTable from '$lib/components/torrents/torrent-table.svelte';
 	import MediaPicture from '$lib/components/media-picture.svelte';
 	import DownloadMovieDialog from '$lib/components/download-dialogs/download-movie-dialog.svelte';
+	import RequestMovieDialog from '$lib/components/requests/request-movie-dialog.svelte';
 	import LibraryCombobox from '$lib/components/library-combobox.svelte';
 	import { resolve } from '$app/paths';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import DeleteMediaDialog from '$lib/components/delete-media-dialog.svelte';
 	import CheckmarkX from '$lib/components/checkmark-x.svelte';
 
-	let movie: PublicMovie = $derived(page.data.movie);
-	let movieFiles: PublicMovieFile[] = $derived(page.data.movieFiles);
-	let user: () => UserRead = getContext('user');
+	let movie: components['schemas']['PublicMovie'] = $derived(page.data.movie);
+	let movieFiles: components['schemas']['PublicMovieFile'][] = $derived(page.data.movieFiles);
+	let user: () => components['schemas']['UserRead'] = getContext('user');
 </script>
 
 <svelte:head>
@@ -79,7 +80,7 @@
 					<Card.Title>Overview</Card.Title>
 				</Card.Header>
 				<Card.Content>
-					<p class="text-justify text-sm leading-6 hyphens-auto text-muted-foreground">
+					<p class="leading-7 not-first:mt-6">
 						{movie.overview}
 					</p>
 				</Card.Content>
@@ -107,6 +108,7 @@
 					{#if user().is_superuser}
 						<DownloadMovieDialog {movie} />
 					{/if}
+					<RequestMovieDialog {movie} />
 				</Card.Content>
 			</Card.Root>
 		</div>

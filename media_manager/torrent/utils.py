@@ -6,9 +6,9 @@ import shutil
 from pathlib import Path, UnsupportedOperation
 
 import bencoder
+import libtorrent
 import patoolib
 import requests
-import torf
 from pathvalidate import sanitize_filename
 from requests.exceptions import InvalidSchema
 
@@ -18,6 +18,16 @@ from media_manager.indexer.utils import follow_redirects_to_final_torrent_url
 from media_manager.torrent.schemas import Torrent
 
 log = logging.getLogger(__name__)
+
+
+def validate_file_path_suffix(value: str) -> str:
+    from media_manager.exceptions import BadRequestError
+
+    if len(value) > 128 or '..' in value or any(
+        character in value for character in '/\\:<>"|?*'
+    ) or any(ord(character) < 32 for character in value):
+        raise BadRequestError('Der Dateizusatz darf keine Pfadbestandteile oder ungültigen Zeichen enthalten.')
+    return value
 
 
 def list_files_recursively(path: Path = Path()) -> list[Path]:
@@ -63,6 +73,10 @@ def extract_archives(files: list) -> None:
 
 
 def get_torrent_filepath(torrent: Torrent) -> Path:
+    if torrent.usenet:
+        from media_manager.torrent.download_clients.sabnzbd import SabnzbdDownloadClient
+
+        return SabnzbdDownloadClient().get_download_path(torrent)
     return MediaManagerConfig().misc.torrent_directory / torrent.title
 
 
@@ -142,7 +156,7 @@ def get_torrent_hash(torrent: IndexerQueryResult) -> str:
     if torrent.download_url.startswith("magnet:"):
         log.info(f"Parsing torrent with magnet URL: {torrent.title}")
         log.debug(f"Magnet URL: {torrent.download_url}")
-        torrent_hash = torf.Magnet.from_string(torrent.download_url).infohash
+        torrent_hash = str(libtorrent.parse_magnet_uri(torrent.download_url).info_hash)
     else:
         # downloading the torrent file
         log.info(f"Downloading .torrent file of torrent: {torrent.title}")
@@ -157,7 +171,7 @@ def get_torrent_hash(torrent: IndexerQueryResult) -> str:
                 session=requests.Session(),
                 timeout=MediaManagerConfig().indexers.prowlarr.timeout_seconds,
             )
-            return torf.Magnet.from_string(final_url).infohash
+            return str(libtorrent.parse_magnet_uri(final_url).info_hash)
         except Exception:
             log.exception("Failed to download torrent file")
             raise

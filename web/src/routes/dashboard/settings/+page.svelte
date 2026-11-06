@@ -1,4 +1,6 @@
 <script lang="ts">
+	import IndexerCategories from '$lib/components/indexer-categories.svelte';
+	import NewznabSettings from '$lib/components/newznab-settings.svelte';
 	import UserTable from '$lib/components/user-data-table.svelte';
 	import { page } from '$app/state';
 	import * as Card from '$lib/components/ui/card/index.js';
@@ -8,11 +10,14 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import { resolve } from '$app/paths';
-	import type { UserRead } from '$lib/api/api';
+	import type { components } from '$lib/api/api';
 
-	let currentUser: () => UserRead = getContext('user');
-	let users: UserRead[] = $derived(
-		page.data.users.filter((user: UserRead) => user.id !== currentUser().id)
+	let currentUser: () => components['schemas']['UserRead'] = getContext('user');
+	let categoryRevision = $state(0);
+	let users: components['schemas']['UserRead'][] = $derived(
+		page.data.users.filter(
+			(user: components['schemas']['UserRead']) => user.id !== currentUser().id
+		)
 	);
 </script>
 
@@ -43,6 +48,13 @@
 	<h1 class="my-6 scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
 		Settings
 	</h1>
+	{#if currentUser().is_superuser}
+		<nav aria-label="Settings sections" class="flex flex-wrap gap-3">
+			<a href="#me" class="rounded-md border px-4 py-2">Account</a>
+			<a href="#newznab" class="rounded-md border px-4 py-2">Indexers</a>
+			<a href="#users" class="rounded-md border px-4 py-2">Users</a>
+		</nav>
+	{/if}
 	<Card.Root id="me">
 		<Card.Header>
 			<Card.Title>You</Card.Title>
@@ -53,6 +65,10 @@
 		</Card.Content>
 	</Card.Root>
 	{#if currentUser().is_superuser}
+		<NewznabSettings onSaved={() => categoryRevision++} />
+		{#key categoryRevision}
+			<IndexerCategories />
+		{/key}
 		<Card.Root id="users">
 			<Card.Header>
 				<Card.Title>Users</Card.Title>

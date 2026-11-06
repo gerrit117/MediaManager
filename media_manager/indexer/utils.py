@@ -13,6 +13,13 @@ from media_manager.tv.schemas import Show
 log = logging.getLogger(__name__)
 
 
+def _keyword_matches(keyword: str, title: str) -> bool:
+    """Match complete keywords, including punctuation such as DD+."""
+    return bool(keyword.strip()) and re.search(
+        rf"(?<!\w){re.escape(keyword)}(?!\w)", title, re.IGNORECASE
+    ) is not None
+
+
 def evaluate_indexer_query_result(
     query_result: IndexerQueryResult, ruleset: ScoringRuleSet
 ) -> tuple[IndexerQueryResult, bool]:
@@ -24,11 +31,7 @@ def evaluate_indexer_query_result(
                 log.debug(f"Applying rule {rule.name} to {query_result.title}")
                 if (
                     any(
-                        re.search(
-                            rf"\b{re.escape(keyword)}\b",
-                            query_result.title,
-                            re.IGNORECASE,
-                        )
+                        _keyword_matches(keyword, query_result.title)
                         for keyword in rule.keywords
                     )
                     and not rule.negate
@@ -39,11 +42,7 @@ def evaluate_indexer_query_result(
                     query_result.score += rule.score_modifier
                 elif (
                     not any(
-                        re.search(
-                            rf"\b{re.escape(keyword)}\b",
-                            query_result.title,
-                            re.IGNORECASE,
-                        )
+                        _keyword_matches(keyword, query_result.title)
                         for keyword in rule.keywords
                     )
                     and rule.negate
@@ -164,3 +163,5 @@ def follow_redirects_to_final_torrent_url(
         )
         msg = "An error occurred during the request"
         raise RuntimeError(msg) from e
+
+    return current_url

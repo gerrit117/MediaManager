@@ -3,7 +3,7 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { toast } from 'svelte-sonner';
 	import client from '$lib/api';
-	import type { MetaDataProviderSearchResult } from '$lib/api/api';
+	import type { components } from '$lib/api/api';
 	import { Spinner } from '$lib/components/ui/spinner';
 	import SuggestedMediaCard from '$lib/components/import-media/suggested-media-card.svelte';
 	import { invalidateAll } from '$app/navigation';
@@ -16,14 +16,33 @@
 	}: {
 		isTv: boolean;
 		name: string;
-		candidates: MetaDataProviderSearchResult[];
+		candidates: components['schemas']['MetaDataProviderSearchResult'][];
 		children: any;
 	} = $props();
 	let dialogOpen = $state(false);
 	let submitRequestError = $state<string | null>(null);
 	let isImporting = $state<boolean>(false);
+	let searchQuery = $state('');
+	let searchProvider = $state<'tmdb' | 'tvdb'>('tmdb');
+	let searchResults = $state<components['schemas']['MetaDataProviderSearchResult'][] | null>(null);
+	let searchError = $state<string | null>(null);
+	let isSearching = $state(false);
+	$effect(() => {
+		if (!dialogOpen) { searchResults = null; searchQuery = ''; searchError = null; }
+	});
+	async function handleManualSearch() {
+		if (!searchQuery.trim() || isSearching) return;
+		isSearching = true; searchError = null;
+		try {
+			const endpoint = isTv ? '/api/v1/tv/search' : '/api/v1/movies/search';
+			const { data, error } = await client.GET(endpoint, { params: { query: { query: searchQuery.trim(), metadata_provider: searchProvider } } });
+			if (error) { searchError = 'Metadatensuche fehlgeschlagen. Bitte erneut versuchen.'; return; }
+			searchResults = data ?? [];
+		} catch { searchError = 'Metadatensuche nicht erreichbar. Bitte erneut versuchen.'; }
+		finally { isSearching = false; }
+	}
 
-	async function handleImportMedia(media: MetaDataProviderSearchResult) {
+	async function handleImportMedia(media: components['schemas']['MetaDataProviderSearchResult']) {
 		isImporting = true;
 		submitRequestError = null;
 		let errored = null;
@@ -102,11 +121,11 @@
 			class="grid w-full auto-rows-min gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-4"
 		>
 			{#if !isImporting}
-				{#each candidates as candidate (candidate.external_id)}
+				{#each (searchResults ?? candidates) as candidate (candidate.metadata_provider + ":" + candidate.external_id)}
 					<SuggestedMediaCard result={candidate} action={() => handleImportMedia(candidate)}
 					></SuggestedMediaCard>
 				{:else}
-					No {isTv ? 'shows' : 'movies'} were found, change the directory's name for better search results!
+					Kein passender Titel gefunden. Du kannst unten manuell suchen.
 				{/each}
 			{:else}
 				<Spinner class="size-8"></Spinner>
@@ -115,6 +134,12 @@
 				<p class="col-span-full text-center text-sm text-red-500">{submitRequestError}</p>
 			{/if}
 		</div>
+		<form class="flex min-w-0 flex-col gap-2 border-t pt-4 sm:flex-row" onsubmit={(event) => { event.preventDefault(); void handleManualSearch(); }}>
+			<input aria-label="Titel manuell suchen" class="min-w-0 flex-1 rounded-md border bg-background px-3 py-2" placeholder="Titel manuell suchen" bind:value={searchQuery} />
+			<select aria-label="Metadatenanbieter" class="rounded-md border bg-background px-3 py-2" bind:value={searchProvider}><option value="tmdb">TMDB</option><option value="tvdb">TVDB</option></select>
+			<Button type="submit" disabled={isSearching || isImporting || !searchQuery.trim()}>{isSearching ? 'Sucht …' : 'Titel suchen'}</Button>
+		</form>
+		{#if searchError}<p role="alert" class="text-sm text-destructive">{searchError}</p>{/if}
 		<Dialog.Footer>
 			<Button disabled={isImporting} onclick={() => (dialogOpen = false)} variant="outline"
 				>Cancel

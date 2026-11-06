@@ -4,7 +4,7 @@ import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { toast } from 'svelte-sonner';
 import client from '$lib/api';
-import type { Show, Movie } from '$lib/api/api';
+import type { components } from '$lib/api/api';
 
 export const qualityMap: { [key: number]: string } = {
 	1: '4K/UHD',
@@ -48,17 +48,6 @@ export function convertTorrentSeasonRangeToIntegerRange(seasons: number[]): stri
 	} else {
 		console.log('Error parsing season range: ' + seasons);
 		return 'Error parsing season range: ' + seasons;
-	}
-}
-
-export function convertTorrentEpisodeRangeToIntegerRange(episodes: number[]): string {
-	if (episodes.length === 1) return episodes[0]?.toString() || 'unknown';
-	else if (episodes.length > 1) {
-		const lastEpisode = episodes.at(-1);
-		return episodes[0]?.toString() + '-' + (lastEpisode?.toString() || 'unknown');
-	} else {
-		console.log('Error parsing episode range: ' + episodes);
-		return 'Error parsing episode range: ' + episodes;
 	}
 }
 
@@ -110,7 +99,10 @@ export function handleQueryNotificationToast(count: number = 0, query: string = 
 	else if (count == 0) toast.info(`No results found for "${query}".`);
 }
 
-export function saveDirectoryPreview(media: Show | Movie, filePathSuffix: string = '') {
+export function saveDirectoryPreview(
+	media: components['schemas']['Show'] | components['schemas']['Movie'],
+	filePathSuffix: string = ''
+) {
 	let path =
 		'/' +
 		getFullyQualifiedMediaName(media) +

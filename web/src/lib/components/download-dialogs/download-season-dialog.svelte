@@ -10,14 +10,14 @@
 	import * as Table from '$lib/components/ui/table';
 	import { Badge } from '$lib/components/ui/badge';
 	import client from '$lib/api';
-	import type { Show } from '$lib/api/api';
+	import type { components } from '$lib/api/api';
 	import SelectFilePathSuffixDialog from '$lib/components/download-dialogs/select-file-path-suffix-dialog.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import TorrentTable from '$lib/components/download-dialogs/torrent-table.svelte';
 	import SearchTabs from '$lib/components/download-dialogs/search-tabs.svelte';
 	import DownloadDialogWrapper from '$lib/components/download-dialogs/download-dialog-wrapper.svelte';
 
-	let { show }: { show: Show } = $props();
+	let { show }: { show: components['schemas']['Show'] } = $props();
 	let dialogueState = $state(false);
 	let selectedSeasonNumber: number = $state(1);
 	let torrentsError: string | null = $state(null);
@@ -59,12 +59,12 @@
 			torrentsError = errorMessage;
 			if (dialogueState) toast.info(errorMessage);
 		} else if (!response.ok) {
-			const errorMessage = `Failed to download torrent for show ${show.id} and season ${selectedSeasonNumber}: ${response.statusText}`;
+			const errorMessage = (error as { detail?: string } | undefined)?.detail ?? `Downloadmanager-Anfrage fehlgeschlagen: ${response.statusText}`;
 			console.error(errorMessage);
 			torrentsError = errorMessage;
 			toast.error(errorMessage);
 		} else {
-			toast.success('Torrent download started successfully!');
+			toast.success('Download an den Downloadmanager übergeben.');
 		}
 		await invalidateAll();
 	}
@@ -86,10 +86,10 @@
 			.then((data) => data?.data)
 			.finally(() => (isLoading = false));
 
-		toast.info('Searching for torrents...');
+		toast.info('Searching indexers...');
 
 		torrentsData = await torrentsPromise;
-		toast.info('Found ' + torrentsData?.length + ' torrents.');
+		toast.info('Found ' + torrentsData?.length + ' releases.');
 	}
 </script>
 
@@ -97,7 +97,7 @@
 	bind:open={dialogueState}
 	triggerText="Download Seasons"
 	title="Download a Season"
-	description="Search and download torrents for a specific season or season packs."
+	description="Search indexers and send releases to your download manager for a specific season or season packs."
 >
 	<SearchTabs
 		bind:tabState
@@ -117,7 +117,7 @@
 					bind:value={selectedSeasonNumber}
 					max={show.seasons.at(-1)?.number}
 				/>
-				<Button disabled={isLoading} class="w-fit" onclick={search}>Search for Torrents</Button>
+				<Button disabled={isLoading} class="w-fit" onclick={search}>Search indexers</Button>
 			</div>
 			<p class="text-sm text-muted-foreground">
 				Enter the season's number you want to search for. The first, usually 1, or the last season

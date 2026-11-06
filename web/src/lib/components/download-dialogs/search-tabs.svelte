@@ -35,10 +35,10 @@
 	<Tabs.Content value="advanced">
 		<div class="grid w-full items-center gap-1.5">
 			<Label for="query-override">Enter a custom query</Label>
-			<div class="flex w-full max-w-sm items-center space-x-2">
+			<form class="flex w-full min-w-0 flex-col gap-2 sm:max-w-lg sm:flex-row" onsubmit={(event) => { event.preventDefault(); if (!isLoading) onSearch(); }}>
 				<Input bind:value={queryOverride} id="query-override" type="text" />
-				<Button disabled={isLoading} class="w-fit" onclick={onSearch}>Search for Torrents</Button>
-			</div>
+				<Button type="submit" disabled={isLoading}>Indexer durchsuchen</Button>
+			</form>
 			<p class="text-sm text-muted-foreground">
 				{advancedModeHelpText}
 			</p>

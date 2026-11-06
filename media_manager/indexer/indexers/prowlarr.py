@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from requests import Response, Session
 
 from media_manager.config import MediaManagerConfig
+from media_manager.indexer.categories import selected_categories
 from media_manager.indexer.indexers.generic import GenericIndexer
 from media_manager.indexer.indexers.torznab_mixin import TorznabMixin
 from media_manager.indexer.schemas import IndexerQueryResult
@@ -55,6 +56,12 @@ class Prowlarr(GenericIndexer, TorznabMixin):
         if parameters is None:
             parameters = {}
 
+        parameters = dict(parameters)
+        categories = selected_categories(
+            "prowlarr", str(indexer.id), parameters.get("t") == "tvsearch"
+        )
+        if categories:
+            parameters["cat"] = ",".join(str(category) for category in categories)
         parameters["limit"] = 10000
         results = self._call_prowlarr_api(
             path=f"/indexer/{indexer.id}/newznab", parameters=parameters

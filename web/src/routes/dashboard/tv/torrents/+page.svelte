@@ -11,8 +11,8 @@
 </script>
 
 <svelte:head>
-	<title>TV Show Torrents - MediaManager</title>
-	<meta content="View and manage TV show torrent downloads in MediaManager" name="description" />
+	<title>TV Show Downloads - MediaManager</title>
+	<meta content="View and manage TV show downloads in MediaManager" name="description" />
 </svelte:head>
 
 <header class="flex h-16 shrink-0 items-center gap-2">
@@ -34,33 +34,33 @@
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Page>TV Torrents</Breadcrumb.Page>
+					<Breadcrumb.Page>TV Downloads</Breadcrumb.Page>
 				</Breadcrumb.Item>
 			</Breadcrumb.List>
 		</Breadcrumb.Root>
 	</div>
 </header>
 
-<div class="mx-auto flex w-full flex-1 flex-col gap-4 p-4 md:max-w-[80em]">
+<div class="mx-auto flex min-w-0 w-full flex-1 flex-col gap-4 p-4 md:max-w-[80em]">
 	<h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
-		TV Torrents
+		TV Downloads
 	</h1>
 	<Accordion.Root type="single" class="w-full">
 		{#each page.data.torrents as show (show.show_id)}
-			<div class="p-6">
-				<Card.Root>
+			<div class="min-w-0 py-3">
+				<Card.Root class="min-w-0">
 					<Card.Header>
 						<Card.Title>
 							{getFullyQualifiedMediaName(show)}
 						</Card.Title>
 					</Card.Header>
-					<Card.Content>
+					<Card.Content class="min-w-0 px-3 sm:px-6">
 						<TorrentTable isShow={true} torrents={show.torrents} showId={show.show_id} />
 					</Card.Content>
 				</Card.Root>
 			</div>
 		{:else}
-			<div class="col-span-full text-center text-muted-foreground">No Torrents added yet.</div>
+			<div class="col-span-full text-center text-muted-foreground">No Downloads added yet.</div>
 		{/each}
 	</Accordion.Root>
 </div>

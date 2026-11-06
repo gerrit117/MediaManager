@@ -13,7 +13,7 @@ RUN env PUBLIC_VERSION=${VERSION} PUBLIC_API_URL=${BASE_PATH} BASE_PATH=${BASE_P
 FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim AS base 
 
 RUN apt-get update && \
-    apt-get install -y ca-certificates bash gcc bc locales postgresql media-types mailcap curl gzip unzip tar 7zip bzip2 unar gosu && \
+    apt-get install -y ca-certificates bash libtorrent21 gcc bc locales postgresql media-types mailcap curl gzip unzip tar 7zip bzip2 unar gosu && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -33,11 +33,11 @@ RUN chown -R mediamanager:mediamanager /app
 
 USER mediamanager
 
-ENV UV_CACHE_DIR=/home/mediamanager/.cache/uv \
+ENV UV_CACHE_DIR=/tmp/uv-cache \
     UV_LINK_MODE=copy
 
 COPY --chown=mediamanager:mediamanager pyproject.toml uv.lock ./
-RUN --mount=type=cache,target=/home/mediamanager/.cache/uv,uid=1000,gid=1000 \
+RUN --mount=type=cache,target=/tmp/uv-cache,uid=1000,gid=1000 \
     uv sync --locked
 
 FROM dependencies AS app
