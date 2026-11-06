@@ -243,9 +243,12 @@ def update_movie_request(
     movie_request = movie_service.get_movie_request_by_id(
         movie_request_id=movie_request_id
     )
-    if movie_request.requested_by.id != user.id or user.is_superuser:
-        movie_request.min_quality = update_movie_request.min_quality
-        movie_request.wanted_quality = update_movie_request.wanted_quality
+    if not movie_request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    if not user.is_superuser and (not movie_request.requested_by or movie_request.requested_by.id != user.id):
+        raise HTTPException(status_code=403, detail="Not authorized to edit this request")
+    movie_request.min_quality = update_movie_request.min_quality
+    movie_request.wanted_quality = update_movie_request.wanted_quality
 
     return movie_service.update_movie_request(movie_request=movie_request)
 
