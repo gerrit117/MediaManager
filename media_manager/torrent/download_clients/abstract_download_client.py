@@ -57,3 +57,14 @@ class AbstractDownloadClient(ABC):
 
         :param torrent: The torrent to resume.
         """
+
+    def get_progress(self, torrents: list[Torrent]) -> dict:
+        return {}
+
+    def retry_download(self, torrent: Torrent) -> None:
+        from media_manager.exceptions import BadRequestError
+
+        state = self.get_progress([torrent]).get(str(torrent.id), {}).get('state')
+        if state not in {'Paused', 'Failed'}:
+            raise BadRequestError('Dieser Download kann derzeit nicht fortgesetzt oder erneut versucht werden.')
+        self.resume_torrent(torrent)
