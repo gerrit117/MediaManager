@@ -63,3 +63,11 @@ def test_fast_discovery_does_not_query_metadata(tmp_path, monkeypatch):
     result=service.get_importable_movies(Mock(),discover_only=True)
     assert len(result)==1 and result[0].directory==folder and result[0].candidates==[]
     service.get_import_candidates.assert_not_called()
+
+
+def test_catalogued_paths_ignore_json_null_from_legacy_imports():
+    from media_manager.movies.repository import MovieRepository
+    from media_manager.tv.repository import TvRepository
+    db=Mock();db.scalars.return_value.all.return_value=[None,[],['/media/own.mkv']]
+    assert MovieRepository(db).catalogued_source_files()==['/media/own.mkv']
+    assert TvRepository(db).catalogued_source_files()==['/media/own.mkv']

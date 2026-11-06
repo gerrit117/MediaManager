@@ -95,6 +95,7 @@ with Session(engine) as db:
  assert import_media('movies',movies[8],'/etc','catalogue')[0]==400
  assert import_media('movies',movies[9],container_paths[0]+'/Own reorganized movie','reorganize')[0]==204
  assert not reorganize.exists() and (reorganize.parent/('.'+reorganize.name)).is_dir()
+ assert request(admin,'/api/v1/movies/importable?discover_only=true')[0]==200 # JSON null in legacy file rows must be ignored
  # A partial season is stored without falsely marking the whole season available.
  exec_python("import uuid;import media_manager.auth.request_policy;from media_manager.torrent.models import Torrent;from sqlalchemy.orm import Session;from media_manager.config import MediaManagerConfig;from media_manager.database import init_engine;from media_manager.tv.models import Episode;e=init_engine(MediaManagerConfig().database);db=Session(e);db.add_all([Episode(id=uuid.uuid4(),season_id=uuid.UUID("+repr(season)+"),number=n,external_id=9910000+n,title='Own episode') for n in [1,2]]);db.commit()")
  series_path=container_paths[1]+'/Own catalogue show'

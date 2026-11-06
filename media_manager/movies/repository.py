@@ -44,7 +44,7 @@ class MovieRepository:
 
     def catalogued_source_files(self) -> list[str]:
         rows = self.db.scalars(select(MovieFile.source_files).where(MovieFile.source_files.is_not(None))).all()
-        return [p for row in rows for p in row]
+        return [p for row in rows if row for p in row]
 
     def __init__(self, db: Session) -> None:
         self.db = db
