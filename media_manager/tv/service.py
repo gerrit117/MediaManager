@@ -31,6 +31,7 @@ from media_manager.torrent.schemas import (
 )
 from media_manager.torrent.service import TorrentService
 from media_manager.torrent.utils import (
+    validate_file_path_suffix,
     extract_external_id_from_string,
     get_files_for_import,
     get_importable_media_directories,
@@ -256,14 +257,16 @@ class TvService:
         :return: A list of indexer query results.
         """
 
-        if search_query_override:
-            return self.indexer_service.search(query=search_query_override, is_tv=True)
-
         show = self.tv_repository.get_show_by_id(show_id=show_id)
 
-        torrents = self.indexer_service.search_season(
-            show=show, season_number=season_number
-        )
+        if search_query_override:
+            torrents = self.indexer_service.search(
+                query=search_query_override, is_tv=True
+            )
+        else:
+            torrents = self.indexer_service.search_season(
+                show=show, season_number=season_number
+            )
 
         results = [torrent for torrent in torrents if season_number in torrent.season]
 
@@ -476,6 +479,7 @@ class TvService:
         :param override_show_file_path_suffix: Optional override for the file path suffix.
         :return: The downloaded torrent.
         """
+        override_show_file_path_suffix = validate_file_path_suffix(override_show_file_path_suffix)
         indexer_result = self.indexer_service.get_result(
             result_id=public_indexer_result_id
         )
@@ -608,6 +612,7 @@ class TvService:
         subtitle_files: list[Path],
         file_path_suffix: str = "",
     ) -> bool:
+        file_path_suffix = validate_file_path_suffix(file_path_suffix)
         episode_file_name = f"{remove_special_characters(show.name)} S{season.number:02d}E{episode_number:02d}"
         if file_path_suffix != "":
             episode_file_name += f" - {file_path_suffix}"
