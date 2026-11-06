@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SystemSettings from '$lib/components/system-settings.svelte';
 	import IndexerCategories from '$lib/components/indexer-categories.svelte';
 	import NewznabSettings from '$lib/components/newznab-settings.svelte';
 	import UserTable from '$lib/components/user-data-table.svelte';
@@ -15,7 +16,7 @@
 	let currentUser: () => components['schemas']['UserRead'] = getContext('user');
 	let categoryRevision = $state(0);
 	let users: components['schemas']['UserRead'][] = $derived(
-		page.data.users.filter(
+		(page.data.users ?? []).filter(
 			(user: components['schemas']['UserRead']) => user.id !== currentUser().id
 		)
 	);
@@ -51,6 +52,7 @@
 	{#if currentUser().is_superuser}
 		<nav aria-label="Settings sections" class="flex flex-wrap gap-3">
 			<a href="#me" class="rounded-md border px-4 py-2">Account</a>
+			<a href="#system" class="rounded-md border px-4 py-2">System & Downloads</a>
 			<a href="#newznab" class="rounded-md border px-4 py-2">Indexers</a>
 			<a href="#users" class="rounded-md border px-4 py-2">Users</a>
 		</nav>
@@ -65,6 +67,7 @@
 		</Card.Content>
 	</Card.Root>
 	{#if currentUser().is_superuser}
+		<SystemSettings />
 		<NewznabSettings onSaved={() => categoryRevision++} />
 		{#key categoryRevision}
 			<IndexerCategories />
