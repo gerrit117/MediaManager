@@ -133,6 +133,7 @@
 								/>
 								<Label for="continuous-download-checkbox">
 									{mmT($mmLocale, "Enable automatic download of future seasons" )}
+                                    <span class="block text-xs text-muted-foreground">{mmT($mmLocale,"Monitors new seasons, not individual episodes added to an existing season.")}</span>
 								</Label>
 							</div>
 						{/if}

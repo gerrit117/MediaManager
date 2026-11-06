@@ -7,6 +7,8 @@ This is a community fork, not an official upstream release. The original project
 ## What differs here
 
 - Built-in movie and season requests remain available.
+- Admins can create user accounts directly in web settings.
+- Manual library scanning supports catalogue-in-place or explicit file reorganization.
 - Exactly two roles: Admin and User. Administrators can set each user's monthly request quota and automatic approval.
 - Persistent quota accounting covers movies and seasons together and cannot be bypassed by deleting requests or making concurrent submissions.
 - Direct Newznab connection and indexer-advertised category discovery, alongside Prowlarr and Jackett.
@@ -32,6 +34,7 @@ On Unraid, use UID 99/GID 100 with writable persistent mounts. Keep existing con
 ## Documentation
 
 - [Requests, policies and language selection](docs/configuration/request-policies.md)
+- [Existing libraries and series monitoring](docs/library-import.md)
 - [Setup and web settings](docs/configuration/web-settings.md)
 - [Managed stack](docs/configuration/managed-stack.md)
 - [Upstream review and backports](docs/upstream-tracking.md)

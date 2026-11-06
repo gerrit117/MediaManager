@@ -2740,6 +2740,7 @@ export interface operations {
 		parameters: {
 			query: {
 				directory: string;
+				mode?: "catalogue" | "reorganize";
 			};
 			header?: never;
 			path: {
@@ -3593,6 +3594,7 @@ export interface operations {
 		parameters: {
 			query: {
 				directory: string;
+				mode?: "catalogue" | "reorganize";
 			};
 			header?: never;
 			path: {

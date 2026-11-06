@@ -1,4 +1,4 @@
-name: Usenet edition checks and image
+name: MediaManager checks and image
 on:
   push:
     branches: [master]
@@ -21,7 +21,7 @@ jobs:
         run: docker build --target checks -f Dockerfile.usenet .
       - name: Build integration image
         run: docker build --target production -f Dockerfile.usenet -t mediamanager:integration .
-      - name: Test managed database, migrations and request policy concurrency
+      - name: Test managed database, accounts, requests and library import
         run: sudo env MM_TEST_IMAGE=mediamanager:integration python3 tests/integration/managed_stack.py
       - name: Sign in to GitHub Container Registry
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'

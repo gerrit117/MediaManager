@@ -7,7 +7,6 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
-	import client from '$lib/api';
 	import type { components } from '$lib/api/api';
 
 	let { data, children }: LayoutProps = $props();
@@ -30,18 +29,25 @@
 		goto(resolve('/login/verify', {}));
 	}
 
-	if (data.user?.is_superuser) {
-		client.GET('/api/v1/movies/importable').then(({ data, error }) => {
-			if (!error) {
-				importableMovies = data;
-			}
-		});
-		client.GET('/api/v1/tv/importable').then(({ data, error }) => {
-			if (!error) {
-				importableShows = data;
-			}
-		});
+	let scanning = $state({ movies: false, tv: false });
+	let scanStatus = $state({ movies: '', tv: '' });
+	async function scanLibrary(kind: 'movies' | 'tv') {
+		if (!data.user?.is_superuser || scanning[kind]) return;
+		scanning[kind] = true; scanStatus[kind] = 'Scanning library…';
+		try {
+			const response = await fetch(`${env.PUBLIC_API_URL ?? ''}/api/v1/${kind}/importable?discover_only=true`, { credentials: 'include' });
+            if (!response.ok) throw new Error();
+            const found: components['schemas']['MediaImportSuggestion'][] = await response.json();
+			if (kind === 'movies') importableMovies = found; else importableShows = found;
+			scanStatus[kind] = found.length ? 'Select a directory below to match and import.' : 'No new directories found.';
+		} catch { scanStatus[kind] = 'Library scan failed. Check paths, permissions and metadata settings.'; }
+		finally { scanning[kind] = false; }
 	}
+	setContext('libraryScan', { run: scanLibrary, busy: (kind: 'movies'|'tv') => scanning[kind], status: (kind: 'movies'|'tv') => scanStatus[kind], remove: (kind: 'movies'|'tv', directory: string) => {
+		if (kind === 'movies') importableMovies = importableMovies.filter(x => x.directory !== directory);
+		else importableShows = importableShows.filter(x => x.directory !== directory);
+	} });
+
 </script>
 
 <Sidebar.Provider>

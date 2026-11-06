@@ -23,6 +23,7 @@ def login(email):
 def run(*args,**kw):return subprocess.check_output(args,stderr=subprocess.STDOUT,**kw).decode()
 def stack(*args):return run(*compose,'--env-file',str(root/'state/stack.env'),'-f',str(repo/'compose.managed.yaml'),*args)
 def exec_python(code):
+ code='import media_manager.auth.request_policy;import media_manager.movies.models;import media_manager.tv.models;import media_manager.torrent.models;\n'+code
  service=stack('ps','-q','mediamanager').strip()
  return run('docker','exec','-i',service,'/app/.venv/bin/python','-c',code)
 try:
@@ -68,11 +69,56 @@ with Session(engine) as db:
  db.flush();db.add(Season(id=uuid.UUID(SEASON),show_id=uuid.UUID(SHOW),number=1,external_id=9900001,name='Own season',overview='Own test'));db.commit()
 """.replace('IDS',repr(movies)).replace('SHOW',repr(show)).replace('SEASON',repr(season))
  exec_python(code)
+ # Exercise both import modes using disposable files only, never a real media mount.
+ def scan_fixture(area, dirname, names):
+  folder=root/area/dirname;folder.mkdir();os.chown(folder,99,100)
+  for name in names:
+   path=folder/name;path.write_bytes(b'own synthetic media fixture');os.chown(path,99,100)
+  return folder
+ cat=scan_fixture('movies','Own catalogue movie',['original.mkv','archive.rar'])
+ reorganize=scan_fixture('movies','Own reorganized movie',['original.mkv'])
+ series=scan_fixture('tv','Own catalogue show',['Own.S01E01.mkv'])
+ original={p.name:(p.stat().st_ino,p.read_bytes()) for p in cat.iterdir()}
+ # Resolve actual container paths from the managed setup config, not host assumptions.
+ container_paths=json.loads(exec_python("import json;from media_manager.config import MediaManagerConfig;c=MediaManagerConfig().misc;print(json.dumps([str(c.movie_directory),str(c.tv_directory)]))"))
+ status,discovered=request(admin,'/api/v1/movies/importable?discover_only=true');assert status==200 and len(discovered)>=2 and all(not item['candidates'] for item in discovered)
+ status,discovered=request(admin,'/api/v1/tv/importable?discover_only=true');assert status==200 and discovered and all(not item['candidates'] for item in discovered)
+ catalogue_path=container_paths[0]+'/Own catalogue movie'
+ def import_media(area,mid,directory,mode=None):
+  query={'directory':directory}
+  if mode is not None:query['mode']=mode
+  return request(admin,'/api/v1/'+area+'/importable/'+mid+'?'+urllib.parse.urlencode(query),method='POST')
+ assert import_media('movies',movies[8],catalogue_path)[0]==204
+ assert original=={p.name:(p.stat().st_ino,p.read_bytes()) for p in cat.iterdir()}
+ assert import_media('movies',movies[8],catalogue_path,'catalogue')[0]==204 # repeat is idempotent
+ assert import_media('movies',movies[8],catalogue_path,'invalid')[0]==422
+ assert import_media('movies',movies[8],'/etc','catalogue')[0]==400
+ assert import_media('movies',movies[9],container_paths[0]+'/Own reorganized movie','reorganize')[0]==204
+ assert not reorganize.exists() and (reorganize.parent/('.'+reorganize.name)).is_dir()
+ # A partial season is stored without falsely marking the whole season available.
+ exec_python("import uuid;import media_manager.auth.request_policy;from media_manager.torrent.models import Torrent;from sqlalchemy.orm import Session;from media_manager.config import MediaManagerConfig;from media_manager.database import init_engine;from media_manager.tv.models import Episode;e=init_engine(MediaManagerConfig().database);db=Session(e);db.add_all([Episode(id=uuid.uuid4(),season_id=uuid.UUID("+repr(season)+"),number=n,external_id=9910000+n,title='Own episode') for n in [1,2]]);db.commit()")
+ series_path=container_paths[1]+'/Own catalogue show'
+ assert import_media('tv',show,series_path)[0]==204
+ code="from sqlalchemy.orm import Session;from media_manager.config import MediaManagerConfig;from media_manager.database import init_engine;from media_manager.tv.repository import TvRepository;from media_manager.tv.service import TvService;import uuid;e=init_engine(MediaManagerConfig().database);s=TvService.__new__(TvService);s.tv_repository=TvRepository(Session(e));assert s.is_season_downloaded(uuid.UUID("+repr(season)+")) == EXPECTED;print('verified')"
+ assert exec_python(code.replace('EXPECTED','False')).strip()=='verified'
+ (series/'Own.S01E02.mkv').write_bytes(b'own second fixture');os.chown(series/'Own.S01E02.mkv',99,100)
+ assert import_media('tv',show,series_path)[0]==204
+ assert exec_python(code.replace('EXPECTED','True')).strip()=='verified'
+ (series/'Own.S01E01.mkv').unlink()
+ assert exec_python(code.replace('EXPECTED','False')).strip()=='verified'
  def new_user(email):
   status,data=request(client(),'/api/v1/auth/register',{'email':email,'password':password},'POST');assert status==201,(status,data)
   uid=data['id'];assert request(admin,'/api/v1/users/'+uid,{'is_active':True,'is_verified':True},'PATCH')[0]==200
   return uid,login(email)
+ created_status,created_data=request(admin,'/api/v1/users/admin-create',{'email':'created@example.com','password':password,'monthly_request_limit':4,'auto_approve_requests':True},'POST')
+ assert created_status==201,(created_status,created_data)
+ assert 'password' not in created_data and 'hashed_password' not in created_data
+ created_client=login('created@example.com');created_quota=request(created_client,'/api/v1/requests/quota')[1]
+ assert created_quota['limit']==4 and created_quota['auto_approve']
+ assert request(admin,'/api/v1/users/admin-create',{'email':'CREATED@example.com','password':password},'POST')[0]==409
  uid,user=new_user('user@example.com')
+ assert request(user,'/api/v1/users/admin-create',{'email':'blocked@example.com','password':password},'POST')[0]==403
+ assert request(client(),'/api/v1/users/admin-create',{'email':'blocked@example.com','password':password},'POST')[0]==401
  policy='/api/v1/users/'+uid+'/request-policy'
  assert request(admin,policy,{'monthly_request_limit':2,'auto_approve_requests':True},'PUT')[0]==200
  payload=lambda mid:{'movie_id':mid,'min_quality':3,'wanted_quality':2}
@@ -107,7 +153,7 @@ with Session(engine) as db:
  assert secrets_before==[(root/'state/secrets'/n).read_bytes() for n in ['app_db_password','db_admin_password']]
  user=login('user@example.com');assert request(user,'/api/v1/requests/quota')[1]['used']==1
  assert not (root/'state/config/initial-admin.json').exists()
- print(json.dumps({'managed_database_provisioning':'passed','least_privilege':'passed','monthly_combined_quota':'passed','auto_approval':'passed','manual_approval':'passed','deletion_no_refund':'passed','self_escalation_blocked':'passed','concurrent_requests':'one accepted, three blocked','month_reset':'passed','restart_and_secret_persistence':'passed','production_data_used':False}))
+ print(json.dumps({'managed_database_provisioning':'passed','least_privilege':'passed','monthly_combined_quota':'passed','auto_approval':'passed','manual_approval':'passed','deletion_no_refund':'passed','self_escalation_blocked':'passed','concurrent_requests':'one accepted, three blocked','month_reset':'passed','restart_and_secret_persistence':'passed','admin_user_creation_and_login':'passed','duplicate_email_rejected':'passed','creation_admin_only':'passed','catalogue_without_file_changes':'passed','reorganize_explicit_mode':'passed','partial_season_and_missing_files':'passed','import_validation':'passed','production_data_used':False}))
 except Exception:
  try:
   log=stack('logs','--no-color');

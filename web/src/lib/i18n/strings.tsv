@@ -477,3 +477,29 @@ Download manager request failed.	Downloadmanager-Anfrage fehlgeschlagen.
 Download manager request sent.	Downloadmanager-Anfrage gesendet.
 Download submitted to the download manager.	Download an den Downloadmanager übergeben.
 Support	Hilfe
+Add user	Benutzer hinzufügen
+Password (at least 12 characters)	Passwort (mindestens 12 Zeichen)
+Could not create user.	Benutzer konnte nicht angelegt werden.
+User created.	Benutzer angelegt.
+Email address is already registered.	Diese E-Mail-Adresse ist bereits registriert.
+Library scan	Bibliotheksscan
+Scanning library…	Bibliothek wird durchsucht …
+Scan existing library	Vorhandene Bibliothek scannen
+Find existing media directories. Choose catalogue-only or reorganize for each import.	Vorhandene Medienordner finden. Bei jedem Import zwischen Erfassen und Neu einsortieren wählen.
+Select a directory below to match and import.	Unten einen Ordner zuordnen und importieren.
+No new directories found.	Keine neuen Ordner gefunden.
+Library scan failed. Check paths, permissions and metadata settings.	Bibliotheksscan fehlgeschlagen. Pfade, Berechtigungen und Metadateneinstellungen prüfen.
+Import mode	Importart
+Catalogue only (keep files in place)	Nur erfassen (Dateien am Speicherort belassen)
+Reorganize into library folders	Neu in Bibliotheksordner einsortieren
+Records existing video files without moving, renaming or extracting archives.	Erfasst vorhandene Videodateien, ohne sie zu verschieben, umzubenennen oder Archive zu entpacken.
+Uses the existing import process, including archive extraction and folder renaming.	Nutzt den bisherigen Import, einschließlich Entpacken von Archiven und Umbenennen von Ordnern.
+Reorganize this directory? Files will be renamed and copied or linked into the configured library structure.	Diesen Ordner neu einsortieren? Dateien werden umbenannt und in die konfigurierte Bibliotheksstruktur kopiert oder verknüpft.
+Monitors new seasons, not individual episodes added to an existing season.	Überwacht neue Staffeln, nicht einzelne neue Folgen einer bestehenden Staffel.
+Scanning…	Suche …
+Import existing show	Vorhandene Serie importieren
+Import existing movie	Vorhandenen Film importieren
+Select the matching title and import mode for this directory.	Den passenden Titel und die Importart für diesen Ordner auswählen.
+Existing show directory	Vorhandener Serienordner
+Existing movie directory	Vorhandener Filmordner
+Directory	Ordner

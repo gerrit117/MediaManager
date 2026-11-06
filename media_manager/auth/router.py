@@ -108,3 +108,41 @@ def update_request_policy(user_id:UUID,body:RequestPolicyUpdate,db:DbSessionDepe
 def own_quota(db:DbSessionDependency,user:Annotated[User,Depends(current_active_user)]):
     stored=db.get(User,user.id)
     return dict(limit=None if stored.is_superuser else stored.monthly_request_limit,used=usage_count(db,user.id),auto_approve=stored.is_superuser or stored.auto_approve_requests,resets_at=month_bounds()[1])
+
+from pydantic import EmailStr
+from fastapi_users.password import PasswordHelper
+from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
+from uuid import uuid4
+import logging
+
+class AdminUserCreate(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=12, repr=False)
+    is_active: bool = True
+    is_verified: bool = True
+    is_superuser: bool = False
+    monthly_request_limit: int | None = Field(default=None, ge=0, le=100000)
+    auto_approve_requests: bool = False
+
+@users_router.post('/users/admin-create', status_code=201, response_model=UserRead)
+def create_user_as_admin(body: AdminUserCreate, db: DbSessionDependency,
+                         actor: Annotated[User, Depends(current_superuser)]) -> UserRead:
+    email = str(body.email).lower()
+    if db.scalar(select(User.id).where(func.lower(User.email) == email)) is not None:
+        raise HTTPException(409, 'Email address is already registered.')
+    user = User(id=uuid4(), email=email,
+                hashed_password=PasswordHelper().hash(body.password),
+                is_active=body.is_active, is_verified=body.is_verified,
+                is_superuser=body.is_superuser,
+                monthly_request_limit=None if body.is_superuser else body.monthly_request_limit,
+                auto_approve_requests=body.auto_approve_requests)
+    try:
+        db.add(user)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, 'Email address is already registered.') from None
+    db.refresh(user)
+    logging.getLogger(__name__).info('Administrator %s created account %s', actor.id, user.id)
+    return UserRead.model_validate(user)

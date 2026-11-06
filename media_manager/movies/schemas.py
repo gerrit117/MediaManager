@@ -28,6 +28,7 @@ class Movie(BaseModel):
 
 
 class MovieFile(BaseModel):
+    source_files: list[str] | None = None
     model_config = ConfigDict(from_attributes=True)
 
     movie_id: MovieId
