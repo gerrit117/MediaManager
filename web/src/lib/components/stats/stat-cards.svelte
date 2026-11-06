@@ -52,7 +52,7 @@
 	</div>
 	<div class="flex-auto">
 		{#await torrentCount then torrent}
-			<AnimatedCard title="Torrents" footer="Total count of torrents/NZBs" number={torrent}
+			<AnimatedCard title="Downloads" footer="NZB- und Torrent-Downloads insgesamt" number={torrent}
 			></AnimatedCard>
 		{/await}
 	</div>

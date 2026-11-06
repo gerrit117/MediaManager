@@ -86,7 +86,7 @@
 					for="delete-torrents"
 					class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 				>
-					Also delete torrents (this will remove torrents from your download clients)
+					Auch Downloads aus dem jeweiligen Downloadmanager entfernen (NZB und Torrent)
 				</Label>
 			</div>
 		</div>
