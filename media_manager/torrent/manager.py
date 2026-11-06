@@ -2,6 +2,7 @@ import logging
 from enum import Enum
 
 from media_manager.config import MediaManagerConfig
+from media_manager.exceptions import InvalidConfigError
 from media_manager.indexer.schemas import IndexerQueryResult
 from media_manager.torrent.download_clients.abstract_download_client import (
     AbstractDownloadClient,
@@ -79,12 +80,12 @@ class DownloadManager:
         # Use the usenet flag from the indexer result to determine the client type
         if indexer_result.usenet:
             if not self._usenet_client:
-                msg = "No usenet download client configured"
-                raise RuntimeError(msg)
+                msg = "Kein erreichbarer Usenet-Downloadmanager eingerichtet. Bitte die SABnzbd-Verbindung prüfen."
+                raise InvalidConfigError(msg)
             return self._usenet_client
         if not self._torrent_client:
-            msg = "No torrent download client configured"
-            raise RuntimeError(msg)
+            msg = "Kein erreichbarer Torrent-Downloadmanager eingerichtet. Bitte qBittorrent oder Transmission konfigurieren."
+            raise InvalidConfigError(msg)
         return self._torrent_client
 
     def download(self, indexer_result: IndexerQueryResult) -> Torrent:
@@ -98,6 +99,20 @@ class DownloadManager:
 
         client = self._get_appropriate_client(indexer_result)
         return client.download_torrent(indexer_result)
+
+    def get_progress(self, torrents: list[Torrent]) -> dict:
+        result = {}
+        for client, is_usenet in [(self._usenet_client, True), (self._torrent_client, False)]:
+            if client is None:
+                continue
+            try:
+                result.update(client.get_progress([t for t in torrents if t.usenet == is_usenet]))
+            except Exception as error:
+                log.warning("Download progress unavailable (%s)", type(error).__name__)
+        return result
+
+    def retry_download(self, torrent: Torrent) -> None:
+        self._get_appropriate_client(torrent).retry_download(torrent)
 
     def remove_torrent(self, torrent: Torrent, delete_data: bool = False) -> None:
         """
