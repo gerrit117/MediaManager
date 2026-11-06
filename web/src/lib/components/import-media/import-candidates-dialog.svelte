@@ -110,7 +110,7 @@
 	>
 		{@render children?.()}
 	</Dialog.Trigger>
-	<Dialog.Content class="max-h-[90vh] w-fit min-w-[80vw] overflow-y-auto">
+	<Dialog.Content class="max-h-[90vh] w-[calc(100vw-2rem)] max-w-6xl min-w-0 overflow-y-auto">
 		<Dialog.Header>
 			<Dialog.Title>Import unknown {isTv ? 'show' : 'movie'} "{name}"</Dialog.Title>
 			<Dialog.Description
