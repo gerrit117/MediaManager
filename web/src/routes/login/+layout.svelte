@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import logo from '$lib/images/logo.svg';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 
@@ -33,7 +34,7 @@
 				class="underline"
 				href="https://maxdorninger.github.io/MediaManager/latest/troubleshooting/"
 			>
-				Trouble logging in?
+				{mmT($mmLocale, "Trouble logging in?" )}
 			</a>
 			<footer
 				class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-muted-foreground"
@@ -43,7 +44,7 @@
 				>
 				<Separator class="h-4" orientation="vertical" />
 				<a target="_blank" class="underline" href="https://github.com/sponsors/maxdorninger"
-					>Donate</a
+					>{mmT($mmLocale, "Donate" )}</a
 				>
 				<Separator class="h-4" orientation="vertical" />
 				<a
@@ -51,7 +52,7 @@
 					class="underline"
 					href="https://unsplash.com/photos/blue-white-and-red-abstract-painting-NTYYL9Eb9y8"
 				>
-					Image Credit
+					{mmT($mmLocale, "Image Credit" )}
 				</a>
 			</footer>
 		</div>

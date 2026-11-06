@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import AddMediaCard from '$lib/components/add-media-card.svelte';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { Button } from '$lib/components/ui/button';
@@ -32,7 +33,7 @@
 	{/if}
 	{#if isShow}
 		<Button class="md:col-start-2" variant="secondary" href={resolve('/dashboard/tv/add-show', {})}>
-			More recommendations
+			{mmT($mmLocale, "More recommendations" )}
 			<ChevronRight />
 		</Button>
 	{:else}
@@ -41,7 +42,7 @@
 			variant="secondary"
 			href={resolve('/dashboard/movies/add-movie', {})}
 		>
-			More recommendations
+			{mmT($mmLocale, "More recommendations" )}
 			<ChevronRight />
 		</Button>
 	{/if}

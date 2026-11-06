@@ -1,114 +1,52 @@
-# MediaManager Usenet edition
+# MediaManager
 
-This fork extends the v1.12.3 release of [MediaManager](https://github.com/maxdorninger/MediaManager). It keeps the built-in movie/season requests, qBittorrent and Transmission clients, and adds direct Newznab support, reliable SABnzbd handling and a responsive download interface.
+An independent fork of [MediaManager by Maximilian Dorninger and contributors](https://github.com/maxdorninger/MediaManager), extending the v1.12.3 foundation with direct indexer access, guided configuration and a clearer download interface. **Both Usenet/NZB and torrents are supported.**
 
-**This is an independent fork, not an official upstream release.** Requests remain available here; the later upstream change removing them is intentionally excluded. Existing configuration and database schema are retained.
+This is a community fork, not an official upstream release. The original project's attribution, license and Git history are retained.
 
-- [Changes, reviewed upstream PRs and limitations](docs/usenet-edition.md)
-- [Build and configure](docs/usenet-edition.md#build-and-configure)
-- [Original project documentation below](#mediamanager)
+## What differs here
 
----
+- Built-in movie and season requests remain available.
+- Exactly two roles: Admin and User. Administrators can set each user's monthly request quota and automatic approval.
+- Persistent quota accounting covers movies and seasons together and cannot be bypassed by deleting requests or making concurrent submissions.
+- Direct Newznab connection and indexer-advertised category discovery, alongside Prowlarr and Jackett.
+- SABnzbd, qBittorrent and Transmission integration, with protocol-aware download labels and progress.
+- Quick release filters for resolution, video source, audio tags and download type.
+- Separate settings tabs, including Integrated/Prowlarr/Jackett indexer tabs, and English/German interface selection.
+- Web configuration with private credential storage. Connection and metadata changes apply live; database, path and sign-in changes are staged for restart.
+- First-run wizard and an optional managed Docker stack that provisions a separate PostgreSQL service, application database and limited application role automatically.
+- Selected upstream fixes are reviewed and backported while retaining the request workflow.
 
-<br />
-<div align="center">
-  <a href="https://maxdorninger.github.io/MediaManager/">
-    <img src="https://raw.githubusercontent.com/maxdorninger/MediaManager/refs/heads/master/web/static/logo.svg" alt="Logo" width="260" height="260">
-  </a>
+## Install
 
-<h3 align="center">MediaManager</h3>
-
-  <p align="center">
-    Modern management system for your media library
-    <br />
-    <a href="https://maxdorninger.github.io/MediaManager/"><strong>Explore the docs »</strong></a>
-    <br />
-    <a href="https://github.com/maxdorninger/MediaManager/issues/new?labels=bug&template=bug_report.md">Report Bug</a>
-    &middot;
-    <a href="https://github.com/maxdorninger/MediaManager/issues/new?template=feature_request.md">Request Feature</a>
-  </p>
-</div>
-
-
-MediaManager is the modern, easy-to-use successor to the fragmented "Arr" stack. Manage, discover, and automate your TV and movie collection in a single, simple interface.
-
-Key features:
-- support for OAuth/OIDC
-- support for TVDB and TMDB
-- made to be deployed with Docker
-
-## Quick Start
+The standard image uses existing external services:
 
 ```sh
-wget -O docker-compose.yaml https://github.com/maxdorninger/MediaManager/releases/latest/download/docker-compose.yaml
-mkdir config
-wget -O ./config/config.toml https://github.com/maxdorninger/MediaManager/releases/latest/download/config.example.toml
-# you probably need to edit the config.toml file in the ./config directory, for more help see the documentation
-docker compose up -d
+docker pull ghcr.io/gerrit117/mediamanager:latest
 ```
 
-### [View the docs for installation instructions and more](https://maxdorninger.github.io/MediaManager/)
+For a new managed stack, use [the installation guide](docs/configuration/managed-stack.md). PostgreSQL remains a separate container. Existing download managers can be reused; optional Compose profiles provide separate SABnzbd and qBittorrent services. There is currently no published AIO image.
 
-## Support MediaManager
+On Unraid, use UID 99/GID 100 with writable persistent mounts. Keep existing configuration and database backups before upgrading. New database migrations are included in the image; do not replace a populated PostgreSQL data directory to upgrade it.
 
-<a href="https://github.com/sponsors/maxdorninger" target="_blank">
-  <img src="https://img.shields.io/badge/Sponsor-Maximilian Dorninger-orange" alt="Sponsor @maxdorninger" />
-</a>
+## Documentation
 
-<a href="https://buymeacoffee.com/maxdorninger" target="_blank">
-  <img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" >
-</a>
+- [Requests, policies and language selection](docs/configuration/request-policies.md)
+- [Setup and web settings](docs/configuration/web-settings.md)
+- [Managed stack](docs/configuration/managed-stack.md)
+- [Upstream review and backports](docs/upstream-tracking.md)
+- [Earlier changes and known limitations](docs/usenet-edition.md)
 
-## Check out the awesome sponsors of MediaManager ❤️
+Source builds currently use the compatibility filename `Dockerfile.usenet`; the project and interface are named MediaManager.
 
-<a href="https://fosstodon.org/@aljazmerzen"><img src="https://github.com/aljazerzen.png" width="80px" alt="Aljaž Mur Eržen" /></a>&nbsp;&nbsp;
-<a href="https://github.com/ldrrp"><img src="https://github.com/ldrrp.png" width="80px" alt="Luis Rodriguez" /></a>&nbsp;&nbsp;
-<a href="https://github.com/brandon-dacrib"><img src="https://github.com/brandon-dacrib.png" width="80px" alt="Brandon P." /></a>&nbsp;&nbsp;
-<a href="https://github.com/SeimusS"><img src="https://github.com/SeimusS.png" width="80px" alt="SeimusS" /></a>&nbsp;&nbsp;
-<a href="https://github.com/HadrienKerlero"><img src="https://github.com/HadrienKerlero.png" width="80px" alt="HadrienKerlero" /></a>&nbsp;&nbsp;
-<a href="https://github.com/keyxmakerx"><img src="https://github.com/keyxmakerx.png" width="80px" alt="keyxmakerx" /></a>&nbsp;&nbsp;
-<a href="https://github.com/LITUATUI"><img src="https://github.com/LITUATUI.png" width="80px" alt="LITUATUI" /></a>&nbsp;&nbsp;
-<a href="https://buymeacoffee.com/maxdorninger"><img src="https://cdn.buymeacoffee.com/uploads/profile_pictures/default/v2/B6CDBD/NI.png" width="80px" alt="Nicolas" /></a>&nbsp;&nbsp;
-<a href="https://buymeacoffee.com/maxdorninger"><img src="https://cdn.buymeacoffee.com/uploads/profile_pictures/default/v2/DEBBB9/JO.png" width="80px" alt="Josh" /></a>&nbsp;&nbsp;
-<a href="https://buymeacoffee.com/maxdorninger"><img src="https://cdn.buymeacoffee.com/uploads/profile_pictures/2025/11/2VeQ8sTGPhj4tiLy.jpg" width="80px" alt="PuppiestDoggo" /></a>&nbsp;&nbsp;
-<a href="https://github.com/seferino-fernandez"><img src="https://avatars.githubusercontent.com/u/5546622" width="80px" alt="Seferino" /></a>&nbsp;&nbsp;
-<a href="https://buymeacoffee.com/maxdorninger"><img src="https://cdn.buymeacoffee.com/uploads/profile_pictures/default/v2/EC9689/SY.png" width="80px" alt="syn" /></a>&nbsp;&nbsp;
+## Thanks
 
-## Star History
+Thanks to **Maximilian Dorninger (`maxdorninger`) and all original MediaManager contributors** for creating and maintaining the project this fork is based on.
 
-[![Star History Chart](https://api.star-history.com/svg?repos=maxdorninger/MediaManager&type=Date)](https://www.star-history.com/#maxdorninger/MediaManager&Date)
+The integrations rely on the work of [SABnzbd](https://github.com/sabnzbd/sabnzbd), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Transmission](https://github.com/transmission/transmission), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [Jackett](https://github.com/Jackett/Jackett), the Newznab ecosystem and [PostgreSQL](https://www.postgresql.org/). Thank you to their maintainers and contributors. These are external integrations/optional services; their engines are not bundled into the standard MediaManager image.
 
-## Screenshots
-
-<img width="1902" height="887" alt="Screenshot 2025-12-08 at 00 44 26" src="https://github.com/user-attachments/assets/4c3fbc73-6358-44ac-a948-0eb35ab116fd" />
-<img width="1875" height="882" alt="Screenshot 2025-12-08 at 00 46 39" src="https://github.com/user-attachments/assets/75645cb6-236b-4bef-9a21-76bfd6d530f9" />
-
-![Screenshot 2025-07-02 174616](https://github.com/user-attachments/assets/c3af4be8-b873-448c-8a4d-0d5db863aec7)
-
-
-<img width="1883" height="890" alt="Screenshot 2025-12-08 at 00 48 23" src="https://github.com/user-attachments/assets/c5789559-5aa7-4c26-9442-a2b156e99b1c" />
-
-
-![Screenshot 2025-06-28 222908](https://github.com/user-attachments/assets/193e1afd-dabb-42a2-ab28-59f2784371c7)
-
-## Developer Quick Start
-
-For the developer guide see the [Developer Guide](https://maxdorninger.github.io/MediaManager/).
-
-<!-- LICENSE -->
+Media metadata comes from TMDB and TheTVDB via the configured providers. Original upstream documentation remains available [here](https://maxdorninger.github.io/MediaManager/).
 
 ## License
 
-Distributed under the AGPL 3.0. See `LICENSE.txt` for more information.
-
-
-<!-- ACKNOWLEDGMENTS -->
-
-## Acknowledgments
-
-Thanks to DigitalOcean for sponsoring the project!
-
-[![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=4edf05429dca&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
-
-* [Thanks to Pawel Czerwinski for the image on the login screen](https://unsplash.com/@pawel_czerwinski)
-
+AGPL-3.0, as inherited from the original project. See [the license](LICENSE).

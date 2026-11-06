@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import * as Collapsible from '$lib/components/ui/collapsible';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
@@ -46,7 +47,7 @@
 								{#snippet child({ props })}
 									<Sidebar.MenuAction {...props} class="data-[state=open]:rotate-90">
 										<ChevronRight />
-										<span class="sr-only">Toggle</span>
+										<span class="sr-only">{mmT($mmLocale, "Toggle" )}</span>
 									</Sidebar.MenuAction>
 								{/snippet}
 							</Collapsible.Trigger>

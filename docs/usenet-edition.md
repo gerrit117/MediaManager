@@ -1,6 +1,6 @@
-# Usenet edition
+# Earlier fork releases (through 1.12.3-usenet.2)
 
-Based on upstream v1.12.3. Independent fork under the original AGPL-3.0 license; upstream attribution and history are retained. The release runtime is pinned by digest. There is no database migration in this version.
+Based on upstream v1.12.3. Independent fork under the original AGPL-3.0 license; upstream attribution and history are retained. The release runtime is pinned by digest. These earlier releases did not migrate the database. The newer request-policy release adds an additive migration; see configuration/request-policies.md.
 
 ## Preserved functionality
 

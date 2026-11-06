@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { cn } from '$lib/utils.js';
 	import type { WithElementRef } from 'bits-ui';
 	import type { HTMLAttributes } from 'svelte/elements';
@@ -17,10 +18,10 @@
 <button
 	bind:this={ref}
 	data-sidebar="rail"
-	aria-label="Toggle Sidebar"
+	aria-label={mmT($mmLocale, "Toggle Sidebar")}
 	tabIndex={-1}
 	onclick={() => sidebar.toggle()}
-	title="Toggle Sidebar"
+	title={mmT($mmLocale, "Toggle Sidebar")}
 	class={cn(
 		'absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border sm:flex',
 		'[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize',

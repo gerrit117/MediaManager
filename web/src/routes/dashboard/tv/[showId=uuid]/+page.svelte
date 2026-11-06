@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
@@ -73,11 +74,11 @@
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard', {})}>Home</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard', {})}>{mmT($mmLocale, "Home" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard/tv', {})}>Shows</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard/tv', {})}>{mmT($mmLocale, "Shows" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
@@ -106,7 +107,7 @@
 		<div class="h-full w-full flex-auto rounded-xl md:w-1/4">
 			<Card.Root class="h-full w-full">
 				<Card.Header>
-					<Card.Title>Overview</Card.Title>
+					<Card.Title>{mmT($mmLocale, "Overview" )}</Card.Title>
 				</Card.Header>
 				<Card.Content>
 					<p class="leading-7 not-first:mt-6">
@@ -121,7 +122,7 @@
 			{#if user().is_superuser}
 				<Card.Root class="w-full  flex-1">
 					<Card.Header>
-						<Card.Title>Administrator Controls</Card.Title>
+						<Card.Title>{mmT($mmLocale, "Administrator Controls" )}</Card.Title>
 					</Card.Header>
 					<Card.Content class="flex flex-col items-center gap-4">
 						{#if !show.ended}
@@ -131,7 +132,7 @@
 									id="continuous-download-checkbox"
 								/>
 								<Label for="continuous-download-checkbox">
-									Enable automatic download of future seasons
+									{mmT($mmLocale, "Enable automatic download of future seasons" )}
 								</Label>
 							</div>
 						{/if}
@@ -142,7 +143,7 @@
 			{/if}
 			<Card.Root class="w-full  flex-1">
 				<Card.Header>
-					<Card.Title>Download Options</Card.Title>
+					<Card.Title>{mmT($mmLocale, "Download Options" )}</Card.Title>
 				</Card.Header>
 				<Card.Content class="flex flex-col items-center gap-4">
 					{#if user().is_superuser}
@@ -156,20 +157,20 @@
 	<div class="flex-1 rounded-xl">
 		<Card.Root class="w-full">
 			<Card.Header>
-				<Card.Title>Season Details</Card.Title>
+				<Card.Title>{mmT($mmLocale, "Season Details" )}</Card.Title>
 				<Card.Description>
-					A list of all seasons for {getFullyQualifiedMediaName(show)}.
+					{mmT($mmLocale, "A list of all seasons for" )} {getFullyQualifiedMediaName(show)}.
 				</Card.Description>
 			</Card.Header>
 			<Card.Content class="w-full overflow-x-auto">
 				<Table.Root>
-					<Table.Caption>A list of all seasons.</Table.Caption>
+					<Table.Caption>{mmT($mmLocale, "A list of all seasons." )}</Table.Caption>
 					<Table.Header>
 						<Table.Row>
-							<Table.Head>Number</Table.Head>
-							<Table.Head>Exists on file</Table.Head>
-							<Table.Head>Title</Table.Head>
-							<Table.Head>Overview</Table.Head>
+							<Table.Head>{mmT($mmLocale, "Number" )}</Table.Head>
+							<Table.Head>{mmT($mmLocale, "Exists on file" )}</Table.Head>
+							<Table.Head>{mmT($mmLocale, "Title" )}</Table.Head>
+							<Table.Head>{mmT($mmLocale, "Overview" )}</Table.Head>
 						</Table.Row>
 					</Table.Header>
 					<Table.Body>
@@ -194,7 +195,7 @@
 							{/each}
 						{:else}
 							<Table.Row>
-								<Table.Cell colspan={3} class="text-center">No season data available.</Table.Cell>
+								<Table.Cell colspan={3} class="text-center">{mmT($mmLocale, "No season data available." )}</Table.Cell>
 							</Table.Row>
 						{/if}
 					</Table.Body>
@@ -205,8 +206,8 @@
 	<div class="flex-1 rounded-xl">
 		<Card.Root>
 			<Card.Header>
-				<Card.Title>Download-Informationen</Card.Title>
-				<Card.Description>Alle Downloads dieser Serie.</Card.Description>
+				<Card.Title>{mmT($mmLocale, "Download-Informationen" )}</Card.Title>
+				<Card.Description>{mmT($mmLocale, "Alle Downloads dieser Serie." )}</Card.Description>
 			</Card.Header>
 
 			<Card.Content class="w-full overflow-x-auto">

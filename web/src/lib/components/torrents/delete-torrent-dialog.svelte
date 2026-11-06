@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
 	import { toast } from 'svelte-sonner';
@@ -8,7 +9,7 @@
 	import { invalidateAll } from '$app/navigation';
 
 	let { torrentId, torrentName, usenet = false }: { torrentId: string; torrentName: string; usenet?: boolean } = $props();
-	let label = $derived(usenet ? 'NZB-Download' : 'Torrent');
+	let label = $derived(mmT($mmLocale,usenet ? 'Delete NZB download' : 'Delete torrent'));
 	let dialogueState = $state(false);
 	let deleteFiles = $state(false);
 
@@ -24,9 +25,9 @@
 			}
 		});
 		if (error) {
-			toast.error(`Download konnte nicht gelöscht werden: ${error}`);
+			toast.error(mmT($mmLocale,`Download konnte nicht gelöscht werden: ${error}`));
 		} else {
-			toast.success('Download gelöscht.');
+			toast.success(mmT($mmLocale,'Download gelöscht.'));
 			dialogueState = false;
 		}
 		await invalidateAll();
@@ -34,29 +35,29 @@
 </script>
 
 <Dialog.Root bind:open={dialogueState}>
-	<Dialog.Trigger aria-label={`${label} löschen`} class={buttonVariants({ variant: 'outline' }) + ' text-destructive hover:bg-destructive/10'}>Löschen</Dialog.Trigger>
+	<Dialog.Trigger aria-label={label} class={buttonVariants({ variant: 'outline' }) + ' text-destructive hover:bg-destructive/10'}>{mmT($mmLocale, "Löschen" )}</Dialog.Trigger>
 	<Dialog.Content>
 		<Dialog.Header>
-			<Dialog.Title>{label} löschen</Dialog.Title>
+			<Dialog.Title>{label}</Dialog.Title>
 			<Dialog.Description>
-				{label} löschen "{torrentName}". This action cannot be undone!
+				{label}: "{torrentName}". {mmT($mmLocale,"This action cannot be undone.")}
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="flex w-full max-w-sm items-center space-x-2">
 			<Checkbox bind:checked={deleteFiles} id="delete-files" />
 			<div class="flex flex-col">
 				<Label for="delete-files">
-					Delete associated files as well.
+					{mmT($mmLocale, "Delete associated files as well." )}
 					<p class="text-sm font-normal text-muted-foreground">
-						(Only files in the download location will be deleted)
+						{mmT($mmLocale, "(Only files in the download location will be deleted)" )}
 					</p>
 				</Label>
 			</div>
 		</div>
 
 		<Dialog.Footer>
-			<Button onclick={() => (dialogueState = false)}>Cancel</Button>
-			<Button onclick={() => deleteTorrent()} variant="destructive">{label} löschen</Button>
+			<Button onclick={() => (dialogueState = false)}>{mmT($mmLocale, "Cancel" )}</Button>
+			<Button onclick={() => deleteTorrent()} variant="destructive">{label}</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>

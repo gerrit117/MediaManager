@@ -1,5 +1,7 @@
 import logging
 
+from media_manager.auth.request_policy import apply_request_policy
+
 from sqlalchemy import delete, select
 from sqlalchemy.exc import (
     IntegrityError,
@@ -199,6 +201,7 @@ class MovieRepository:
             authorized=movie_request.authorized,
         )
         try:
+            apply_request_policy(self.db, db_model, "movies")
             self.db.add(db_model)
             self.db.commit()
             self.db.refresh(db_model)

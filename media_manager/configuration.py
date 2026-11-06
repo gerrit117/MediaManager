@@ -82,7 +82,7 @@ def fields_for_browser() -> list[dict]:
                  environment=bool(os.getenv('MEDIAMANAGER_'+key.upper().replace('.', '__')) is not None)) for key,label,kind in FIELDS]
 
 
-def stage_settings(values: dict) -> None:
+def stage_settings(values: dict, apply_live: bool = False) -> dict:
     from media_manager.config import MediaManagerConfig
     kinds = {key: kind for key, _, kind in FIELDS}
     cleaned = {}
@@ -109,7 +109,20 @@ def stage_settings(values: dict) -> None:
         except Exception: raise ValueError('Ungültige Konfiguration; Adressen, Ports und Werte prüfen') from None
         current = json.loads(settings_file().read_text()) if settings_file().exists() else {}
         pending = json.loads(settings_file(True).read_text()) if settings_file(True).exists() else {}
-        atomic_json(settings_file(True),merge(merge(current,pending),nested(cleaned)))
+        proposed=merge(merge(current,pending),nested(cleaned))
+        hot={key:value for key,value in cleaned.items() if key.startswith(('indexers.','torrents.','metadata.'))} if apply_live else {}
+        if hot:
+            active=merge(current,nested(hot))
+            if settings_file().exists():
+                shutil.copyfile(settings_file(),settings_file().with_suffix('.json.bak'))
+                os.chmod(settings_file().with_suffix('.json.bak'),0o600)
+            atomic_json(settings_file(),active)
+        live=MediaManagerConfig().model_dump(mode='json')
+        desired=merge(live,proposed)
+        restart_required=any(lookup(live,key)!=lookup(desired,key) for key,_,_ in FIELDS)
+        if not apply_live or restart_required:atomic_json(settings_file(True),proposed)
+        else:settings_file(True).unlink(missing_ok=True)
+        return {'restart_required':restart_required,'applied_live':bool(hot)}
 
 
 def activate_settings() -> None:

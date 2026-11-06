@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
@@ -47,10 +48,11 @@
 			console.log('Login successful!');
 			console.log('Received User Data: ', response);
 			successMessage = 'Login successful! Redirecting...';
-			toast.success(successMessage);
-			await goto(resolve('/dashboard', {}));
+			toast.success(mmT($mmLocale,successMessage));
+			const target = new URLSearchParams(window.location.search).get('next');
+			await goto(target === '/web/dashboard/settings/' ? resolve('/dashboard/settings', {}) : resolve('/dashboard', {}));
 		} else {
-			toast.error('Login failed!');
+			toast.error(mmT($mmLocale,'Login failed!'));
 			errorMessage = `Login failed! Please check your credentials and try again.`;
 		}
 	}
@@ -58,13 +60,13 @@
 
 <Card.Root class="mx-auto max-w-sm">
 	<Card.Header>
-		<Card.Title class="text-2xl">Login</Card.Title>
-		<Card.Description>Enter your email below to log in to your account</Card.Description>
+		<Card.Title class="text-2xl">{mmT($mmLocale, "Login" )}</Card.Title>
+		<Card.Description>{mmT($mmLocale, "Enter your email below to log in to your account" )}</Card.Description>
 	</Card.Header>
 	<Card.Content>
 		<form class="grid gap-4" onsubmit={handleLogin}>
 			<div class="grid gap-2">
-				<Label for="email">Email</Label>
+				<Label for="email">{mmT($mmLocale, "Email" )}</Label>
 				<Input
 					autocomplete="email"
 					bind:value={email}
@@ -76,12 +78,12 @@
 			</div>
 			<div class="grid gap-2">
 				<div class="flex items-center">
-					<Label for="password">Password</Label>
+					<Label for="password">{mmT($mmLocale, "Password" )}</Label>
 					<a
 						class="ml-auto inline-block text-sm underline"
 						href={resolve('/login/forgot-password', {})}
 					>
-						Forgot your password?
+						{mmT($mmLocale, "Forgot your password?" )}
 					</a>
 				</div>
 				<Input
@@ -96,38 +98,38 @@
 			{#if errorMessage}
 				<Alert.Root variant="destructive">
 					<AlertCircleIcon class="size-4" />
-					<Alert.Title>Error</Alert.Title>
-					<Alert.Description>{errorMessage}</Alert.Description>
+					<Alert.Title>{mmT($mmLocale, "Error" )}</Alert.Title>
+					<Alert.Description>{mmT($mmLocale, errorMessage)}</Alert.Description>
 				</Alert.Root>
 			{/if}
 
 			{#if successMessage}
 				<Alert.Root variant="default">
-					<Alert.Title>Success</Alert.Title>
-					<Alert.Description>{successMessage}</Alert.Description>
+					<Alert.Title>{mmT($mmLocale, "Success" )}</Alert.Title>
+					<Alert.Description>{mmT($mmLocale,successMessage)}</Alert.Description>
 				</Alert.Root>
 			{/if}
 
 			{#if isLoading}
 				<LoadingBar />
 			{/if}
-			<Button class="w-full" disabled={isLoading} type="submit">Login</Button>
+			<Button class="w-full" disabled={isLoading} type="submit">{mmT($mmLocale, "Login" )}</Button>
 		</form>
 		{#each oauthProviderNames as name (name)}
 			<div
 				class="relative mt-2 text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border"
 			>
 				<span class="relative z-10 bg-background px-2 text-muted-foreground">
-					Or continue with
+					{mmT($mmLocale, "Or continue with" )}
 				</span>
 			</div>
 			<Button class="mt-2 w-full" onclick={() => handleOauth()} variant="outline"
-				>Login with {name}</Button
+				>{mmT($mmLocale, "Login with" )} {name}</Button
 			>
 		{/each}
 		<div class="mt-4 text-center text-sm">
 			<Button href={resolve('/login/signup/', {})} variant="link"
-				>Don't have an account? Sign up</Button
+				>{mmT($mmLocale, "Don't have an account? Sign up" )}</Button
 			>
 		</div>
 	</Card.Content>

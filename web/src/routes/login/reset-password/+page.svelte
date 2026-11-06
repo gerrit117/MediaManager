@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -64,56 +65,56 @@
 </script>
 
 <svelte:head>
-	<title>Reset Password - MediaManager</title>
+	<title>{mmT($mmLocale, "Reset Password - MediaManager" )}</title>
 	<meta content="Reset your MediaManager password with a secure token" name="description" />
 </svelte:head>
 
 <Card class="mx-auto max-w-sm">
 	<CardHeader>
-		<CardTitle class="text-2xl">Reset Password</CardTitle>
-		<CardDescription>Enter your new password below.</CardDescription>
+		<CardTitle class="text-2xl">{mmT($mmLocale, "Reset Password" )}</CardTitle>
+		<CardDescription>{mmT($mmLocale, "Enter your new password below." )}</CardDescription>
 	</CardHeader>
 	<CardContent>
 		<form class="grid gap-4" onsubmit={handleSubmit}>
 			<div class="grid gap-2">
-				<Label for="new-password">New Password</Label>
+				<Label for="new-password">{mmT($mmLocale, "New Password" )}</Label>
 				<Input
 					bind:value={newPassword}
 					disabled={isLoading}
 					id="new-password"
 					minlength={1}
-					placeholder="Enter your new password"
+					placeholder={mmT($mmLocale, "Enter your new password")}
 					required
 					type="password"
 				/>
 			</div>
 			<div class="grid gap-2">
-				<Label for="confirm-password">Confirm Password</Label>
+				<Label for="confirm-password">{mmT($mmLocale, "Confirm Password" )}</Label>
 				<Input
 					bind:value={confirmPassword}
 					disabled={isLoading}
 					id="confirm-password"
 					minlength={1}
-					placeholder="Confirm your new password"
+					placeholder={mmT($mmLocale, "Confirm your new password")}
 					required
 					type="password"
 				/>
 			</div>
 			<Button class="w-full" disabled={isLoading || !newPassword || !confirmPassword} type="submit">
 				{#if isLoading}
-					Resetting Password...
+					{mmT($mmLocale, "Resetting Password..." )}
 				{:else}
-					Reset Password
+					{mmT($mmLocale, "Reset Password" )}
 				{/if}
 			</Button>
 		</form>
 		<div class="mt-4 text-center text-sm">
 			<a class="font-semibold text-primary hover:underline" href={resolve('/login', {})}>
-				Back to Login
+				{mmT($mmLocale, "Back to Login" )}
 			</a>
 			<span class="mx-2 text-muted-foreground">•</span>
 			<a class="text-primary hover:underline" href={resolve('/login/forgot-password', {})}>
-				Request New Reset Link
+				{mmT($mmLocale, "Request New Reset Link" )}
 			</a>
 		</div>
 	</CardContent>

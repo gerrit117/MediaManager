@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -42,7 +43,7 @@
 </script>
 
 <svelte:head>
-	<title>Forgot Password - MediaManager</title>
+	<title>{mmT($mmLocale, "Forgot Password - MediaManager" )}</title>
 	<meta
 		content="Reset your MediaManager password - Enter your email to receive a reset link"
 		name="description"
@@ -51,14 +52,12 @@
 
 <Card class="mx-auto max-w-sm">
 	<CardHeader>
-		<CardTitle class="text-2xl">Forgot Password</CardTitle>
+		<CardTitle class="text-2xl">{mmT($mmLocale, "Forgot Password" )}</CardTitle>
 		<CardDescription>
 			{#if isSuccess}
-				We've sent a password reset link to your email address if a SMTP server is configured. Check
-				your inbox and follow the instructions to reset your password. If you didn't receive an
-				email, please contact an administrator, the reset link will be in the logs of MediaManager.
+				{mmT($mmLocale, "We've sent a password reset link to your email address if a SMTP server is configured. Check your inbox and follow the instructions to reset your password. If you didn't receive an email, please contact an administrator, the reset link will be in the logs of MediaManager." )}
 			{:else}
-				Enter your email address and we'll send you a link to reset your password.
+				{mmT($mmLocale, "Enter your email address and we'll send you a link to reset your password." )}
 			{/if}
 		</CardDescription>
 	</CardHeader>
@@ -67,11 +66,11 @@
 			<div class="space-y-4">
 				<div class="rounded-lg bg-green-50 p-4 text-center dark:bg-green-950">
 					<p class="text-sm text-green-700 dark:text-green-300">
-						Password reset email sent successfully!
+						{mmT($mmLocale, "Password reset email sent successfully!" )}
 					</p>
 				</div>
 				<div class="text-center text-sm text-muted-foreground">
-					<p>Didn't receive the email? Check your spam folder or</p>
+					<p>{mmT($mmLocale, "Didn't receive the email? Check your spam folder or" )}</p>
 					<button
 						class="text-primary hover:underline"
 						onclick={() => {
@@ -79,14 +78,14 @@
 							email = '';
 						}}
 					>
-						try again
+						{mmT($mmLocale, "try again" )}
 					</button>
 				</div>
 			</div>
 		{:else}
 			<form class="grid gap-4" onsubmit={handleSubmit}>
 				<div class="grid gap-2">
-					<Label for="email">Email</Label>
+					<Label for="email">{mmT($mmLocale, "Email" )}</Label>
 					<Input
 						id="email"
 						type="email"
@@ -98,16 +97,16 @@
 				</div>
 				<Button type="submit" class="w-full" disabled={isLoading || !email}>
 					{#if isLoading}
-						Sending Reset Email...
+						{mmT($mmLocale, "Sending Reset Email..." )}
 					{:else}
-						Send Reset Email
+						{mmT($mmLocale, "Send Reset Email" )}
 					{/if}
 				</Button>
 			</form>
 		{/if}
 		<div class="mt-4 text-center text-sm">
 			<a class="font-semibold text-primary hover:underline" href={resolve('/login', {})}>
-				Back to Login
+				{mmT($mmLocale, "Back to Login" )}
 			</a>
 		</div>
 	</CardContent>

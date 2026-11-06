@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import LoginCard from '$lib/components/auth/login-card.svelte';
 	import { page } from '$app/state';
 	import type { components } from '$lib/api/api';
@@ -6,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Login - MediaManager</title>
+	<title>{mmT($mmLocale, "Login - MediaManager" )}</title>
 	<meta
 		content="Login to MediaManager - Access your personal media management dashboard"
 		name="description"

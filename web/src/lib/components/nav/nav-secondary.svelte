@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import type { ComponentProps } from 'svelte';
 	import Sun from '@lucide/svelte/icons/sun';
@@ -28,9 +29,9 @@
 					{#snippet child({ props })}
 						<div onclick={() => toggleMode()} {...props}>
 							<Sun class="dark:hidden " />
-							<span class="dark:hidden">Switch to dark mode</span>
+							<span class="dark:hidden">{mmT($mmLocale, "Switch to dark mode" )}</span>
 							<Moon class="hidden dark:inline" />
-							<span class="hidden dark:inline">Switch to light mode</span>
+							<span class="hidden dark:inline">{mmT($mmLocale, "Switch to light mode" )}</span>
 						</div>
 					{/snippet}
 				</Sidebar.MenuButton>
@@ -43,7 +44,7 @@
 							<!-- eslint-disable svelte/no-navigation-without-resolve -->
 							<a href={item.url} {...props}>
 								<item.icon />
-								<span>{item.title}</span>
+								<span>{mmT($mmLocale,item.title)}</span>
 							</a>
 							<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						{/snippet}

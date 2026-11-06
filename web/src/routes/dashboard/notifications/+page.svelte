@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Separator } from '$lib/components/ui/separator';
@@ -89,7 +90,7 @@
 </script>
 
 <svelte:head>
-	<title>Notifications - MediaManager</title>
+	<title>{mmT($mmLocale, "Notifications - MediaManager" )}</title>
 </svelte:head>
 
 <header class="flex h-16 shrink-0 items-center gap-2">
@@ -103,11 +104,11 @@
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard', {})}>Home</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard', {})}>{mmT($mmLocale, "Home" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Page>Notifications</Breadcrumb.Page>
+					<Breadcrumb.Page>{mmT($mmLocale, "Notifications" )}</Breadcrumb.Page>
 				</Breadcrumb.Item>
 			</Breadcrumb.List>
 		</Breadcrumb.Root>
@@ -116,13 +117,13 @@
 
 <main class="container mx-auto px-4 py-8">
 	<div class="mb-6 flex items-center justify-between">
-		<h1 class="text-3xl font-bold text-gray-900 dark:text-white">Notifications</h1>
+		<h1 class="text-3xl font-bold text-gray-900 dark:text-white">{mmT($mmLocale, "Notifications" )}</h1>
 		{#if unreadNotifications.length > 0}
 			<Button onclick={() => markAllAsRead()} disabled={markingAllAsRead} class="flex items-center">
 				{#if markingAllAsRead}
 					<div class="h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
 				{/if}
-				Mark All as Read
+				{mmT($mmLocale, "Mark All as Read" )}
 			</Button>
 		{/if}
 	</div>
@@ -136,7 +137,7 @@
 		<div class="mb-8">
 			<div class="mb-4 flex items-center gap-2">
 				<h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-					Unread Notifications
+					{mmT($mmLocale, "Unread Notifications" )}
 					{#if unreadNotifications.length > 0}:
 						{unreadNotifications.length}
 					{/if}
@@ -147,8 +148,8 @@
 				<div
 					class="rounded-lg border border-green-200 bg-green-50 p-6 text-center dark:border-green-800 dark:bg-green-900/20"
 				>
-					<p class="font-medium text-green-800 dark:text-green-200">All caught up!</p>
-					<p class="text-sm text-green-600 dark:text-green-400">No unread notifications</p>
+					<p class="font-medium text-green-800 dark:text-green-200">{mmT($mmLocale, "All caught up!" )}</p>
+					<p class="text-sm text-green-600 dark:text-green-400">{mmT($mmLocale, "No unread notifications" )}</p>
 				</div>
 			{:else}
 				<div class="space-y-3">
@@ -171,7 +172,7 @@
 									<Button
 										onclick={() => markAsRead(notification.id ?? '')}
 										class="rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-100 dark:hover:bg-blue-800"
-										title="Mark as read"
+										title={mmT($mmLocale, "Mark as read")}
 										variant="outline"
 									>
 										<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,7 +207,7 @@
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
 					></path>
 				</svg>
-				<span>Read Notifications ({readNotifications.length})</span>
+				<span>{mmT($mmLocale, "Read Notifications (" )}{readNotifications.length})</span>
 			</button>
 		</div>
 
@@ -217,7 +218,7 @@
 					<div
 						class="rounded-lg border border-gray-200 bg-gray-50 p-6 text-center dark:border-gray-700 dark:bg-gray-800"
 					>
-						<p class="text-gray-500 dark:text-gray-400">No read notifications</p>
+						<p class="text-gray-500 dark:text-gray-400">{mmT($mmLocale, "No read notifications" )}</p>
 					</div>
 				{:else}
 					<div class="space-y-3">
@@ -240,7 +241,7 @@
 										<Button
 											onclick={() => markAsUnread(notification.id ?? '')}
 											class="rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-100 dark:hover:bg-blue-800"
-											title="Mark as unread"
+											title={mmT($mmLocale, "Mark as unread")}
 											variant="outline"
 										>
 											<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Button } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';
 	import { Badge } from '$lib/components/ui/badge';
@@ -51,15 +52,15 @@
 			const errorMessage = `There already is a Movie File using the Filepath Suffix '${filePathSuffix}'. Try again with a different Filepath Suffix.`;
 			console.warn(errorMessage);
 			torrentsError = errorMessage;
-			if (dialogueState) toast.info(errorMessage);
+			if (dialogueState) toast.info(mmT($mmLocale,errorMessage));
 		} else if (!response.ok) {
 			const errorMessage = (error as { detail?: string } | undefined)?.detail ?? `Downloadmanager-Anfrage fehlgeschlagen: ${response.statusText}`;
 			console.error(errorMessage);
 			torrentsError = errorMessage;
-			toast.error(errorMessage);
+			toast.error(mmT($mmLocale,errorMessage));
 		} else {
 			console.log('Download submitted:', data);
-			toast.success('Download an den Downloadmanager übergeben.');
+			toast.success(mmT($mmLocale,'Download an den Downloadmanager übergeben.'));
 		}
 		await invalidateAll();
 	}
@@ -81,18 +82,18 @@
 			})
 			.then((data) => data?.data)
 			.finally(() => (isLoading = false));
-		toast.info('Searching indexers...');
+		toast.info(mmT($mmLocale,'Searching indexers...'));
 
 		torrentsData = await torrentsPromise;
-		toast.info('Found ' + torrentsData?.length + ' releases.');
+		toast.info(mmT($mmLocale,'Found ' + torrentsData?.length + ' releases.'));
 	}
 </script>
 
 <DownloadDialogWrapper
 	bind:open={dialogueState}
-	triggerText="Download Movie"
-	title="Download a Movie"
-	description="Search indexers and send releases to your download manager for this movie."
+	triggerText={mmT($mmLocale, "Download Movie")}
+	title={mmT($mmLocale, "Download a Movie")}
+	description={mmT($mmLocale, "Search indexers and send releases to your download manager for this movie.")}
 >
 	<SearchTabs
 		bind:tabState
@@ -102,11 +103,11 @@
 		advancedModeHelpText="The custom query will override the default search string like 'A Minecraft Movie (2025)'."
 	>
 		{#snippet basicModeContent()}
-			<Button disabled={isLoading} class="w-fit" onclick={search}>Search indexers</Button>
+			<Button disabled={isLoading} class="w-fit" onclick={search}>{mmT($mmLocale, "Search indexers" )}</Button>
 		{/snippet}
 	</SearchTabs>
 	{#if torrentsError}
-		<div class="my-2 w-full text-center text-red-500">An error occurred: {torrentsError}</div>
+		<div class="my-2 w-full text-center text-red-500">{mmT($mmLocale, "An error occurred:" )} {mmT($mmLocale, torrentsError)}</div>
 	{/if}
 	<TorrentTable {torrentsPromise} columns={tableColumnHeadings}>
 		{#snippet rowSnippet(torrent)}
@@ -115,7 +116,7 @@
 			<Table.Cell>{torrent.usenet ? 'Usenet / NZB' : 'Torrent'}</Table.Cell>
 			<Table.Cell>{torrent.usenet ? '—' : torrent.seeders}</Table.Cell>
 			<Table.Cell>{torrent.score}</Table.Cell>
-			<Table.Cell>{torrent.indexer ?? 'Unknown'}</Table.Cell>
+			<Table.Cell>{torrent.indexer ?? mmT($mmLocale, "Unknown")}</Table.Cell>
 			<Table.Cell>
 				{#each torrent.flags as flag (flag)}
 					<Badge variant="outline">{flag}</Badge>

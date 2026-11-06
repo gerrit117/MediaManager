@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
@@ -43,22 +44,22 @@
 
 		if (response.ok) {
 			successMessage = 'Registration successful! Please login.';
-			toast.success(successMessage);
+			toast.success(mmT($mmLocale,successMessage));
 		} else {
-			toast.error('Registration failed');
+			toast.error(mmT($mmLocale,'Registration failed'));
 		}
 	}
 </script>
 
 <Card.Root class="mx-auto max-w-sm">
 	<Card.Header>
-		<Card.Title class="text-xl">Sign Up</Card.Title>
-		<Card.Description>Enter your information to create an account</Card.Description>
+		<Card.Title class="text-xl">{mmT($mmLocale, "Sign Up" )}</Card.Title>
+		<Card.Description>{mmT($mmLocale, "Enter your information to create an account" )}</Card.Description>
 	</Card.Header>
 	<Card.Content>
 		<form class="grid gap-4" onsubmit={handleSignup}>
 			<div class="grid gap-2">
-				<Label for="email">Email</Label>
+				<Label for="email">{mmT($mmLocale, "Email" )}</Label>
 				<Input
 					autocomplete="email"
 					bind:value={email}
@@ -69,7 +70,7 @@
 				/>
 			</div>
 			<div class="grid gap-2">
-				<Label for="password">Password</Label>
+				<Label for="password">{mmT($mmLocale, "Password" )}</Label>
 				<Input
 					autocomplete="new-password"
 					bind:value={password}
@@ -79,7 +80,7 @@
 				/>
 			</div>
 			<div class="grid gap-2">
-				<Label for="password">Confirm Password</Label>
+				<Label for="password">{mmT($mmLocale, "Confirm Password" )}</Label>
 				<Input
 					autocomplete="new-password"
 					bind:value={confirmPassword}
@@ -91,15 +92,15 @@
 			{#if errorMessage}
 				<Alert.Root variant="destructive">
 					<AlertCircleIcon class="size-4" />
-					<Alert.Title>Error</Alert.Title>
-					<Alert.Description>{errorMessage}</Alert.Description>
+					<Alert.Title>{mmT($mmLocale, "Error" )}</Alert.Title>
+					<Alert.Description>{mmT($mmLocale, errorMessage)}</Alert.Description>
 				</Alert.Root>
 			{/if}
 			{#if successMessage}
 				<Alert.Root variant="default">
 					<CheckCircle2Icon class="size-4" />
-					<Alert.Title>Success</Alert.Title>
-					<Alert.Description>{successMessage}</Alert.Description>
+					<Alert.Title>{mmT($mmLocale, "Success" )}</Alert.Title>
+					<Alert.Description>{mmT($mmLocale,successMessage)}</Alert.Description>
 				</Alert.Root>
 			{/if}
 			{#if isLoading}
@@ -109,7 +110,7 @@
 				class="w-full"
 				disabled={isLoading || password !== confirmPassword || password === ''}
 				type="submit"
-				>Create an account
+				>{mmT($mmLocale, "Create an account" )}
 			</Button>
 		</form>
 		{#each oauthProviderNames as name (name)}
@@ -117,15 +118,15 @@
 				class="relative mt-2 text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border"
 			>
 				<span class="relative z-10 bg-background px-2 text-muted-foreground">
-					Or continue with
+					{mmT($mmLocale, "Or continue with" )}
 				</span>
 			</div>
 			<Button class="mt-2 w-full" onclick={() => handleOauth()} variant="outline"
-				>Login with {name}</Button
+				>{mmT($mmLocale, "Login with" )} {name}</Button
 			>
 		{/each}
 		<div class="mt-4 text-center text-sm">
-			<Button href={resolve('/login/', {})} variant="link">Already have an account? Login</Button>
+			<Button href={resolve('/login/', {})} variant="link">{mmT($mmLocale, "Already have an account? Login" )}</Button>
 		</div>
 	</Card.Content>
 </Card.Root>

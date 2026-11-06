@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Pagination as PaginationPrimitive } from 'bits-ui';
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import { cn } from '$lib/utils.js';
@@ -13,7 +14,7 @@
 </script>
 
 {#snippet Fallback()}
-	<span>Previous</span>
+	<span>{mmT($mmLocale, "Previous" )}</span>
 	<ChevronLeft />
 {/snippet}
 

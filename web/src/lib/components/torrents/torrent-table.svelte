@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import {
 		convertTorrentSeasonRangeToIntegerRange,
 		getTorrentQualityString,
@@ -58,16 +59,16 @@
 			}
 		});
 		if (error) {
-			toast.error((error as { detail?: string })?.detail ?? 'Downloadmanager-Anfrage fehlgeschlagen.');
+			toast.error(mmT($mmLocale,(error as { detail?: string })?.detail ?? 'Downloadmanager-Anfrage fehlgeschlagen.'));
 		} else {
 			console.log(`Successfully retried download for torrent ${torrent.torrent_title}`);
-			toast.success('Downloadmanager-Anfrage gesendet.');
+			toast.success(mmT($mmLocale,'Downloadmanager-Anfrage gesendet.'));
 		}
 		await invalidateAll();
 	}
 </script>
 
-<div class="grid min-w-0 gap-4" aria-label="Downloads">
+<div class="grid min-w-0 gap-4" aria-label={mmT($mmLocale, "Downloads")}>
 	{#each torrents as torrent (torrent.torrent_id)}
 		{@const live = progress[torrent.torrent_id]}
 		{@const percent = live?.percent ?? (torrent.imported ? 100 : null)}
@@ -84,31 +85,31 @@
 							<p class="break-words font-semibold leading-relaxed [overflow-wrap:anywhere]">{torrent.torrent_title}</p>
 						{/if}
 					</div>
-					<span class="w-fit max-w-full rounded-full bg-muted px-3 py-1 text-sm font-medium sm:shrink-0">{statusLabel(live?.state, torrent.status)}</span>
+					<span class="w-fit max-w-full rounded-full bg-muted px-3 py-1 text-sm font-medium sm:shrink-0">{mmT($mmLocale,statusLabel(live?.state, torrent.status))}</span>
 				</div>
 				<div class="flex flex-wrap items-center gap-2 text-xs">
 					<span class="rounded-md border px-2 py-1">{torrent.usenet ? 'Usenet / NZB' : 'Torrent'}</span>
 					{#if quality !== 'unknown'}<span class="rounded-md border px-2 py-1">{quality}</span>{/if}
-					{#if isShow}<span class="rounded-md border px-2 py-1">Staffel {convertTorrentSeasonRangeToIntegerRange((torrent as components['schemas']['RichSeasonTorrent']).seasons!)}</span>{/if}
+					{#if isShow}<span class="rounded-md border px-2 py-1">{mmT($mmLocale, "Staffel" )} {convertTorrentSeasonRangeToIntegerRange((torrent as components['schemas']['RichSeasonTorrent']).seasons!)}</span>{/if}
 					<span class={torrent.imported ? 'text-emerald-500' : 'text-muted-foreground'}>{torrent.imported ? 'In der Bibliothek' : 'Import steht aus'}</span>
 				</div>
 				<div class="space-y-2">
 					<div class="flex items-center justify-between gap-3 text-sm">
-						<span class="text-muted-foreground">Fortschritt</span>
-						<span class="font-medium tabular-nums">{percent !== null && Number.isFinite(percent) ? percent.toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' %' : 'Nicht verfügbar'}</span>
+						<span class="text-muted-foreground">{mmT($mmLocale, "Fortschritt" )}</span>
+						<span class="font-medium tabular-nums">{percent !== null && Number.isFinite(percent) ? percent.toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' %' : mmT($mmLocale, "Nicht verfügbar")}</span>
 					</div>
 					{#if percent !== null && Number.isFinite(percent)}
-						<div class="h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Downloadfortschritt" aria-valuemin="0" aria-valuemax="100" aria-valuenow={percent}>
+						<div class="h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label={mmT($mmLocale, "Downloadfortschritt")} aria-valuemin="0" aria-valuemax="100" aria-valuenow={percent}>
 							<div class="h-full rounded-full bg-primary transition-[width] duration-500" style:width={`${Math.max(0, Math.min(100, percent))}%`}></div>
 						</div>
 					{/if}
 				</div>
-				{#if torrent.file_path_suffix}<p class="break-words text-xs text-muted-foreground">Dateizusatz: {torrent.file_path_suffix}</p>{/if}
+				{#if torrent.file_path_suffix}<p class="break-words text-xs text-muted-foreground">{mmT($mmLocale, "Dateizusatz:" )} {torrent.file_path_suffix}</p>{/if}
 			</div>
 			{#if user().is_superuser}
-				<footer class="flex flex-wrap items-center justify-end gap-2 border-t bg-muted/20 px-4 py-3 sm:px-5" aria-label="Download-Aktionen">
+				<footer class="flex flex-wrap items-center justify-end gap-2 border-t bg-muted/20 px-4 py-3 sm:px-5" aria-label={mmT($mmLocale, "Download-Aktionen")}>
 					{#if live?.state === 'Paused' || live?.state === 'Failed'}
-						<Button variant="secondary" onclick={() => retryTorrentDownload(torrent)}>{live?.state === 'Paused' ? 'Fortsetzen' : 'Erneut versuchen'}</Button>
+						<Button variant="secondary" onclick={() => retryTorrentDownload(torrent)}>{live?.state === 'Paused' ? mmT($mmLocale, "Fortsetzen") : mmT($mmLocale, "Erneut versuchen")}</Button>
 					{/if}
 					<EditTorrentDialog {torrent} />
 					<DeleteTorrentDialog usenet={torrent.usenet} torrentName={torrent.torrent_title} torrentId={torrent.torrent_id!} />

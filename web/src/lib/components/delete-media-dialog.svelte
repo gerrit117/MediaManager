@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import type { components } from '$lib/api/api.ts';
 	import { toast } from 'svelte-sonner';
 	import client from '$lib/api/index.ts';
@@ -23,7 +24,7 @@
 
 	async function delete_movie() {
 		if (!media.id) {
-			toast.error('Movie ID is missing');
+			toast.error(mmT($mmLocale,'Movie ID is missing'));
 			return;
 		}
 		const { error } = await client.DELETE('/api/v1/movies/{movie_id}', {
@@ -33,9 +34,9 @@
 			}
 		});
 		if (error) {
-			toast.error('Failed to delete movie: ' + error.detail);
+			toast.error(mmT($mmLocale,'Failed to delete movie: ' + error.detail));
 		} else {
-			toast.success('Movie deleted successfully.');
+			toast.success(mmT($mmLocale,'Movie deleted successfully.'));
 			deleteDialogOpen = false;
 			await goto(resolve('/dashboard/movies', {}), { invalidateAll: true });
 		}
@@ -49,9 +50,9 @@
 			}
 		});
 		if (error) {
-			toast.error('Failed to delete show: ' + error.detail);
+			toast.error(mmT($mmLocale,'Failed to delete show: ' + error.detail));
 		} else {
-			toast.success('Show deleted successfully.');
+			toast.success(mmT($mmLocale,'Show deleted successfully.'));
 			deleteDialogOpen = false;
 			await goto(resolve('/dashboard/tv', {}), { invalidateAll: true });
 		}
@@ -60,13 +61,13 @@
 
 <AlertDialog.Root bind:open={deleteDialogOpen}>
 	<AlertDialog.Trigger class={buttonVariants({ variant: 'destructive' })}>
-		Delete {isShow ? ' Show' : ' Movie'}
+		{mmT($mmLocale, "Delete" )} {isShow ? ' Show' : ' Movie'}
 	</AlertDialog.Trigger>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
-			<AlertDialog.Title>Delete - {getFullyQualifiedMediaName(media)}?</AlertDialog.Title>
+			<AlertDialog.Title>{mmT($mmLocale, "Delete -" )} {getFullyQualifiedMediaName(media)}?</AlertDialog.Title>
 			<AlertDialog.Description>
-				This action cannot be undone. This will permanently delete
+				{mmT($mmLocale, "This action cannot be undone. This will permanently delete" )}
 				<strong>{getFullyQualifiedMediaName(media)}</strong>.
 			</AlertDialog.Description>
 		</AlertDialog.Header>
@@ -77,7 +78,7 @@
 					for="delete-files"
 					class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 				>
-					Also delete files on disk (this will only remove imported files, not downloads)
+					{mmT($mmLocale, "Also delete files on disk (this will only remove imported files, not downloads)" )}
 				</Label>
 			</div>
 			<div class="flex items-center space-x-2">
@@ -86,12 +87,12 @@
 					for="delete-torrents"
 					class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 				>
-					Auch Downloads aus dem jeweiligen Downloadmanager entfernen (NZB und Torrent)
+					{mmT($mmLocale, "Auch Downloads aus dem jeweiligen Downloadmanager entfernen (NZB und Torrent)" )}
 				</Label>
 			</div>
 		</div>
 		<AlertDialog.Footer>
-			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Cancel>{mmT($mmLocale, "Cancel" )}</AlertDialog.Cancel>
 			<AlertDialog.Action
 				onclick={() => {
 					if (isShow) {
@@ -100,7 +101,7 @@
 				}}
 				class={buttonVariants({ variant: 'destructive' })}
 			>
-				Delete
+				{mmT($mmLocale, "Delete" )}
 			</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>

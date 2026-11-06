@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import SignupCard from '$lib/components/auth/signup-card.svelte';
 	import { page } from '$app/state';
 
@@ -6,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Login - MediaManager</title>
+	<title>{mmT($mmLocale, "Login - MediaManager" )}</title>
 	<meta content="Signup - MediaManager" name="description" />
 </svelte:head>
 

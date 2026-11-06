@@ -37,8 +37,8 @@ def get_openid_router() -> APIRouter:
             backend=openid_cookie_auth_backend,
             get_user_manager=fastapi_users.get_user_manager,
             state_secret=SECRET,
-            associate_by_email=True,
-            is_verified_by_default=True,
+            associate_by_email=False,
+            is_verified_by_default=False,
             redirect_url=None,
         )
     # this is there, so that the appropriate routes are created even if OIDC is not configured,
@@ -78,3 +78,33 @@ def get_auth_metadata() -> AuthMetadata:
     if openid_config.enabled:
         return AuthMetadata(oauth_providers=[openid_config.name])
     return AuthMetadata(oauth_providers=[])
+
+# Server-managed fields stay out of UserUpdate: users cannot raise their own quota.
+from pydantic import BaseModel, Field
+from fastapi import HTTPException
+from media_manager.auth.request_policy import usage_count, month_bounds
+from media_manager.auth.users import current_active_user
+from typing import Annotated
+from uuid import UUID
+
+class RequestPolicyUpdate(BaseModel):
+    monthly_request_limit: int | None = Field(default=None,ge=0,le=100000)
+    auto_approve_requests: bool = False
+
+@users_router.get('/users/request-policies',dependencies=[Depends(current_superuser)])
+def request_policies(db:DbSessionDependency):
+    return [dict(id=str(u.id),monthly_request_limit=u.monthly_request_limit,auto_approve_requests=u.auto_approve_requests,used=usage_count(db,u.id),resets_at=month_bounds()[1]) for u in db.execute(select(User)).unique().scalars()]
+
+@users_router.put('/users/{user_id}/request-policy',dependencies=[Depends(current_superuser)])
+def update_request_policy(user_id:UUID,body:RequestPolicyUpdate,db:DbSessionDependency):
+    user=db.execute(select(User).where(User.id==user_id).with_for_update(of=User)).unique().scalar_one_or_none()
+    if user is None:raise HTTPException(404,'Benutzer nicht gefunden')
+    user.monthly_request_limit=body.monthly_request_limit
+    user.auto_approve_requests=body.auto_approve_requests
+    db.flush()
+    return {'saved':True}
+
+@users_router.get('/requests/quota')
+def own_quota(db:DbSessionDependency,user:Annotated[User,Depends(current_active_user)]):
+    stored=db.get(User,user.id)
+    return dict(limit=None if stored.is_superuser else stored.monthly_request_limit,used=usage_count(db,user.id),auto_approve=stored.is_superuser or stored.auto_approve_requests,resets_at=month_bounds()[1])

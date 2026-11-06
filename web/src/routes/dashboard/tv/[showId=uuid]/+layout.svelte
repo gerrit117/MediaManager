@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import type { LayoutProps } from './$types';
 
 	let { data, children }: LayoutProps = $props();
@@ -8,9 +9,9 @@
 </script>
 
 {#if fetchError}
-	<p>Error loading show: {fetchError}</p>
+	<p>{mmT($mmLocale, "Error loading show:" )} {fetchError}</p>
 {:else if showData}
 	{@render children()}
 {:else}
-	<p>Loading show data...</p>
+	<p>{mmT($mmLocale, "Loading show data..." )}</p>
 {/if}

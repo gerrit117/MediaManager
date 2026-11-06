@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
@@ -29,7 +30,7 @@
 </script>
 
 <svelte:head>
-	<title>Dashboard - MediaManager</title>
+	<title>{mmT($mmLocale, "Dashboard - MediaManager" )}</title>
 	<meta
 		content="MediaManager Dashboard - View your recommended movies and TV shows"
 		name="description"
@@ -47,7 +48,7 @@
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Page>Home</Breadcrumb.Page>
+					<Breadcrumb.Page>{mmT($mmLocale, "Home" )}</Breadcrumb.Page>
 				</Breadcrumb.Item>
 			</Breadcrumb.List>
 		</Breadcrumb.Root>
@@ -55,19 +56,19 @@
 </header>
 <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
 	<h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
-		Dashboard
+		{mmT($mmLocale, "Dashboard" )}
 	</h1>
 	<main class="min-h-screen flex-1 items-center justify-center rounded-xl p-4 md:min-h-min">
 		<div class="mx-auto">
-			<div class="my-8 block text-2xl">Welcome to MediaManager!</div>
+			<div class="my-8 block text-2xl">{mmT($mmLocale, "Welcome to MediaManager!" )}</div>
 			<StatCard showCount={data.tvShows?.length ?? 0} moviesCount={data.movies?.length ?? 0}
 			></StatCard>
 		</div>
 		<div class="mx-auto">
-			<h3 class="my-4 text-center text-2xl font-semibold">Trending Shows</h3>
+			<h3 class="my-4 text-center text-2xl font-semibold">{mmT($mmLocale, "Trending Shows" )}</h3>
 			<RecommendedMediaCarousel isLoading={showsLoading} isShow={true} media={recommendedShows} />
 
-			<h3 class="my-4 text-center text-2xl font-semibold">Trending Movies</h3>
+			<h3 class="my-4 text-center text-2xl font-semibold">{mmT($mmLocale, "Trending Movies" )}</h3>
 			<RecommendedMediaCarousel
 				isLoading={moviesLoading}
 				isShow={false}

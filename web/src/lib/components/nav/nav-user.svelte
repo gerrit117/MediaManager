@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
 	import LogOut from '@lucide/svelte/icons/log-out';
 	import * as Avatar from '$lib/components/ui/avatar';
@@ -57,12 +58,12 @@
 				</DropdownMenu.Label>
 				<DropdownMenu.Separator />
 				<DropdownMenu.Item onclick={() => goto(resolve('/dashboard/settings#me', {}))}>
-					My Account
+					{mmT($mmLocale, "My Account" )}
 				</DropdownMenu.Item>
 				<DropdownMenu.Separator />
 				<DropdownMenu.Item onclick={() => handleLogout()}>
 					<LogOut />
-					Log out
+					{mmT($mmLocale, "Log out" )}
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { page } from '$app/state';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -11,7 +12,7 @@
 </script>
 
 <svelte:head>
-	<title>TV Show Downloads - MediaManager</title>
+	<title>{mmT($mmLocale, "TV Show Downloads - MediaManager" )}</title>
 	<meta content="View and manage TV show downloads in MediaManager" name="description" />
 </svelte:head>
 
@@ -26,15 +27,15 @@
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard', {})}>Home</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard', {})}>{mmT($mmLocale, "Home" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard/tv', {})}>Shows</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard/tv', {})}>{mmT($mmLocale, "Shows" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Page>TV Downloads</Breadcrumb.Page>
+					<Breadcrumb.Page>{mmT($mmLocale, "TV Downloads" )}</Breadcrumb.Page>
 				</Breadcrumb.Item>
 			</Breadcrumb.List>
 		</Breadcrumb.Root>
@@ -43,7 +44,7 @@
 
 <div class="mx-auto flex min-w-0 w-full flex-1 flex-col gap-4 p-4 md:max-w-[80em]">
 	<h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
-		TV Downloads
+		{mmT($mmLocale, "TV Downloads" )}
 	</h1>
 	<Accordion.Root type="single" class="w-full">
 		{#each page.data.torrents as show (show.show_id)}
@@ -60,7 +61,7 @@
 				</Card.Root>
 			</div>
 		{:else}
-			<div class="col-span-full text-center text-muted-foreground">No Downloads added yet.</div>
+			<div class="col-span-full text-center text-muted-foreground">{mmT($mmLocale, "No Downloads added yet." )}</div>
 		{/each}
 	</Accordion.Root>
 </div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import Card from '$lib/components/stats/card.svelte';
 	import { getContext, onMount } from 'svelte';
 	import client from '$lib/api';
@@ -38,27 +39,27 @@
 
 <div class="flex flex-wrap gap-2">
 	<div class="flex-auto">
-		<AnimatedCard title="TV Shows" footer="Total count of downloaded episodes" number={showCount}
+		<AnimatedCard title={mmT($mmLocale, "TV Shows")} footer={mmT($mmLocale, "Total count of downloaded episodes")} number={showCount}
 		></AnimatedCard>
 	</div>
 	<div class="flex-auto">
 		{#await episodeCount then episodes}
-			<AnimatedCard title="Episodes" footer="Total count of downloaded episodes" number={episodes}
+			<AnimatedCard title={mmT($mmLocale, "Episodes")} footer={mmT($mmLocale, "Total count of downloaded episodes")} number={episodes}
 			></AnimatedCard>
 		{/await}
 	</div>
 	<div class="flex-auto">
-		<AnimatedCard title="Movies" footer="Total count of movies" number={moviesCount}></AnimatedCard>
+		<AnimatedCard title={mmT($mmLocale, "Movies")} footer={mmT($mmLocale, "Total count of movies")} number={moviesCount}></AnimatedCard>
 	</div>
 	<div class="flex-auto">
 		{#await torrentCount then torrent}
-			<AnimatedCard title="Downloads" footer="NZB- und Torrent-Downloads insgesamt" number={torrent}
+			<AnimatedCard title={mmT($mmLocale, "Downloads")} footer={mmT($mmLocale, "NZB- und Torrent-Downloads insgesamt")} number={torrent}
 			></AnimatedCard>
 		{/await}
 	</div>
 	{#if importablesShows().length > 0}
 		<div class="flex-auto">
-			<Card title="Detected TV shows!" footer="Count of detected TV shows ready to import">
+			<Card title={mmT($mmLocale, "Detected TV shows!")} footer={mmT($mmLocale, "Count of detected TV shows ready to import")}>
 				<a rel="external" target="_blank" href={resolve('/dashboard/tv/', {})} class="underline">
 					{importablesShows().length}
 				</a>
@@ -67,7 +68,7 @@
 	{/if}
 	{#if importablesMovies().length > 0}
 		<div class="flex-auto">
-			<Card title="Detected movies!" footer="Count of detected movies ready to import">
+			<Card title={mmT($mmLocale, "Detected movies!")} footer={mmT($mmLocale, "Count of detected movies ready to import")}>
 				<a
 					rel="external"
 					target="_blank"
@@ -81,7 +82,7 @@
 	{/if}
 	<div class="flex-auto">
 		{#if semverIsGreater(newestVersion ?? '', installedVersion ?? '') || !isSemver(installedVersion ?? '')}
-			<Card title="New version available!" footer="A new version of MediaManager is available!">
+			<Card title={mmT($mmLocale, "New version available!")} footer={mmT($mmLocale, "A new version of MediaManager is available!")}>
 				<a
 					rel="external"
 					target="_blank"

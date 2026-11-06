@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { useSidebar } from '$lib/components/ui/sidebar';
@@ -40,7 +41,7 @@
 						{#snippet child({ props })}
 							<Sidebar.MenuAction showOnHover {...props}>
 								<Ellipsis />
-								<span class="sr-only">More</span>
+								<span class="sr-only">{mmT($mmLocale, "More" )}</span>
 							</Sidebar.MenuAction>
 						{/snippet}
 					</DropdownMenu.Trigger>
@@ -51,16 +52,16 @@
 					>
 						<DropdownMenu.Item>
 							<Folder class="text-muted-foreground" />
-							<span>View Project</span>
+							<span>{mmT($mmLocale, "View Project" )}</span>
 						</DropdownMenu.Item>
 						<DropdownMenu.Item>
 							<Share class="text-muted-foreground" />
-							<span>Share Project</span>
+							<span>{mmT($mmLocale, "Share Project" )}</span>
 						</DropdownMenu.Item>
 						<DropdownMenu.Separator />
 						<DropdownMenu.Item>
 							<Trash2 class="text-muted-foreground" />
-							<span>Delete Project</span>
+							<span>{mmT($mmLocale, "Delete Project" )}</span>
 						</DropdownMenu.Item>
 					</DropdownMenu.Content>
 				</DropdownMenu.Root>

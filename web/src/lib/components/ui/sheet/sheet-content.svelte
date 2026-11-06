@@ -22,6 +22,7 @@
 </script>
 
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Dialog as SheetPrimitive, type WithoutChildrenOrChild } from 'bits-ui';
 	import X from '@lucide/svelte/icons/x';
 	import type { Snippet } from 'svelte';
@@ -50,7 +51,7 @@
 			class="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-secondary"
 		>
 			<X class="size-4" />
-			<span class="sr-only">Close</span>
+			<span class="sr-only">{mmT($mmLocale, "Close" )}</span>
 		</SheetPrimitive.Close>
 	</SheetPrimitive.Content>
 </SheetPrimitive.Portal>
