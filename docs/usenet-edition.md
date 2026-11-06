@@ -19,7 +19,7 @@ Do not replace this branch wholesale with upstream master: PR 455 removed the re
 - SABnzbd category selection, per-job status/history lookup, normalized completed-path mapping and repair/unpack/delete postprocessing.
 - Download cards with progress and separate actions. NZB/torrent labels are distinct. Progress supports SABnzbd, qBittorrent and Transmission.
 - Resume only paused jobs; retry only failed SABnzbd jobs. Running jobs cannot be restarted by the action shown in the UI.
-- Existing requests are preserved; this fork is not yet a feature-complete replacement for Sonarr/Radarr language profiles and automatic upgrades.
+- Existing requests are preserved. Search scoring evaluates release titles and flags.
 
 ## Reviewed upstream changes
 
@@ -68,7 +68,7 @@ category = "mediamanager"
 remote_download_directory = "/downloads/mediamanager"
 ```
 
-The remote directory must map to the same completed-download location as `misc.torrent_directory` inside MediaManager. If torrent clients and SABnzbd use separate completed directories, configure their mounts accordingly; do not point an unrelated client at the SABnzbd category directory. A general download-client settings UI is planned separately.
+The remote directory must map to the same completed-download location as `misc.torrent_directory` inside MediaManager. If torrent clients and SABnzbd use separate completed directories, configure their mounts accordingly; do not point an unrelated client at the SABnzbd category directory.
 
 Original upstream Docker/documentation publication jobs are restricted to the upstream repository. This fork runs its own regression-check workflow on pull requests or manual dispatch and does not attempt to publish to upstream registries or pages. It does not automatically merge upstream changes. Review/backport new fixes individually.
 
@@ -76,7 +76,7 @@ Original upstream Docker/documentation publication jobs are restricted to the up
 
 Unit/API contract tests cover protocol routing, old/new qBittorrent responses, progress, status, scoring, quality and suffix validation. Real-client integration results are recorded separately with the release; a mocked test alone is not described as a real torrent transfer. Tests use self-created payloads and no third-party media.
 
-OIDC remains disabled by default; the upstream email-association concern in issue 575 is not solved by these changes. Review it before enabling OIDC. German metadata and German audio preferences are separate; no claim is made that indexer categories guarantee an audio language.
+Metadata language and release audio preferences are configured independently.
 
 ### Verified release checks
 

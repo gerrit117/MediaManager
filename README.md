@@ -25,7 +25,7 @@ The standard image uses existing external services:
 docker pull ghcr.io/gerrit117/mediamanager:latest
 ```
 
-For a new managed stack, use [the installation guide](docs/configuration/managed-stack.md). PostgreSQL remains a separate container. Existing download managers can be reused; optional Compose profiles provide separate SABnzbd and qBittorrent services. There is currently no published AIO image.
+For a new managed stack, use [the installation guide](docs/configuration/managed-stack.md). PostgreSQL remains a separate container. Existing download managers can be reused; optional Compose profiles provide separate SABnzbd and qBittorrent services.
 
 On Unraid, use UID 99/GID 100 with writable persistent mounts. Keep existing configuration and database backups before upgrading. New database migrations are included in the image; do not replace a populated PostgreSQL data directory to upgrade it.
 
@@ -37,7 +37,7 @@ On Unraid, use UID 99/GID 100 with writable persistent mounts. Keep existing con
 - [Upstream review and backports](docs/upstream-tracking.md)
 - [Earlier changes and known limitations](docs/usenet-edition.md)
 
-Source builds currently use the compatibility filename `Dockerfile.usenet`; the project and interface are named MediaManager.
+Build from source with `docker build -f Dockerfile.usenet -t mediamanager .`.
 
 ## Thanks
 
