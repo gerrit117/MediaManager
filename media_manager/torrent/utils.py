@@ -20,6 +20,16 @@ from media_manager.torrent.schemas import Torrent
 log = logging.getLogger(__name__)
 
 
+def validate_file_path_suffix(value: str) -> str:
+    from media_manager.exceptions import BadRequestError
+
+    if len(value) > 128 or '..' in value or any(
+        character in value for character in '/\\:<>"|?*'
+    ) or any(ord(character) < 32 for character in value):
+        raise BadRequestError('Der Dateizusatz darf keine Pfadbestandteile oder ungültigen Zeichen enthalten.')
+    return value
+
+
 def list_files_recursively(path: Path = Path()) -> list[Path]:
     files = list(path.glob("**/*"))
     log.debug(f"Found {len(files)} entries via glob")
@@ -63,6 +73,10 @@ def extract_archives(files: list) -> None:
 
 
 def get_torrent_filepath(torrent: Torrent) -> Path:
+    if torrent.usenet:
+        from media_manager.torrent.download_clients.sabnzbd import SabnzbdDownloadClient
+
+        return SabnzbdDownloadClient().get_download_path(torrent)
     return MediaManagerConfig().misc.torrent_directory / torrent.title
 
 
