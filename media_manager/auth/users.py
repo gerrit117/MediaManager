@@ -1,4 +1,6 @@
 import contextlib
+import json
+from media_manager.configuration import config_file
 import logging
 import uuid
 from collections.abc import AsyncGenerator
@@ -151,7 +153,10 @@ async def create_default_admin_user() -> None:
                             if config.auth.admin_emails
                             else "admin@example.com"
                         )
-                        default_password = "admin"  # noqa: S105 # Simple default password
+                        initial_file = config_file().parent / 'initial-admin.json'
+                        initial = json.loads(initial_file.read_text()) if initial_file.exists() else {}
+                        admin_email = initial.get('email', admin_email)
+                        default_password = initial.get('password', 'admin')
 
                         user_create = UserCreate(
                             email=admin_email,
@@ -164,7 +169,13 @@ async def create_default_admin_user() -> None:
                         log.info("=" * 60)
                         log.info("DEFAULT ADMIN USER CREATED!")
                         log.info(f"    Email: {admin_email}")
-                        log.info(f"    Password: {default_password}")
+                        if initial:
+                            initial_file.unlink()
+                            code_file = config_file().parent / 'setup-code'
+                            code_file.unlink(missing_ok=True)
+                            log.info("Use the administrator password set during onboarding.")
+                        else:
+                            log.info("Use the initial administrator password and change it after login.")
                         log.info(f"    User ID: {user.id}")
                         log.info(
                             "IMPORTANT: Please change this password after first login!"
