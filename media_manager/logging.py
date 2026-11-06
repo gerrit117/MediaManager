@@ -78,6 +78,8 @@ def setup_logging() -> None:
         format="%(asctime)s - %(levelname)s - %(name)s - %(funcName)s(): %(message)s",
         stream=sys.stdout,
     )
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("transmission_rpc").setLevel(logging.WARNING)
