@@ -66,5 +66,7 @@ def setup_scheduler(config: MediaManagerConfig) -> BackgroundScheduler:
     from media_manager.tv.monitor import monitor_new_episodes
     scheduler.add_job(monitor_new_episodes, CronTrigger(minute="7,37"),
                       id="monitor_new_episodes", replace_existing=True, max_instances=1, coalesce=True)
+    from media_manager.library_scan import automatic_scan
+    scheduler.add_job(automatic_scan, CronTrigger(minute=17),id="automatic_library_scan",replace_existing=True,max_instances=1,coalesce=True)
     scheduler.start()
     return scheduler

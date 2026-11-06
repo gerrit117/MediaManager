@@ -56,6 +56,9 @@ def lookup(data: dict, key: str):
 
 # Fields exposed deliberately: signing secrets and internal flags are never returned.
 FIELDS: list[tuple[str, str, str]] = [
+ ('misc.library_scan.automatic','Scan library automatically','bool'),('misc.library_scan.interval_hours','Scan interval (hours)','number'),
+ ('misc.library_scan.radarr_url','Radarr metadata URL (optional)','text'),('misc.library_scan.radarr_api_key','Radarr API key','secret'),('misc.library_scan.radarr_root','Radarr media root','path'),
+ ('misc.library_scan.sonarr_url','Sonarr metadata URL (optional)','text'),('misc.library_scan.sonarr_api_key','Sonarr API key','secret'),('misc.library_scan.sonarr_root','Sonarr media root','path'),
  ('indexers.release_policy.enabled','Enforce release rules for every download','bool'),
  ('indexers.release_policy.languages','Language priority (de, en)','list'),
  ('indexers.release_policy.resolutions','Resolution priority (2160p, 1080p, 720p, 480p)','list'),
@@ -115,7 +118,7 @@ def stage_settings(values: dict, apply_live: bool = False) -> dict:
         current = json.loads(settings_file().read_text()) if settings_file().exists() else {}
         pending = json.loads(settings_file(True).read_text()) if settings_file(True).exists() else {}
         proposed=merge(merge(current,pending),nested(cleaned))
-        hot={key:value for key,value in cleaned.items() if key.startswith(('indexers.','torrents.','metadata.'))} if apply_live else {}
+        hot={key:value for key,value in cleaned.items() if key.startswith(('indexers.','torrents.','metadata.','misc.library_scan.'))} if apply_live else {}
         if hot:
             active=merge(current,nested(hot))
             if settings_file().exists():

@@ -151,6 +151,8 @@ with Session(engine) as db:
  assert request(user,'/api/v1/requests/quota')[1]['used']==1
  episode_checks=(repo/'tests/integration/episode_checks.py').read_text().replace('SHOW_ID',repr(show))
  assert 'no backfill passed' in exec_python(episode_checks)
+ library_checks=(repo/'tests/integration/library_scan_checks.py').read_text().replace('ADMIN_PASSWORD',repr(password))
+ assert 'manual review passed' in exec_python(library_checks)
  secrets_before=[(root/'state/secrets'/n).read_bytes() for n in ['app_db_password','db_admin_password']]
  stack('down');subprocess.run(command,env=env,stdout=subprocess.DEVNULL,check=True)
  for _ in range(90):
@@ -161,7 +163,7 @@ with Session(engine) as db:
  assert secrets_before==[(root/'state/secrets'/n).read_bytes() for n in ['app_db_password','db_admin_password']]
  user=login('user@example.com');assert request(user,'/api/v1/requests/quota')[1]['used']==1
  assert not (root/'state/config/initial-admin.json').exists()
- print(json.dumps({'managed_database_provisioning':'passed','least_privilege':'passed','monthly_combined_quota':'passed','auto_approval':'passed','manual_approval':'passed','deletion_no_refund':'passed','self_escalation_blocked':'passed','concurrent_requests':'one accepted, three blocked','month_reset':'passed','restart_and_secret_persistence':'passed','admin_user_creation_and_login':'passed','duplicate_email_rejected':'passed','creation_admin_only':'passed','catalogue_without_file_changes':'passed','reorganize_explicit_mode':'passed','partial_season_and_missing_files':'passed','import_validation':'passed','production_data_used':False}))
+ print(json.dumps({'managed_database_provisioning':'passed','least_privilege':'passed','monthly_combined_quota':'passed','auto_approval':'passed','manual_approval':'passed','deletion_no_refund':'passed','self_escalation_blocked':'passed','concurrent_requests':'one accepted, three blocked','month_reset':'passed','restart_and_secret_persistence':'passed','admin_user_creation_and_login':'passed','duplicate_email_rejected':'passed','creation_admin_only':'passed','catalogue_without_file_changes':'passed','reorganize_explicit_mode':'passed','partial_season_and_missing_files':'passed','import_validation':'passed','bulk_library_async_readonly_idempotence_and_review':'passed','production_data_used':False}))
 except Exception:
  try:
   log=stack('logs','--no-color');

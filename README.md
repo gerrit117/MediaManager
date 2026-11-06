@@ -8,7 +8,7 @@ This is a community fork, not an official upstream release. The original project
 
 - Built-in movie and season requests remain available.
 - Admins can create user accounts directly in web settings.
-- Manual library scanning supports catalogue-in-place or explicit file reorganization.
+- Background library imports use trusted NFO IDs or optional Radarr/Sonarr metadata, with progress, manual review, repeatable scans and an explicit choice of catalogue-in-place or file reorganization.
 - Episode monitoring follows weekly releases within existing seasons, with persistent submission deduplication and targeted imports.
 - Shared language/resolution preferences and release exclusions apply to all indexer providers and manual/automatic downloads.
 - Exactly two roles: Admin and User. Administrators can set each user's monthly request quota and automatic approval.

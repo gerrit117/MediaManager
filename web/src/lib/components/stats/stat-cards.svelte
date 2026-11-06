@@ -27,6 +27,7 @@
 	let importablesShows: () => [] = getContext('importableShows');
 	let importablesMovies: () => [] = getContext('importableMovies');
 
+	onMount(()=>{const timer=setInterval(()=>{episodeCount=client.GET('/api/v1/tv/episodes/count').then(r=>Number(r.data??0));},10000);return()=>clearInterval(timer);});
 	onMount(async () => {
 		let releases = await fetch('https://api.github.com/repos/maxdorninger/mediamanager/releases');
 		if (releases.ok) {
@@ -39,12 +40,12 @@
 
 <div class="flex flex-wrap gap-2">
 	<div class="flex-auto">
-		<AnimatedCard title={mmT($mmLocale, "TV Shows")} footer={mmT($mmLocale, "Total count of downloaded episodes")} number={showCount}
+		<AnimatedCard title={mmT($mmLocale, "TV Shows")} footer={mmT($mmLocale, "Catalogued series")} number={showCount}
 		></AnimatedCard>
 	</div>
 	<div class="flex-auto">
 		{#await episodeCount then episodes}
-			<AnimatedCard title={mmT($mmLocale, "Episodes")} footer={mmT($mmLocale, "Total count of downloaded episodes")} number={episodes}
+			<AnimatedCard title={mmT($mmLocale, "Episodes")} footer={mmT($mmLocale, "Catalogued episodes")} number={episodes}
 			></AnimatedCard>
 		{/await}
 	</div>

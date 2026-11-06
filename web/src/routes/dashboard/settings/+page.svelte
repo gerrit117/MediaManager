@@ -5,6 +5,7 @@
 	import SystemSettings from '$lib/components/system-settings.svelte';
 	import IndexerServices from '$lib/components/indexer-services.svelte';
     import ReleaseRules from '$lib/components/release-rules.svelte';
+    import LibraryManagement from '$lib/components/library-management.svelte';
 	import {onMount} from 'svelte';
 
 	import UserTable from '$lib/components/user-management.svelte';
@@ -21,8 +22,8 @@
 
 	let currentUser: () => components['schemas']['UserRead'] = getContext('user');
 	let activeTab=$state('account');
-	const tabs=[{id:'account',name:'Konto'},{id:'system',name:'System & Downloads'},{id:'indexers',name:'Indexer-Dienste'},{id:'releases',name:'Release rules'},{id:'users',name:'Benutzerverwaltung'}];
-	onMount(()=>{const handler=(e:Event)=>{const target=(e as CustomEvent).detail;if(tabs.some(t=>t.id===target))activeTab=target;};window.addEventListener('mm-settings-tab',handler);return()=>window.removeEventListener('mm-settings-tab',handler);});
+	const tabs=[{id:'account',name:'Konto'},{id:'system',name:'System & Downloads'},{id:'indexers',name:'Indexer-Dienste'},{id:'library',name:'Library'},{id:'releases',name:'Release rules'},{id:'users',name:'Benutzerverwaltung'}];
+	onMount(()=>{const section=new URLSearchParams(location.search).get('section');if(tabs.some(t=>t.id===section))activeTab=section!;const handler=(e:Event)=>{const target=(e as CustomEvent).detail;if(tabs.some(t=>t.id===target))activeTab=target;};window.addEventListener('mm-settings-tab',handler);return()=>window.removeEventListener('mm-settings-tab',handler);});
 	let users: components['schemas']['UserRead'][] = $derived(
 		(page.data.users ?? []).filter(
 			(user: components['schemas']['UserRead']) => user.id !== currentUser().id
@@ -66,6 +67,7 @@
  {#if currentUser().is_superuser}
   <section role="tabpanel" id="panel-system" aria-labelledby="tab-system" hidden={activeTab!=='system'}><ConnectionSetup/><SystemSettings/></section>
   <section role="tabpanel" id="panel-indexers" aria-labelledby="tab-indexers" hidden={activeTab!=='indexers'}><IndexerServices/></section>
+  <section role="tabpanel" id="panel-library" aria-labelledby="tab-library" hidden={activeTab!=='library'}><LibraryManagement active={activeTab==='library'}/></section>
   <section role="tabpanel" id="panel-releases" aria-labelledby="tab-releases" hidden={activeTab!=='releases'}><ReleaseRules/></section>
   <section role="tabpanel" id="panel-users" aria-labelledby="tab-users" hidden={activeTab!=='users'}><Card.Root><Card.Header><Card.Title>{mmT($mmLocale, "Benutzerverwaltung" )}</Card.Title><Card.Description>{mmT($mmLocale, "Konten, Monatskontingente und automatische Genehmigung verwalten" )}</Card.Description></Card.Header><Card.Content><UserTable {users}/></Card.Content></Card.Root></section>
  {/if}

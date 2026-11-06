@@ -776,9 +776,15 @@ class MovieService:
         importable_movies: list[MediaImportSuggestion] = []
         candidate_dirs = get_importable_media_directories(movie_root_path)
 
-        catalogued = [Path(p) for p in self.movie_repository.catalogued_source_files()]
+        catalogued = {}
+        root = movie_root_path.resolve()
+        for stored in self.movie_repository.catalogued_source_files():
+            path = Path(stored)
+            try:parts=path.relative_to(root).parts
+            except ValueError:continue
+            if len(parts)>1:catalogued.setdefault(parts[0],[]).append(path)
         for movie_dir in candidate_dirs:
-            if any(p.is_relative_to(movie_dir.resolve()) and p.is_file() for p in catalogued):
+            if any(p.is_file() for p in catalogued.get(movie_dir.name,[])):
                 continue
             metadata, external_id = extract_external_id_from_string(movie_dir.name)
             if metadata is not None and external_id is not None:

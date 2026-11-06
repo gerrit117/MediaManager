@@ -1,33 +1,6 @@
 <script lang="ts">
-	import {locale as mmLocale,t as mmT} from '$lib/i18n';
-	import Card from '$lib/components/stats/card.svelte';
-	import { animate } from 'animejs';
-	import { onMount } from 'svelte';
-
-	function animateCounter(el: HTMLElement | undefined, target: number, pad = 3) {
-		if (!el) return;
-
-		const obj = { value: 0 };
-
-		animate(obj, {
-			value: target,
-			duration: 2000,
-			easing: 'easeInOutSine',
-			onUpdate: () => {
-				el.textContent = Math.floor(obj.value).toString().padStart(pad, '0');
-			}
-		});
-	}
-
-	let { title, footer, number }: { title: string; footer: string; number: number } = $props();
-	let element: HTMLSpanElement;
-	let numberString = $derived(number?.toString().padStart(3, '0'));
-
-	onMount(async () => {
-		animateCounter(element, number, 3);
-	});
+ import Card from '$lib/components/stats/card.svelte';
+ let {title,footer,number}:{title:string;footer:string;number:number}=$props();
+ let text=$derived(Number.isFinite(number)?String(number).padStart(3,'0'):'000');
 </script>
-
-<Card {title} {footer}>
-	<span bind:this={element}>{numberString ?? mmT($mmLocale, "Error")}</span>
-</Card>
+<Card {title} {footer}><span>{text}</span></Card>

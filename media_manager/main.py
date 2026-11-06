@@ -121,6 +121,8 @@ if get_openid_router():
 
 from media_manager.settings_router import router as settings_router
 api_app.include_router(settings_router, prefix="/settings", tags=["settings"])
+from media_manager.library_scan import router as library_router
+api_app.include_router(library_router,prefix="/library",tags=["library"])
 
 api_app.include_router(indexer_router, prefix="/indexers", tags=["indexers"])
 api_app.include_router(tv_router.router, prefix="/tv", tags=["tv"])

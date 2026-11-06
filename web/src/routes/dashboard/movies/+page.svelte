@@ -10,12 +10,16 @@
 	import type { components } from '$lib/api/api.d.ts';
 	import ImportCandidatesDialog from '$lib/components/import-media/import-candidates-dialog.svelte';
 	import DetectedMediaCard from '$lib/components/import-media/detected-media-card.svelte';
-	import { getContext } from 'svelte';
+	import { getContext,onMount } from 'svelte';
 	import type { PageProps } from './$types';
 	import LoadingBar from '$lib/components/loading-bar.svelte';
 	import LibraryScan from '$lib/components/import-media/library-scan.svelte';
 
 	let { data }: PageProps = $props();
+    let match=$state('');let limit=$state(40);
+    const scanner=getContext<{run:(kind:'movies'|'tv')=>Promise<void>}>('libraryScan');
+    onMount(()=>{match=new URLSearchParams(location.search).get('match')??'';if(match)void scanner.run('movies');});
+
 	let importableMovies: () => components['schemas']['MediaImportSuggestion'][] =
 		getContext('importableMovies');
 </script>
@@ -53,7 +57,7 @@
 		<div
 			class="grid w-full auto-rows-min gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-4"
 		>
-			{#each importableMovies() as importable (importable.directory)}
+			{#each importableMovies().filter(x=>!match||x.directory===match).slice(0,limit) as importable (importable.directory)}
 				<DetectedMediaCard isTv={false} directory={importable.directory}>
 					<ImportCandidatesDialog
 						isTv={false}
@@ -65,6 +69,7 @@
 				</DetectedMediaCard>
 			{/each}
 		</div>
+    {#if importableMovies().filter(x=>!match||x.directory===match).length>limit}<button type="button" class="rounded-lg border px-4 py-2" onclick={()=>limit+=40}>{mmT($mmLocale,'Show more entries')}</button>{/if}
 	{/if}
 	{#await data.movies}
 		<LoadingBar />
@@ -72,7 +77,7 @@
 		<div
 			class="grid w-full auto-rows-min gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
 		>
-			{#each movies as movie (movie.id)}
+			{#each movies.slice(0,limit) as movie (movie.id)}
 				<a href={resolve('/dashboard/movies/[movieId]', { movieId: movie.id! })}>
 					<Card.Root class="col-span-full max-w-[90vw] ">
 						<Card.Header>
@@ -88,5 +93,6 @@
 				<div class="col-span-full text-center text-muted-foreground">{mmT($mmLocale, "No movies added yet." )}</div>
 			{/each}
 		</div>
+        {#if movies.length>limit}<button type="button" class="mx-auto rounded-lg border px-4 py-2" onclick={()=>limit+=40}>{mmT($mmLocale,'Show more entries')}</button>{/if}
 	{/await}
 </main>

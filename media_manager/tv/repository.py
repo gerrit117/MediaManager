@@ -40,6 +40,9 @@ from media_manager.tv.schemas import (
 )
 
 
+_episode_count_cache = {}
+
+
 class TvRepository:
     """
     Repository for managing TV shows, seasons, and episodes in the database.
@@ -125,14 +128,23 @@ class TvRepository:
             raise
 
     def get_total_downloaded_episodes_count(self) -> int:
-        try:
-            stmt = (
-                select(func.count()).select_from(Episode).join(Season).join(SeasonFile)
-            )
-            return self.db.execute(stmt).scalar_one_or_none()
-        except SQLAlchemyError:
-            log.exception("Database error while calculating downloaded episodes count")
-            raise
+        from media_manager.library import episode_numbers
+        from pathlib import Path
+        import time
+        cache_key=id(self.db.bind)
+        cached=_episode_count_cache.get(cache_key)
+        if cached and time.monotonic()-cached[0]<30:return cached[1]
+        # Count recorded episodes once; season variants and future metadata are not extra downloads.
+        rows=self.db.execute(select(SeasonFile.season_id,Season.number,SeasonFile.source_files,SeasonFile.episode_numbers,SeasonFile.torrent_id,Torrent.imported).join(Season,SeasonFile.season_id==Season.id).outerjoin(Torrent,SeasonFile.torrent_id==Torrent.id)).all()
+        seen=set()
+        for sid,number,paths,explicit,tid,imported in rows:
+            if paths is not None:items=episode_numbers([p for p in paths if Path(p).is_file()],number)
+            elif tid is None or imported:
+                items=set(explicit) if explicit else set(self.db.scalars(select(Episode.number).where(Episode.season_id==sid)).all())
+            else:continue
+            seen.update((sid,n) for n in items)
+        _episode_count_cache[cache_key]=(time.monotonic(),len(seen))
+        return len(seen)
 
     def save_show(self, show: ShowSchema) -> ShowSchema:
         """
@@ -162,6 +174,7 @@ class TvRepository:
                 overview=show.overview,
                 year=show.year,
                 ended=show.ended,
+                library=show.library,
                 original_language=show.original_language,
                 imdb_id=show.imdb_id,
                 seasons=[
@@ -364,6 +377,7 @@ class TvRepository:
             raise
 
     def add_season_file(self, season_file: SeasonFileSchema) -> SeasonFileSchema:
+        _episode_count_cache.clear()
         """
         Adds a season file record to the database.
 
@@ -726,7 +740,7 @@ class TvRepository:
         return ShowSchema.model_validate(db_show)
 
     def update_season_attributes(
-        self, season_id: SeasonId, name: str | None = None, overview: str | None = None
+        self, season_id: SeasonId, name: str | None = None, overview: str | None = None, external_id: int | None = None
     ) -> SeasonSchema:
         """
         Update attributes of an existing season.
@@ -745,6 +759,9 @@ class TvRepository:
             raise NotFoundError(msg)
 
         updated = False
+        if external_id is not None and db_season.external_id != external_id:
+            db_season.external_id = external_id
+            updated = True
         if name is not None and db_season.name != name:
             db_season.name = name
             updated = True
