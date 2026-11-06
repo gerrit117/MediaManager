@@ -3,7 +3,9 @@ import logging
 from media_manager.config import MediaManagerConfig
 from media_manager.indexer.indexers.generic import GenericIndexer
 from media_manager.indexer.indexers.jackett import Jackett
+from media_manager.indexer.indexers.newznab import Newznab
 from media_manager.indexer.indexers.prowlarr import Prowlarr
+from media_manager.indexer.newznab_settings import read_settings
 from media_manager.indexer.repository import IndexerRepository
 from media_manager.indexer.schemas import IndexerQueryResult, IndexerQueryResultId
 from media_manager.movies.schemas import Movie
@@ -18,6 +20,10 @@ class IndexerService:
         config = MediaManagerConfig()
         self.repository = indexer_repository
         self.indexers: list[GenericIndexer] = []
+
+        direct = read_settings()
+        if direct.enabled:
+            self.indexers.append(Newznab(direct))
 
         if config.indexers.prowlarr.enabled:
             self.indexers.append(Prowlarr())
