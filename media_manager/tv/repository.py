@@ -46,6 +46,10 @@ class TvRepository:
     Provides methods to retrieve, save, and delete shows and seasons.
     """
 
+    def catalogued_source_files(self) -> list[str]:
+        rows = self.db.scalars(select(SeasonFile.source_files).where(SeasonFile.source_files.is_not(None))).all()
+        return [p for row in rows if row for p in row]
+
     def __init__(self, db: Session) -> None:
         self.db = db
 
@@ -368,6 +372,12 @@ class TvRepository:
         :raises SQLAlchemyError: If a database error occurs.
         """
         db_model = SeasonFile(**season_file.model_dump())
+        if season_file.source_files is not None:
+            existing = self.db.get(SeasonFile, (season_file.season_id, season_file.file_path_suffix))
+            if existing is not None:
+                existing.source_files = season_file.source_files
+                self.db.commit()
+                return SeasonFileSchema.model_validate(existing)
         try:
             self.db.add(db_model)
             self.db.commit()

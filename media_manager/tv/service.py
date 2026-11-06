@@ -2,6 +2,7 @@ import pprint
 import re
 import shutil
 from pathlib import Path
+from media_manager.library import video_files, catalogue_suffix, episode_numbers
 from typing import overload
 
 from sqlalchemy.exc import IntegrityError
@@ -375,6 +376,11 @@ class TvService:
         :param season_file: The season file to check.
         :return: True if the file exists, False otherwise.
         """
+        if season_file.source_files is not None:
+            season = self.tv_repository.get_season(season_file.season_id)
+            expected = {episode.number for episode in season.episodes}
+            present = episode_numbers([p for p in season_file.source_files if Path(p).is_file()], season.number)
+            return bool(expected) and expected.issubset(present)
         if season_file.torrent_id is None:
             return True
         try:
@@ -904,6 +910,21 @@ class TvService:
         )
         return import_candidates
 
+    def catalogue_existing_tv_show(self, tv_show: Show, source_directory: Path) -> bool:
+        files = video_files(source_directory)
+        found = False
+        for season in tv_show.seasons:
+            season_files = [p for p in files if episode_numbers([p], season.number)]
+            if not season_files:
+                continue
+            self.tv_repository.add_season_file(SeasonFile(
+                season_id=season.id, quality=Quality.unknown,
+                file_path_suffix=catalogue_suffix(source_directory), torrent_id=None,
+                source_files=season_files,
+            ))
+            found = True
+        return found
+
     def import_existing_tv_show(self, tv_show: Show, source_directory: Path) -> None:
         new_source_path = source_directory.parent / ("." + source_directory.name)
         try:
@@ -933,7 +954,7 @@ class TvService:
                 self.tv_repository.add_season_file(season_file=season_file)
 
     def get_importable_tv_shows(
-        self, metadata_provider: AbstractMetadataProvider
+        self, metadata_provider: AbstractMetadataProvider, discover_only: bool = False
     ) -> list[MediaImportSuggestion]:
         tv_directory = MediaManagerConfig().misc.tv_directory
         import_suggestions: list[MediaImportSuggestion] = []
@@ -943,22 +964,31 @@ class TvService:
             metadata, external_id = extract_external_id_from_string(item.name)
             if metadata is not None and external_id is not None:
                 try:
-                    self.tv_repository.get_show_by_external_id(
+                    known = self.tv_repository.get_show_by_external_id(
                         external_id=external_id,
                         metadata_provider=metadata,
                     )
                     log.debug(
                         f"Show {item.name} already exists in the database, skipping import suggestion."
                     )
-                    continue
+                    if known.seasons and all(self.is_season_downloaded(season.id) for season in known.seasons):
+                        continue
                 except NotFoundError:
                     log.debug(
                         f"Show {item.name} not found in database, checking for import candidates."
                     )
 
-            import_suggestion = self.get_import_candidates(
-                tv_show=item, metadata_provider=metadata_provider
-            )
+            if discover_only:
+                import_suggestions.append(MediaImportSuggestion(directory=item, candidates=[]))
+                continue
+
+            try:
+                import_suggestion = self.get_import_candidates(
+                    tv_show=item, metadata_provider=metadata_provider
+                )
+            except Exception:
+                log.warning("Metadata lookup failed for library scan directory %s", item)
+                import_suggestion = MediaImportSuggestion(directory=item, candidates=[])
             import_suggestions.append(import_suggestion)
 
         log.debug(f"Detected {len(import_suggestions)} importable TV shows.")

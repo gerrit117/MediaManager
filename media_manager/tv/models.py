@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy import JSON, ForeignKey, PrimaryKeyConstraint, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from media_manager.auth.db import User
@@ -71,6 +71,7 @@ class Episode(Base):
 
 
 class SeasonFile(Base):
+    source_files: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     __tablename__ = "season_file"
     __table_args__ = (PrimaryKeyConstraint("season_id", "file_path_suffix"),)
     season_id: Mapped[UUID] = mapped_column(

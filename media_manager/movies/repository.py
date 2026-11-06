@@ -42,6 +42,10 @@ class MovieRepository:
     Provides methods to retrieve, save, and delete movies.
     """
 
+    def catalogued_source_files(self) -> list[str]:
+        rows = self.db.scalars(select(MovieFile.source_files).where(MovieFile.source_files.is_not(None))).all()
+        return [p for row in rows if row for p in row]
+
     def __init__(self, db: Session) -> None:
         self.db = db
 
@@ -290,6 +294,12 @@ class MovieRepository:
         :raises SQLAlchemyError: If a database error occurs.
         """
         db_model = MovieFile(**movie_file.model_dump())
+        if movie_file.source_files is not None:
+            existing = self.db.get(MovieFile, (movie_file.movie_id, movie_file.file_path_suffix))
+            if existing is not None:
+                existing.source_files = movie_file.source_files
+                self.db.commit()
+                return MovieFileSchema.model_validate(existing)
         try:
             self.db.add(db_model)
             self.db.commit()

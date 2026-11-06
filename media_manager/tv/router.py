@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -81,12 +82,12 @@ def get_recommended_shows(
     dependencies=[Depends(current_superuser)],
 )
 def get_all_importable_shows(
-    tv_service: tv_service_dep, metadata_provider: metadata_provider_dep
+    tv_service: tv_service_dep, metadata_provider: metadata_provider_dep, discover_only: bool = False
 ) -> list[MediaImportSuggestion]:
     """
     Get a list of unknown shows that were detected in the TV directory and are importable.
     """
-    return tv_service.get_importable_tv_shows(metadata_provider=metadata_provider)
+    return tv_service.get_importable_tv_shows(metadata_provider=metadata_provider, discover_only=discover_only)
 
 
 @router.post(
@@ -95,19 +96,24 @@ def get_all_importable_shows(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def import_detected_show(
-    tv_service: tv_service_dep, tv_show: show_dep, directory: str
+    tv_service: tv_service_dep, tv_show: show_dep, directory: str,
+    mode: Literal["catalogue", "reorganize"] = "catalogue",
 ) -> None:
     """
     Import a detected show from the specified directory into the library.
     """
     source_directory = Path(directory)
+    if source_directory.is_symlink():
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Symlink directories cannot be imported")
     if source_directory not in get_importable_media_directories(
         MediaManagerConfig().misc.tv_directory
     ):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "No such directory")
-    tv_service.import_existing_tv_show(
-        tv_show=tv_show, source_directory=source_directory
-    )
+    if mode == "catalogue":
+        if not tv_service.catalogue_existing_tv_show(tv_show, source_directory):
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "No recognizable episode files found (S01E01 or 1x01)")
+    else:
+        tv_service.import_existing_tv_show(tv_show, source_directory)
 
 
 # -----------------------------------------------------------------------------

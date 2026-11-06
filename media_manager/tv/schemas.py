@@ -99,6 +99,7 @@ class RichSeasonRequest(SeasonRequest):
 
 
 class SeasonFile(BaseModel):
+    source_files: list[str] | None = None
     model_config = ConfigDict(from_attributes=True)
 
     season_id: SeasonId

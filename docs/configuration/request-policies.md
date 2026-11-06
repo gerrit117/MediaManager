@@ -2,6 +2,8 @@
 
 MediaManager has two roles: Admin and User. Administrators remain unlimited and their new requests are approved automatically. Existing users keep unlimited requests until an administrator assigns a quota. The profile checkbox enables automatic approval of **new** requests; it does not approve existing pending requests retroactively.
 
+Administrators can create accounts directly under Settings → Users with an email address and a password of at least 12 characters. Role, active/verified status, quota and automatic approval are saved together; the password is hashed using the same authentication backend as existing accounts.
+
 Settings → Users replaces the earlier table with account cards, usage, role and status, and a profile editor. Set the maximum number of requests per calendar month or choose unlimited; zero blocks new requests. One movie or one season counts as one request, sharing the same quota. Limits reset at the first day of the month in Europe/Berlin, including daylight saving transitions. Requests from before this migration are not charged retroactively because they have no trustworthy creation timestamp.
 
 The server enforces policy during the same database transaction as request insertion. A row lock serializes concurrent movie/season submissions for one user. Failed/duplicate insertions roll back their usage event. Editing a request does not charge another request, and deletion does not refund usage. Normal users cannot change their own quota, approval policy or administrator privileges through the policy API.

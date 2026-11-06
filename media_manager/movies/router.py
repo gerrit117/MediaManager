@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -82,12 +83,12 @@ def get_popular_movies(
     dependencies=[Depends(current_superuser)],
 )
 def get_all_importable_movies(
-    movie_service: movie_service_dep, metadata_provider: metadata_provider_dep
+    movie_service: movie_service_dep, metadata_provider: metadata_provider_dep, discover_only: bool = False
 ) -> list[MediaImportSuggestion]:
     """
     Get a list of unknown movies that were detected in the movie directory and are importable.
     """
-    return movie_service.get_importable_movies(metadata_provider=metadata_provider)
+    return movie_service.get_importable_movies(metadata_provider=metadata_provider, discover_only=discover_only)
 
 
 @router.post(
@@ -96,19 +97,23 @@ def get_all_importable_movies(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def import_detected_movie(
-    movie_service: movie_service_dep, movie: movie_dep, directory: str
+    movie_service: movie_service_dep, movie: movie_dep, directory: str,
+    mode: Literal["catalogue", "reorganize"] = "catalogue",
 ) -> None:
     """
     Import a detected movie from the specified directory into the library.
     """
     source_directory = Path(directory)
+    if source_directory.is_symlink():
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Symlink directories cannot be imported")
     if source_directory not in get_importable_media_directories(
         MediaManagerConfig().misc.movie_directory
     ):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "No such directory")
-    success = movie_service.import_existing_movie(
-        movie=movie, source_directory=source_directory
-    )
+    if mode == "catalogue":
+        success = movie_service.catalogue_existing_movie(movie, source_directory)
+    else:
+        success = movie_service.import_existing_movie(movie, source_directory)
     if not success:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Error on importing")
 

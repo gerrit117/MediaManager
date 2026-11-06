@@ -1,6 +1,7 @@
 import re
 import shutil
 from pathlib import Path
+from media_manager.library import video_files, catalogue_suffix, episode_numbers
 from typing import overload
 
 from sqlalchemy.exc import IntegrityError
@@ -371,6 +372,8 @@ class MovieService:
         :param movie_file: The movie file to check.
         :return: True if the file exists, False otherwise.
         """
+        if movie_file.source_files is not None:
+            return any(Path(p).is_file() for p in movie_file.source_files)
         if movie_file.torrent_id is None:
             return True
         torrent_file = self.torrent_service.get_torrent_by_id(
@@ -680,6 +683,16 @@ class MovieService:
         )
         return import_candidates
 
+    def catalogue_existing_movie(self, movie: Movie, source_directory: Path) -> bool:
+        files = video_files(source_directory)
+        if not files:
+            return False
+        self.movie_repository.add_movie_file(MovieFile(
+            movie_id=movie.id, file_path_suffix=catalogue_suffix(source_directory),
+            torrent_id=None, quality=Quality.unknown, source_files=files,
+        ))
+        return True
+
     def import_existing_movie(self, movie: Movie, source_directory: Path) -> bool:
         new_source_path = source_directory.parent / ("." + source_directory.name)
         try:
@@ -748,31 +761,43 @@ class MovieService:
         return updated_movie
 
     def get_importable_movies(
-        self, metadata_provider: AbstractMetadataProvider
+        self, metadata_provider: AbstractMetadataProvider, discover_only: bool = False
     ) -> list[MediaImportSuggestion]:
         movie_root_path = MediaManagerConfig().misc.movie_directory
         importable_movies: list[MediaImportSuggestion] = []
         candidate_dirs = get_importable_media_directories(movie_root_path)
 
+        catalogued = [Path(p) for p in self.movie_repository.catalogued_source_files()]
         for movie_dir in candidate_dirs:
+            if any(p.is_relative_to(movie_dir.resolve()) and p.is_file() for p in catalogued):
+                continue
             metadata, external_id = extract_external_id_from_string(movie_dir.name)
             if metadata is not None and external_id is not None:
                 try:
-                    self.movie_repository.get_movie_by_external_id(
+                    known = self.movie_repository.get_movie_by_external_id(
                         external_id=external_id, metadata_provider=metadata
                     )
                     log.debug(
                         f"Movie {movie_dir.name} already exists in the database, skipping."
                     )
-                    continue
+                    if self.is_movie_downloaded(known):
+                        continue
                 except NotFoundError:
                     log.debug(
                         f"Movie {movie_dir.name} not found in database, checking for import candidates."
                     )
 
-            import_candidates = self.get_import_candidates(
-                movie=movie_dir, metadata_provider=metadata_provider
-            )
+            if discover_only:
+                importable_movies.append(MediaImportSuggestion(directory=movie_dir, candidates=[]))
+                continue
+
+            try:
+                import_candidates = self.get_import_candidates(
+                    movie=movie_dir, metadata_provider=metadata_provider
+                )
+            except Exception:
+                log.warning("Metadata lookup failed for library scan directory %s", movie_dir)
+                import_candidates = MediaImportSuggestion(directory=movie_dir, candidates=[])
             importable_movies.append(import_candidates)
 
         log.debug(f"Found {len(importable_movies)} importable movies.")

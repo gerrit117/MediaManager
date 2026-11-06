@@ -16,10 +16,10 @@
 <Card.Root class="col-span-full flex h-full flex-col overflow-x-hidden sm:col-span-1">
 	<Card.Header>
 		<Card.Title class="flex h-12 items-center leading-tight">
-			{mmT($mmLocale, "An importable" )} {isTv ? 'TV show' : 'movie'} {mmT($mmLocale, "was detected!" )}
+			{mmT($mmLocale, isTv ? "Existing show directory" : "Existing movie directory")}
 		</Card.Title>
 		<Card.Description>
-			{mmT($mmLocale, "The detected" )} {isTv ? 'TV show' : 'movie'} {mmT($mmLocale, "is in this directory:" )}
+			{mmT($mmLocale, "Directory")}
 			<code
 				class="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold"
 			>
