@@ -13,6 +13,12 @@ from media_manager.torrent.schemas import Torrent, TorrentStatus
 router = APIRouter()
 
 
+@router.get("/progress", dependencies=[Depends(current_active_user)])
+def get_download_progress(service: torrent_service_dep) -> dict:
+    torrents = service.torrent_repository.get_all_torrents()
+    return service.download_manager.get_progress(torrents)
+
+
 @router.get(
     "",
     status_code=status.HTTP_200_OK,
@@ -55,8 +61,7 @@ def retry_torrent_download(
     service: torrent_service_dep,
     torrent: torrent_dep,
 ) -> None:
-    service.pause_download(torrent=torrent)
-    service.resume_download(torrent=torrent)
+    service.download_manager.retry_download(torrent)
 
 
 @router.patch(
