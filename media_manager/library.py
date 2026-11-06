@@ -31,3 +31,17 @@ def episode_numbers(files: list[str], season: int) -> set[int]:
             if int(match[1])==season and 0<=int(match[3])-int(match[2])<=100:
                 result.update(range(int(match[2]),int(match[3])+1))
     return result
+
+
+def catalogued_directories(root: Path, files: list[str]) -> set[Path]:
+    """Top-level media directories already linked to database records, including partial seasons."""
+    root = root.resolve()
+    result = set()
+    for file in files:
+        try:
+            parts = Path(file).resolve().relative_to(root).parts
+        except (ValueError, OSError):
+            continue
+        if len(parts) > 1:
+            result.add(root / parts[0])
+    return result

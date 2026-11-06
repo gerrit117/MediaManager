@@ -1,6 +1,6 @@
 # Existing media libraries
 
-Admins manage scans under **Settings → Library**. The dashboard and movie/series pages link directly to this area.
+Admins manage scans under **Settings → Library**. The movie and series pages link directly to this area.
 
 **Start library scan and import** runs a background job that registers existing media in the database and reports progress, errors and folders needing review. It uses explicit IDs in movie/show NFO files or optional read-only metadata from existing Radarr/Sonarr installations. Source media roots map the source application's top-level folders to MediaManager's configured movie/TV roots. Conflicting or missing identities are left for manual matching; the scanner does not guess from a title.
 
@@ -18,3 +18,9 @@ Unresolved folders have **Match manually** links to the existing metadata-search
 ## Series monitoring
 
 Enable **Monitor new episodes and seasons** on a series to follow aired episodes from activation onward. Importing an existing library does not enable it automatically. See [episode monitoring and release rules](episode-monitoring.md).
+
+## Library browsing and metadata
+
+The movie and series libraries display poster grids with title, year, provider ID, title/ID search and sorting. Already catalogued directories, including partial seasons, are excluded from the separate manual matching area. Missing posters use a title placeholder.
+
+Admins can edit title, year and description on a detail page, search TMDB/TVDB, preview an identity and refresh metadata and cover art. Changing the provider or ID requires confirmation. Internal media, season and episode IDs, file paths, requests and monitoring flags are preserved; episodes are matched by season and episode number. Check episode ordering after correcting an identity. Duplicate provider IDs and stale concurrent edits are rejected. Saved assignments take precedence over conflicting source metadata during later scans.

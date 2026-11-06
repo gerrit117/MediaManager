@@ -998,8 +998,12 @@ class TvService:
         tv_directory = MediaManagerConfig().misc.tv_directory
         import_suggestions: list[MediaImportSuggestion] = []
         candidate_dirs = get_importable_media_directories(tv_directory)
+        from media_manager.library import catalogued_directories
+        recorded = catalogued_directories(tv_directory, self.tv_repository.catalogued_source_files())
 
         for item in candidate_dirs:
+            if item.resolve() in recorded:
+                continue
             metadata, external_id = extract_external_id_from_string(item.name)
             if metadata is not None and external_id is not None:
                 try:

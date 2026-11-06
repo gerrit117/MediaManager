@@ -19,7 +19,8 @@ def download_poster_image(storage_path: Path, poster_url: str, uuid: UUID) -> bo
         image_file_path.write_bytes(res.content)
 
         original_image = Image.open(image_file_path)
-        original_image.save(image_file_path.with_suffix(".avif"), quality=50)
-        original_image.save(image_file_path.with_suffix(".webp"), quality=50)
+        original_image = original_image.convert("RGB")
+        original_image.save(image_file_path.with_suffix(".jpeg"), quality=90)
+        original_image.save(image_file_path.with_suffix(".webp"), quality=85)
         return True
     return False

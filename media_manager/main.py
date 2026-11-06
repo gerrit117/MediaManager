@@ -132,6 +132,9 @@ api_app.include_router(
     notification_router, prefix="/notification", tags=["notification"]
 )
 
+from media_manager.library_metadata import router as library_metadata_router
+api_app.include_router(library_metadata_router, prefix="/library/metadata", tags=["library"])
+
 # serve static image files
 app.mount(
     "/api/v1/static/image",

@@ -173,6 +173,12 @@ def run_scan(lease,mode='catalogue'):
                         except NotFoundError:pass
                     source='radarr' if kind=='movies' else 'sonarr';entry=sources[source].get(folder.name)
                     nfo=read_nfo(folder,kind)
+                    recorded_id=(known_movies if kind=='movies' else known_shows).get(folder.name)
+                    if recorded_id:
+                        recorded=(movie_repo.get_movie_by_id(recorded_id) if kind=='movies' else tv_repo.get_show_by_id(recorded_id))
+                        candidate=identity(entry,kind) if entry else ((nfo['provider'],nfo['external_id']) if nfo else None)
+                        if candidate and candidate!=(recorded.metadata_provider,recorded.external_id):
+                            entry=None;nfo=None # A saved detail-page correction must survive future scans.
                     if entry:
                         provider,external=identity(entry,kind)
                         if external<=0:entry=None
@@ -207,6 +213,8 @@ def run_scan(lease,mode='catalogue'):
                             else:
                                 # Preserve provider identities, IDs, libraries and monitoring preferences.
                                 fresh.id=model.id;fresh.external_id=model.external_id;fresh.metadata_provider=model.metadata_provider
+                                # A library scan refreshes file/episode coverage, not manually edited display details.
+                                fresh.name=model.name;fresh.year=model.year;fresh.overview=model.overview
                                 if model.metadata_provider=='tmdb':
                                     for season in fresh.seasons:
                                         known=next((s for s in model.seasons if s.number==season.number),None)

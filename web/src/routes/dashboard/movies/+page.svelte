@@ -5,7 +5,7 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import { getFullyQualifiedMediaName } from '$lib/utils';
-	import MediaPicture from '$lib/components/media-picture.svelte';
+	import MediaLibrary from '$lib/components/media-library.svelte';
 	import { resolve } from '$app/paths';
 	import type { components } from '$lib/api/api.d.ts';
 	import ImportCandidatesDialog from '$lib/components/import-media/import-candidates-dialog.svelte';
@@ -53,7 +53,13 @@
 <main class="flex w-full flex-1 flex-col gap-4 p-4 pt-0">
 	<h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">{mmT($mmLocale, "Movies" )}</h1>
 	<LibraryScan kind="movies" />
+	{#await data.movies}
+		<LoadingBar />
+	{:then movies}
+		<MediaLibrary items={movies} isTv={false}/>
+	{/await}
 	{#if importableMovies().length > 0}
+		<details open={!!match} class="rounded-xl border bg-card p-4"><summary class="cursor-pointer font-medium">{mmT($mmLocale,'Directories needing review')} ({importableMovies().length})</summary>
 		<div
 			class="grid w-full auto-rows-min gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-4"
 		>
@@ -70,29 +76,6 @@
 			{/each}
 		</div>
     {#if importableMovies().filter(x=>!match||x.directory===match).length>limit}<button type="button" class="rounded-lg border px-4 py-2" onclick={()=>limit+=40}>{mmT($mmLocale,'Show more entries')}</button>{/if}
+		</details>
 	{/if}
-	{#await data.movies}
-		<LoadingBar />
-	{:then movies}
-		<div
-			class="grid w-full auto-rows-min gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
-		>
-			{#each movies.slice(0,limit) as movie (movie.id)}
-				<a href={resolve('/dashboard/movies/[movieId]', { movieId: movie.id! })}>
-					<Card.Root class="col-span-full max-w-[90vw] ">
-						<Card.Header>
-							<Card.Title class="h-6 truncate">{getFullyQualifiedMediaName(movie)}</Card.Title>
-							<Card.Description class="truncate">{movie.overview}</Card.Description>
-						</Card.Header>
-						<Card.Content>
-							<MediaPicture media={movie} />
-						</Card.Content>
-					</Card.Root>
-				</a>
-			{:else}
-				<div class="col-span-full text-center text-muted-foreground">{mmT($mmLocale, "No movies added yet." )}</div>
-			{/each}
-		</div>
-        {#if movies.length>limit}<button type="button" class="mx-auto rounded-lg border px-4 py-2" onclick={()=>limit+=40}>{mmT($mmLocale,'Show more entries')}</button>{/if}
-	{/await}
 </main>

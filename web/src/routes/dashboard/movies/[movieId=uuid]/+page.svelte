@@ -11,6 +11,7 @@
 	import { page } from '$app/state';
 	import TorrentTable from '$lib/components/torrents/torrent-table.svelte';
 	import MediaPicture from '$lib/components/media-picture.svelte';
+	import MetadataEditor from '$lib/components/metadata-editor.svelte';
 	import DownloadMovieDialog from '$lib/components/download-dialogs/download-movie-dialog.svelte';
 	import RequestMovieDialog from '$lib/components/requests/request-movie-dialog.svelte';
 	import LibraryCombobox from '$lib/components/library-combobox.svelte';
@@ -63,6 +64,7 @@
 	{getFullyQualifiedMediaName(movie)}
 </h1>
 <main class="mx-auto flex w-full flex-1 flex-col gap-4 p-4 md:max-w-[80em]">
+	<MetadataEditor media={movie} isTv={false}/>
 	<div class="flex flex-col gap-4 md:flex-row md:items-stretch">
 		<div class="w-full overflow-hidden rounded-xl bg-muted/50 md:w-1/3 md:max-w-sm">
 			{#if movie.id}

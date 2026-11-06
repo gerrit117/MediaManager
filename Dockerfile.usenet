@@ -3,16 +3,16 @@ WORKDIR /frontend
 COPY web/package*.json ./
 RUN npm ci
 COPY web/ ./
-ARG VERSION=1.12.3-fork.6
+ARG VERSION=1.12.3-fork.7
 RUN node --experimental-strip-types --test tests/*.test.mjs
 RUN BASE_PATH=/web PUBLIC_API_URL= PUBLIC_VERSION=${VERSION} npm run build
 
 # Preserve the tested release runtime and its dependency lock; no master migration.
 FROM quay.io/maxdorninger/mediamanager@sha256:83b80dce26f8cdbbf8afec06784a85e7eedcba05ad4be57d2f70b006304d7a8c AS runtime
-ARG VERSION=1.12.3-fork.6
+ARG VERSION=1.12.3-fork.7
 ENV PUBLIC_VERSION=${VERSION} UV_NO_SYNC=1 UV_CACHE_DIR=/tmp/uv-cache
 LABEL org.opencontainers.image.source="https://github.com/gerrit117/MediaManager" \
-      org.opencontainers.image.version="1.12.3-fork.6" \
+      org.opencontainers.image.version="1.12.3-fork.7" \
       org.opencontainers.image.description="MediaManager fork; NZB and torrents, requests, guided setup"
 COPY --chmod=755 edition-startup.sh /app/edition-startup.sh
 CMD ["/app/edition-startup.sh"]
