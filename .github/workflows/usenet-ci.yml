@@ -1,5 +1,7 @@
-name: Usenet edition checks
+name: Usenet edition checks and image
 on:
+  push:
+    branches: [master]
   pull_request:
   workflow_dispatch:
 concurrency:
@@ -10,7 +12,26 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
-      - name: Build frontend and run backend regression tests
+      - name: Build frontend and run regression tests
         run: docker build --target checks -f Dockerfile.usenet .
+      - name: Sign in to GitHub Container Registry
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish tested image
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+        env:
+          IMAGE: ghcr.io/gerrit117/mediamanager
+        run: |
+          docker build --target production -f Dockerfile.usenet --label org.opencontainers.image.revision=${GITHUB_SHA} -t ${IMAGE}:sha-${GITHUB_SHA} .
+          docker tag ${IMAGE}:sha-${GITHUB_SHA} ${IMAGE}:latest
+          docker push ${IMAGE}:sha-${GITHUB_SHA}
+          docker push ${IMAGE}:latest
