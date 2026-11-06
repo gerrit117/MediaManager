@@ -530,3 +530,45 @@ Indexer search incomplete; release priorities cannot be verified. Please try aga
 Monitoring updated.	Überwachung aktualisiert.
 Monitoring could not be updated.	Überwachung konnte nicht aktualisiert werden.
 Preferred release order	Release-Priorität
+Library	Bibliothek
+Manage existing library	Vorhandene Bibliothek verwalten
+Import existing library	Vorhandene Bibliothek erfassen
+Register existing movies and shows in the database. Trusted NFO IDs and optional Sonarr/Radarr metadata identify titles; uncertain matches are left for review. This does not request new downloads.	Vorhandene Filme und Serien in die Datenbank aufnehmen. Eindeutige NFO-IDs und optional Metadaten aus Sonarr/Radarr ordnen Titel zu; unklare Treffer bleiben zur Prüfung offen. Dabei werden keine neuen Downloads angefragt.
+Start library scan and import	Bibliothek scannen und erfassen
+catalogued or updated	erfasst oder aktualisiert
+without video files	ohne Videodateien
+Needs manual matching	Manuelle Zuordnung nötig
+Match manually	Manuell zuordnen
+Errors	Fehler
+Ready	Bereit
+Completed	Abgeschlossen
+Failed	Fehlgeschlagen
+Interrupted	Unterbrochen
+Scan settings	Scan-Einstellungen
+Save scan settings	Scan-Einstellungen speichern
+Scan library automatically	Bibliothek automatisch erfassen
+Scan interval (hours)	Scan-Intervall (Stunden)
+Radarr metadata URL (optional)	Radarr-Metadaten: Adresse (optional)
+Radarr API key	Radarr-API-Schlüssel
+Radarr media root	Medienpfad in Radarr
+Sonarr metadata URL (optional)	Sonarr-Metadaten: Adresse (optional)
+Sonarr API key	Sonarr-API-Schlüssel
+Sonarr media root	Medienpfad in Sonarr
+Automatic scans always catalogue in place. Existing monitoring settings and file permissions are preserved. Source API access is read-only; API keys stay on the server.	Automatische Läufe erfassen Dateien immer am vorhandenen Speicherort. Überwachungseinstellungen und Dateirechte bleiben erhalten. Auf die Metadatenquellen wird nur lesend zugegriffen; API-Schlüssel bleiben auf dem Server.
+Reorganize the existing library? This renames source folders and uses the file importer. Continue only if you want to change the media layout.	Vorhandene Bibliothek neu einsortieren? Dabei werden Quellordner umbenannt und der Dateiimport verwendet. Nur fortfahren, wenn die Ordnerstruktur geändert werden soll.
+Library status could not be loaded.	Bibliotheksstatus konnte nicht geladen werden.
+Library scan could not be started.	Bibliotheksscan konnte nicht gestartet werden.
+A library scan is already running.	Ein Bibliotheksscan läuft bereits.
+Metadata IDs disagree.	Die Metadaten-IDs widersprechen sich.
+No trusted metadata ID. Match this directory manually.	Keine eindeutige Metadaten-ID. Diesen Ordner bitte manuell zuordnen.
+Metadata could not be loaded.	Metadaten konnten nicht geladen werden.
+No recognizable video/episode files.	Keine erkennbaren Video-/Folgennamen gefunden.
+Metadata source is unavailable. Check URL and API key.	Metadatenquelle nicht erreichbar. Adresse und API-Schlüssel prüfen.
+Import failed. Check the server logs for this directory.	Import fehlgeschlagen. Serverprotokoll für diesen Ordner prüfen.
+Library scan failed. Check paths, permissions and server logs.	Bibliotheksscan fehlgeschlagen. Pfade, Berechtigungen und Serverprotokoll prüfen.
+Show more entries	Weitere Einträge anzeigen
+Reorganization requires explicit confirmation.	Das Neu-Einsortieren muss ausdrücklich bestätigt werden.
+Cross-origin scan requests are not allowed.	Scan-Anfragen von einer fremden Herkunft sind nicht erlaubt.
+Catalogued series	Erfasste Serien
+Catalogued episodes	Erfasste Folgen
+Match individual directories	Einzelne Ordner zuordnen

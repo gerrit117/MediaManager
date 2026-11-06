@@ -833,11 +833,12 @@ class TvService:
         existing_season_external_ids = {s.external_id: s for s in db_show.seasons}
 
         for fresh_season_data in fresh_show_data.seasons:
-            if fresh_season_data.external_id in existing_season_external_ids:
-                # Update existing season
-                existing_season = existing_season_external_ids[
-                    fresh_season_data.external_id
-                ]
+            existing_season = existing_season_external_ids.get(fresh_season_data.external_id) if fresh_season_data.external_id else None
+            if existing_season is None:
+                existing_season = next((s for s in db_show.seasons if s.number==fresh_season_data.number),None)
+            if existing_season is not None:
+                # Imported catalogues may initially lack provider-specific season IDs.
+
                 log.debug(
                     f"Updating existing season {existing_season.number} for show {db_show.name}"
                 )
@@ -845,6 +846,7 @@ class TvService:
                     season_id=existing_season.id,
                     name=fresh_season_data.name,
                     overview=fresh_season_data.overview,
+                    external_id=fresh_season_data.external_id or None,
                 )
 
                 # Process episodes for this season
@@ -852,11 +854,12 @@ class TvService:
                     ep.external_id: ep for ep in existing_season.episodes
                 }
                 for fresh_episode_data in fresh_season_data.episodes:
-                    if fresh_episode_data.external_id in existing_episode_external_ids:
-                        # Update existing episode
-                        existing_episode = existing_episode_external_ids[
-                            fresh_episode_data.external_id
-                        ]
+                    existing_episode = existing_episode_external_ids.get(fresh_episode_data.external_id) if fresh_episode_data.external_id else None
+                    if existing_episode is None:
+                        existing_episode = next((e for e in existing_season.episodes if e.number==fresh_episode_data.number),None)
+                    if existing_episode is not None:
+                        # Match source imports by episode number until provider IDs are available.
+
                         log.debug(
                             f"Updating existing episode {existing_episode.number} for season {existing_season.number}"
                         )
@@ -866,6 +869,8 @@ class TvService:
                         )
                         from media_manager.tv.models import Episode as EpisodeModel
                         self.tv_repository.db.get(EpisodeModel, existing_episode.id).air_date = fresh_episode_data.air_date
+                        if fresh_episode_data.external_id:
+                            self.tv_repository.db.get(EpisodeModel, existing_episode.id).external_id = fresh_episode_data.external_id
                     else:
                         # Add new episode
                         log.debug(
@@ -909,6 +914,7 @@ class TvService:
                     show_id=db_show.id, season_data=season_schema
                 )
 
+        self.tv_repository.db.flush()
         updated_show = self.tv_repository.get_show_by_id(show_id=db_show.id)
 
         log.info(f"Successfully updated metadata for show ID: {db_show.id}")

@@ -10,12 +10,16 @@
 	import ImportCandidatesDialog from '$lib/components/import-media/import-candidates-dialog.svelte';
 	import DetectedMediaCard from '$lib/components/import-media/detected-media-card.svelte';
 	import type { components } from '$lib/api/api';
-	import { getContext } from 'svelte';
+	import { getContext,onMount } from 'svelte';
 	import type { PageProps } from './$types';
 	import LoadingBar from '$lib/components/loading-bar.svelte';
 	import LibraryScan from '$lib/components/import-media/library-scan.svelte';
 
 	let { data }: PageProps = $props();
+    let match=$state('');let limit=$state(40);
+    const scanner=getContext<{run:(kind:'movies'|'tv')=>Promise<void>}>('libraryScan');
+    onMount(()=>{match=new URLSearchParams(location.search).get('match')??'';if(match)void scanner.run('tv');});
+
 	let importableShows: () => components['schemas']['MediaImportSuggestion'][] =
 		getContext('importableShows');
 </script>
@@ -55,7 +59,7 @@
 		<div
 			class="grid w-full auto-rows-min gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-4"
 		>
-			{#each importableShows() as importable (importable.directory)}
+			{#each importableShows().filter(x=>!match||x.directory===match).slice(0,limit) as importable (importable.directory)}
 				<DetectedMediaCard isTv={true} directory={importable.directory}>
 					<ImportCandidatesDialog
 						isTv={true}
@@ -67,6 +71,7 @@
 				</DetectedMediaCard>
 			{/each}
 		</div>
+    {#if importableShows().filter(x=>!match||x.directory===match).length>limit}<button type="button" class="rounded-lg border px-4 py-2" onclick={()=>limit+=40}>{mmT($mmLocale,'Show more entries')}</button>{/if}
 	{/if}
 	{#await data.tvShows}
 		<LoadingBar />
@@ -74,7 +79,7 @@
 		<div
 			class="grid w-full auto-rows-min gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
 		>
-			{#each tvShows as show (show.id)}
+			{#each tvShows.slice(0,limit) as show (show.id)}
 				<a href={resolve('/dashboard/tv/[showId]', { showId: show.id! })}>
 					<Card.Root class="col-span-full max-w-[90vw] ">
 						<Card.Header>
@@ -90,5 +95,6 @@
 				<div class="col-span-full text-center text-muted-foreground">{mmT($mmLocale, "No TV shows added yet." )}</div>
 			{/each}
 		</div>
+        {#if tvShows.length>limit}<button type="button" class="mx-auto rounded-lg border px-4 py-2" onclick={()=>limit+=40}>{mmT($mmLocale,'Show more entries')}</button>{/if}
 	{/await}
 </main>

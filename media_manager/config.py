@@ -12,6 +12,7 @@ from pydantic_settings import (
 )
 
 from media_manager.auth.config import AuthConfig
+from media_manager.library_scan_config import LibraryScanConfig
 from media_manager.database.config import DbConfig
 from media_manager.indexer.config import IndexerConfig
 from media_manager.metadataProvider.config import MetadataProviderConfig
@@ -36,6 +37,7 @@ class LibraryItem(BaseSettings):
 
 
 class BasicConfig(BaseSettings):
+    library_scan: LibraryScanConfig = LibraryScanConfig()
     image_directory: Path = Path(__file__).parent.parent / "data" / "images"
     tv_directory: Path = Path(__file__).parent.parent / "data" / "tv"
     movie_directory: Path = Path(__file__).parent.parent / "data" / "movies"
@@ -52,6 +54,7 @@ class BasicConfig(BaseSettings):
 class MediaManagerConfig(BaseSettings):
     model_config = SettingsConfigDict(
         toml_file=config_path,
+        hide_input_in_errors=True,
         case_sensitive=False,
         env_nested_delimiter="__",
         env_prefix="MEDIAMANAGER_",

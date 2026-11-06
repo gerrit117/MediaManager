@@ -6,6 +6,8 @@
 	import StatCard from '$lib/components/stats/stat-cards.svelte';
 	import RecommendedMediaCarousel from '$lib/components/recommended-media-carousel.svelte';
 	import { resolve } from '$app/paths';
+    let libraryCounts=$state<{movies:number;shows:number}|null>(null);
+    async function refreshCounts(){try{const r=await fetch('/api/v1/library/summary');if(r.ok)libraryCounts=await r.json();}catch{}}
 	import { onMount } from 'svelte';
 	import client from '$lib/api';
 	import type { components } from '$lib/api/api.d.ts';
@@ -17,7 +19,7 @@
 	let recommendedMovies: components['schemas']['MetaDataProviderSearchResult'][] = $state([]);
 	let moviesLoading = $state(true);
 
-	onMount(async () => {
+	onMount(() => {
 		client.GET('/api/v1/tv/recommended').then((res) => {
 			recommendedShows = res.data as components['schemas']['MetaDataProviderSearchResult'][];
 			showsLoading = false;
@@ -26,6 +28,7 @@
 			recommendedMovies = res.data as components['schemas']['MetaDataProviderSearchResult'][];
 			moviesLoading = false;
 		});
+        void refreshCounts();const timer=setInterval(refreshCounts,10000);return()=>clearInterval(timer);
 	});
 </script>
 
@@ -61,7 +64,7 @@
 	<main class="min-h-screen flex-1 items-center justify-center rounded-xl p-4 md:min-h-min">
 		<div class="mx-auto">
 			<div class="my-8 block text-2xl">{mmT($mmLocale, "Welcome to MediaManager!" )}</div>
-			<StatCard showCount={data.tvShows?.length ?? 0} moviesCount={data.movies?.length ?? 0}
+			<StatCard showCount={libraryCounts?.shows ?? data.tvShows?.length ?? 0} moviesCount={libraryCounts?.movies ?? data.movies?.length ?? 0}
 			></StatCard>
 		</div>
 		<div class="mx-auto">
