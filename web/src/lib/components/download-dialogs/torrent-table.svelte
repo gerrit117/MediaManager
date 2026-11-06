@@ -2,6 +2,7 @@
 	import { ArrowDown, ArrowUp, LoaderCircle } from 'lucide-svelte';
 	import * as Table from '$lib/components/ui/table';
 	import { type Snippet } from 'svelte';
+	import { emptyFacets, availableFacets, matchesFacets, facetLabels, type Facets } from '$lib/release-filters';
 
 	let {
 		torrentsPromise,
@@ -13,6 +14,8 @@
 		rowSnippet: Snippet<[any]>;
 	} = $props();
 
+	let selected = $state<Facets>(emptyFacets());
+	function toggleFilter(group: keyof Facets, tag: string) { selected = { ...selected, [group]: selected[group].includes(tag) ? selected[group].filter(x => x !== tag) : [...selected[group], tag] }; }
 	let sortBy = $state({ col: 'score', ascending: false });
 
 	function getSortedColumnState(column: string | undefined): boolean | null {
@@ -45,11 +48,32 @@
 	{#await torrentsPromise}
 		<div class="flex w-full max-w-sm items-center space-x-2">
 			<LoaderCircle class="animate-spin" />
-			<p>Loading torrents...</p>
+			<p>Releases werden geladen …</p>
 		</div>
 	{:then data}
-		<h3 class="mb-2 text-lg font-semibold">Found Torrents:</h3>
-		<div class="overflow-y-auto rounded-md border p-2">
+		<h3 class="mb-2 text-lg font-semibold">Gefundene Releases:</h3>
+		{#if data?.length}
+   {@const options = availableFacets(data)}
+   <div class="mb-4 space-y-3 rounded-lg border p-3" aria-label="Release-Schnellfilter">
+    {#each Object.keys(options) as key}
+     {@const group = key as keyof Facets}
+     {#if options[group].length}
+      <div class="flex flex-wrap items-center gap-2" role="group" aria-label={facetLabels[group]}>
+       <span class="min-w-24 text-sm font-semibold">{facetLabels[group]}</span>
+       {#each options[group] as tag}
+        <button type="button" aria-pressed={selected[group].includes(tag)} class="rounded-full border px-3 py-1.5 text-sm transition-colors aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground" onclick={() => toggleFilter(group, tag)}>{tag}</button>
+       {/each}
+      </div>
+     {/if}
+    {/each}
+    <div class="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+     <span aria-live="polite">{data.filter((row: any) => matchesFacets(row, selected)).length} von {data.length} Releases</span>
+     <button type="button" class="underline" onclick={() => selected = emptyFacets()}>Filter zurücksetzen</button>
+    </div>
+    <p class="text-xs text-muted-foreground">Tags aus dem Release-Namen; keine verifizierten Dateiinformationen. Innerhalb einer Gruppe gilt „oder“, zwischen Gruppen „und“.</p>
+   </div>
+  {/if}
+  <div class="max-w-full overflow-auto rounded-md border p-2">
 			<Table.Root>
 				<Table.Header>
 					<Table.Row>
@@ -74,14 +98,14 @@
 				</Table.Header>
 				<Table.Body>
 					{#if data}
-						{@const sortedData = sort(data, sortBy.col, sortBy.ascending)}
+						{@const sortedData = sort(data.filter((row: any) => matchesFacets(row, selected)), sortBy.col, sortBy.ascending)}
 						{#each sortedData as torrent (torrent.id)}
 							<Table.Row>
 								{@render rowSnippet(torrent)}
 							</Table.Row>
 						{:else}
 							<Table.Cell colspan={columns.length + 2}>
-								<div class="font-light text-center w-full">No torrents found.</div>
+								<div class="font-light text-center w-full">Keine passenden Releases gefunden.</div>
 							</Table.Cell>
 						{/each}
 					{:else}
@@ -95,7 +119,7 @@
 			</Table.Root>
 		</div>
 	{:catch error}
-		<div class="w-full text-center text-red-500">Failed to load torrents.</div>
+		<div class="w-full text-center text-red-500">Releases konnten nicht geladen werden.</div>
 		<div class="w-full text-center text-red-500">Error: {error.message}</div>
 	{/await}
 </div>
