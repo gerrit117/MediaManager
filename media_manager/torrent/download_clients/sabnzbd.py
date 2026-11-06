@@ -1,8 +1,10 @@
 import logging
+from pathlib import Path
 
 import sabnzbd_api
 
 from media_manager.config import MediaManagerConfig
+from media_manager.exceptions import BadRequestError
 from media_manager.indexer.schemas import IndexerQueryResult
 from media_manager.torrent.download_clients.abstract_download_client import (
     AbstractDownloadClient,
@@ -22,6 +24,7 @@ class SabnzbdDownloadClient(AbstractDownloadClient):
         "Extracting",
         "Moving",
         "Running",
+        "Fetching", "Propagating", "QuickCheck", "Verifying", "Repairing",
     )
     FINISHED_STATE = ("Completed",)
     ERROR_STATE = ("Failed",)
@@ -52,7 +55,8 @@ class SabnzbdDownloadClient(AbstractDownloadClient):
         try:
             # Add NZB to SABnzbd queue
             response = self.client.add_uri(
-                url=str(indexer_result.download_url), nzbname=indexer_result.title
+                url=str(indexer_result.download_url), nzbname=indexer_result.title,
+                cat=self.config.category, pp=3,
             )
             if not response["status"]:
                 raise RuntimeError(f"Failed to add NZB to SABnzbd: {response}")  # noqa: EM102, TRY003, TRY301
@@ -123,8 +127,76 @@ class SabnzbdDownloadClient(AbstractDownloadClient):
         :return: The status of the torrent.
         """
         response = self.client.get_downloads(nzo_ids=torrent.hash)
-        status = response["queue"]["status"]
-        return self._map_status(status)
+        for slot in response.get("queue", {}).get("slots", []):
+            if slot.get("nzo_id") == torrent.hash:
+                return self._map_status(slot.get("status", "Unknown"))
+        slot = self._history_slot(torrent)
+        return self._map_status(slot.get("status", "Unknown"))
+
+    def _history_slot(self, torrent: Torrent) -> dict:
+        response = self.client.get_history(nzo_ids=torrent.hash)
+        return next(
+            (slot for slot in response.get("history", {}).get("slots", [])
+             if slot.get("nzo_id") == torrent.hash), {}
+        )
+
+    def get_progress(self, torrents: list[Torrent]) -> dict:
+        """Read live job progress without exposing remote paths or credentials."""
+        if not torrents:
+            return {}
+        ids = [torrent.hash for torrent in torrents]
+        queue = self.client.get_downloads(nzo_ids=ids).get("queue", {})
+        slots = {slot["nzo_id"]: slot for slot in queue.get("slots", [])}
+        missing = [identifier for identifier in ids if identifier not in slots]
+        if missing:
+            history = self.client.get_history(nzo_ids=missing, limit=len(missing))
+            slots.update({slot["nzo_id"]: slot for slot in history.get("history", {}).get("slots", [])})
+        result = {}
+        for torrent in torrents:
+            slot = slots.get(torrent.hash, {})
+            status = slot.get("status", "Unknown")
+            if queue.get("paused") and status in {"Downloading", "Queued"}:
+                status = "QueuePaused"
+            percent = None
+            try:
+                if slot.get("percentage") is not None:
+                    percent = min(100.0, max(0.0, float(slot["percentage"])))
+            except (TypeError, ValueError):
+                pass
+            if status == "Completed" or torrent.imported:
+                percent = 100.0
+            result[str(torrent.id)] = {"percent": percent, "state": status, "client": "SABnzbd", "usenet": True}
+        return result
+
+    def retry_download(self, torrent: Torrent) -> None:
+        slots = self.client.get_downloads(nzo_ids=torrent.hash).get("queue", {}).get("slots", [])
+        slot = next((slot for slot in slots if slot.get("nzo_id") == torrent.hash), None)
+        if slot is not None:
+            if slot.get("status") != "Paused":
+                raise BadRequestError("Dieser Download läuft bereits oder wird nachbearbeitet.")
+            self.client.resume_job(nzo_id=torrent.hash)
+            return
+        if self._history_slot(torrent).get("status") != "Failed":
+            raise BadRequestError("Nur fehlgeschlagene Downloads können erneut versucht werden.")
+        response = self.client.retry_item(nzo_id=torrent.hash)
+        if not response.get("status"):
+            raise BadRequestError("SABnzbd konnte den Download nicht erneut starten.")
+
+    def get_download_path(self, torrent: Torrent) -> Path:
+        """Use SAB's actual completed path; release names may be normalized."""
+        storage = self._history_slot(torrent).get("storage")
+        if not storage or not self.config.remote_download_directory:
+            raise RuntimeError("SABnzbd meldet keinen zugeordneten Downloadpfad.")
+        remote = Path(self.config.remote_download_directory)
+        try:
+            relative = Path(storage).relative_to(remote)
+        except ValueError:
+            raise RuntimeError("SABnzbd-Download liegt außerhalb des MediaManager-Ordners.") from None
+        root = MediaManagerConfig().misc.torrent_directory.resolve()
+        target = (root / relative).resolve()
+        if not target.is_relative_to(root):
+            raise RuntimeError("Ungültiger SABnzbd-Downloadpfad.")
+        return target.parent if target.is_file() else target
 
     def _map_status(self, sabnzbd_status: str) -> TorrentStatus:
         """
