@@ -2,7 +2,8 @@
 	import AppSidebar from '$lib/components/nav/app-sidebar.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { LayoutProps } from './$types';
-	import { setContext } from 'svelte';
+	import { onMount, setContext } from 'svelte';
+	import { env } from '$env/dynamic/public';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
@@ -15,6 +16,14 @@
 	setContext('user', () => data.user);
 	setContext('importableMovies', () => importableMovies);
 	setContext('importableShows', () => importableShows);
+
+	onMount(() => {
+		if (data.user?.is_superuser) {
+			fetch(`${env.PUBLIC_API_URL ?? ''}/api/v1/indexers/categories`, {
+				credentials: 'include'
+			}).catch(() => {});
+		}
+	});
 
 	if (!data.user?.is_verified) {
 		toast.info('Your account requires verification. Redirecting...');
