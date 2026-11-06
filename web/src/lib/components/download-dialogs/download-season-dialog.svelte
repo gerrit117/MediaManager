@@ -33,7 +33,7 @@
 
 	const tableColumnHeadings = [
 		{ name: 'Size', id: 'size' },
-		{ name: 'Usenet', id: 'usenet' },
+		{ name: 'Downloadart', id: 'usenet' },
 		{ name: 'Seeders', id: 'seeders' },
 		{ name: 'Age', id: 'age' },
 		{ name: 'Score', id: 'score' },
@@ -133,7 +133,7 @@
 		{#snippet rowSnippet(torrent)}
 			<Table.Cell class="font-medium">{torrent.title}</Table.Cell>
 			<Table.Cell>{(torrent.size / 1024 / 1024 / 1024).toFixed(2)}GB</Table.Cell>
-			<Table.Cell>{torrent.usenet}</Table.Cell>
+			<Table.Cell>{torrent.usenet ? 'Usenet / NZB' : 'Torrent'}</Table.Cell>
 			<Table.Cell>{torrent.usenet ? 'N/A' : torrent.seeders}</Table.Cell>
 			<Table.Cell
 				>{torrent.age
