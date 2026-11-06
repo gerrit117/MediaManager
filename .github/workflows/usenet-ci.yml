@@ -1,0 +1,15 @@
+name: Usenet edition checks
+on:
+  push:
+    branches: [master, usenet-stable]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build frontend and run backend regression tests
+        run: docker build --target checks -f Dockerfile.usenet .
