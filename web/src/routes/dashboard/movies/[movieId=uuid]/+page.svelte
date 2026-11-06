@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
@@ -44,11 +45,11 @@
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard', {})}>Home</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard', {})}>{mmT($mmLocale, "Home" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard/movies', {})}>Movies</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard/movies', {})}>{mmT($mmLocale, "Movies" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
@@ -77,7 +78,7 @@
 		<div class="h-full w-full flex-auto rounded-xl md:w-1/4">
 			<Card.Root class="h-full w-full">
 				<Card.Header>
-					<Card.Title>Overview</Card.Title>
+					<Card.Title>{mmT($mmLocale, "Overview" )}</Card.Title>
 				</Card.Header>
 				<Card.Content>
 					<p class="leading-7 not-first:mt-6">
@@ -92,7 +93,7 @@
 			{#if user().is_superuser}
 				<Card.Root class="w-full  flex-1">
 					<Card.Header>
-						<Card.Title>Administrator Controls</Card.Title>
+						<Card.Title>{mmT($mmLocale, "Administrator Controls" )}</Card.Title>
 					</Card.Header>
 					<Card.Content class="flex flex-col items-center gap-4">
 						<LibraryCombobox media={movie} mediaType="movie" />
@@ -102,7 +103,7 @@
 			{/if}
 			<Card.Root class="w-full  flex-1">
 				<Card.Header>
-					<Card.Title>Download Options</Card.Title>
+					<Card.Title>{mmT($mmLocale, "Download Options" )}</Card.Title>
 				</Card.Header>
 				<Card.Content class="flex flex-col items-center gap-4">
 					{#if user().is_superuser}
@@ -116,21 +117,21 @@
 	<div class="flex-1 rounded-xl">
 		<Card.Root class="h-full w-full">
 			<Card.Header>
-				<Card.Title>Movie files</Card.Title>
+				<Card.Title>{mmT($mmLocale, "Movie files" )}</Card.Title>
 				<Card.Description>
-					A list of all downloaded/downloading versions of this movie.
+					{mmT($mmLocale, "A list of all downloaded/downloading versions of this movie." )}
 				</Card.Description>
 			</Card.Header>
 			<Card.Content>
 				<Table.Root>
 					<Table.Caption>
-						A list of all downloaded/downloading versions of this movie.
+						{mmT($mmLocale, "A list of all downloaded/downloading versions of this movie." )}
 					</Table.Caption>
 					<Table.Header>
 						<Table.Row>
-							<Table.Head>Quality</Table.Head>
-							<Table.Head>File Path Suffix</Table.Head>
-							<Table.Head>Imported</Table.Head>
+							<Table.Head>{mmT($mmLocale, "Quality" )}</Table.Head>
+							<Table.Head>{mmT($mmLocale, "File Path Suffix" )}</Table.Head>
+							<Table.Head>{mmT($mmLocale, "Imported" )}</Table.Head>
 						</Table.Row>
 					</Table.Header>
 					<Table.Body>
@@ -155,8 +156,8 @@
 	<div class="flex-1 rounded-xl">
 		<Card.Root class="h-full w-full">
 			<Card.Header>
-				<Card.Title>Download-Informationen</Card.Title>
-				<Card.Description>Alle Downloads dieses Films.</Card.Description>
+				<Card.Title>{mmT($mmLocale, "Download-Informationen" )}</Card.Title>
+				<Card.Description>{mmT($mmLocale, "Alle Downloads dieses Films." )}</Card.Description>
 			</Card.Header>
 			<Card.Content class="flex flex-col gap-4">
 				<TorrentTable isShow={false} torrents={movie.torrents} movieId={movie.id} />

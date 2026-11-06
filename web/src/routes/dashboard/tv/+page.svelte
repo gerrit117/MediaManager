@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -19,7 +20,7 @@
 </script>
 
 <svelte:head>
-	<title>TV Shows - MediaManager</title>
+	<title>{mmT($mmLocale, "TV Shows - MediaManager" )}</title>
 	<meta content="Browse and manage your TV show collection in MediaManager" name="description" />
 </svelte:head>
 
@@ -34,11 +35,11 @@
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard', {})}>Home</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard', {})}>{mmT($mmLocale, "Home" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Page>Shows</Breadcrumb.Page>
+					<Breadcrumb.Page>{mmT($mmLocale, "Shows" )}</Breadcrumb.Page>
 				</Breadcrumb.Item>
 			</Breadcrumb.List>
 		</Breadcrumb.Root>
@@ -46,7 +47,7 @@
 </header>
 <main class="flex w-full flex-col gap-4 p-4 pt-0">
 	<h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
-		TV Shows
+		{mmT($mmLocale, "TV Shows" )}
 	</h1>
 	{#if importableShows().length > 0}
 		<div
@@ -59,7 +60,7 @@
 						name={importable.directory}
 						candidates={importable.candidates}
 					>
-						Import TV show
+						{mmT($mmLocale, "Import TV show" )}
 					</ImportCandidatesDialog>
 				</DetectedMediaCard>
 			{/each}
@@ -84,7 +85,7 @@
 					</Card.Root>
 				</a>
 			{:else}
-				<div class="col-span-full text-center text-muted-foreground">No TV shows added yet.</div>
+				<div class="col-span-full text-center text-muted-foreground">{mmT($mmLocale, "No TV shows added yet." )}</div>
 			{/each}
 		</div>
 	{/await}

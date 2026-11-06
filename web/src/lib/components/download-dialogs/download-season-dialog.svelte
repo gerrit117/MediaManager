@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -95,9 +96,9 @@
 
 <DownloadDialogWrapper
 	bind:open={dialogueState}
-	triggerText="Download Seasons"
-	title="Download a Season"
-	description="Search indexers and send releases to your download manager for a specific season or season packs."
+	triggerText={mmT($mmLocale, "Download Seasons")}
+	title={mmT($mmLocale, "Download a Season")}
+	description={mmT($mmLocale, "Search indexers and send releases to your download manager for a specific season or season packs.")}
 >
 	<SearchTabs
 		bind:tabState
@@ -108,7 +109,7 @@
 	>
 		{#snippet basicModeContent()}
 			<Label for="season-number">
-				Enter a season number from 1 to {show.seasons.at(-1)?.number}
+				{mmT($mmLocale, "Enter a season number from 1 to" )} {show.seasons.at(-1)?.number}
 			</Label>
 			<div class="flex w-full max-w-sm items-center space-x-2">
 				<Input
@@ -117,17 +118,15 @@
 					bind:value={selectedSeasonNumber}
 					max={show.seasons.at(-1)?.number}
 				/>
-				<Button disabled={isLoading} class="w-fit" onclick={search}>Search indexers</Button>
+				<Button disabled={isLoading} class="w-fit" onclick={search}>{mmT($mmLocale, "Search indexers" )}</Button>
 			</div>
 			<p class="text-sm text-muted-foreground">
-				Enter the season's number you want to search for. The first, usually 1, or the last season
-				number usually yield the most season packs. Note that only Seasons which are listed in the
-				"Seasons" cell will be imported!
+				{mmT($mmLocale, "Enter the season's number you want to search for. The first, usually 1, or the last season number usually yield the most season packs. Note that only Seasons which are listed in the \"Seasons\" cell will be imported!" )}
 			</p>
 		{/snippet}
 	</SearchTabs>
 	{#if torrentsError}
-		<div class="my-2 w-full text-center text-red-500">An error occurred: {torrentsError}</div>
+		<div class="my-2 w-full text-center text-red-500">{mmT($mmLocale, "An error occurred:" )} {mmT($mmLocale, torrentsError)}</div>
 	{/if}
 	<TorrentTable {torrentsPromise} columns={tableColumnHeadings}>
 		{#snippet rowSnippet(torrent)}

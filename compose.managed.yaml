@@ -1,0 +1,69 @@
+name: mediamanager-managed
+services:
+  database:
+    image: postgres:17-bookworm
+    user: "${MM_UID:-99}:${MM_GID:-100}"
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_admin_password
+    secrets: [db_admin_password, app_db_password]
+    volumes:
+      - ${MM_STATE}/postgres:/var/lib/postgresql/data
+      - ./ops/postgres-init.sh:/docker-entrypoint-initdb.d/10-mediamanager.sh:ro
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  mediamanager:
+    image: ${MM_IMAGE:-ghcr.io/gerrit117/mediamanager:latest}
+    user: "${MM_UID:-99}:${MM_GID:-100}"
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    ports: ["${MM_PORT:-8095}:8000"]
+    environment:
+      CONFIG_DIR: /app/config
+      MEDIAMANAGER_MANAGED_DATABASE: "true"
+      MEDIAMANAGER_DB_HOST: database
+      MEDIAMANAGER_DB_PASSWORD_FILE: /run/secrets/app_db_password
+    secrets: [app_db_password]
+    volumes:
+      - ${MM_STATE}/config:/app/config
+      - ${MM_STATE}/images:/data/images
+      - ${MM_MOVIES}:/data/movies
+      - ${MM_TV}:/data/tv
+      - ${MM_DOWNLOADS}:/downloads
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    profiles: [nzb]
+    restart: unless-stopped
+    environment:
+      PUID: ${MM_UID:-99}
+      PGID: ${MM_GID:-100}
+      UMASK: "002"
+    volumes:
+      - ${MM_STATE}/sabnzbd:/config
+      - ${MM_DOWNLOADS}:/downloads
+    ports: ["${MM_SAB_PORT:-8096}:8080"]
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    profiles: [torrent]
+    restart: unless-stopped
+    environment:
+      PUID: ${MM_UID:-99}
+      PGID: ${MM_GID:-100}
+      UMASK: "002"
+      WEBUI_PORT: 8080
+    volumes:
+      - ${MM_STATE}/qbittorrent:/config
+      - ${MM_DOWNLOADS}:/downloads
+    ports: ["${MM_QBIT_PORT:-8097}:8080"]
+secrets:
+  db_admin_password:
+    file: ${MM_STATE}/secrets/db_admin_password
+  app_db_password:
+    file: ${MM_STATE}/secrets/app_db_password

@@ -63,3 +63,17 @@ def test_bootstrap_requires_code_and_never_overwrites(settings,monkeypatch):
  assert (settings/'config.toml').stat().st_mode&0o777==0o600
  assert 'a sufficiently long password' not in (settings/'config.toml').read_text()
  assert c.post('/setup/complete',json=body).status_code==409
+
+def test_hot_settings_apply_without_restart_and_cold_stays_pending(settings):
+ result=cfg.stage_settings({'metadata.tmdb.default_language':'de'},apply_live=True)
+ assert result['restart_required'] is False
+ assert MediaManagerConfig().metadata.tmdb.default_language=='de'
+ assert not cfg.settings_file(True).exists()
+ result=cfg.stage_settings({'indexers.prowlarr.enabled':True,'database.host':'pending-db'},apply_live=True)
+ assert MediaManagerConfig().indexers.prowlarr.enabled
+ assert MediaManagerConfig().database.host=='localhost'
+ assert result['restart_required']
+ result=cfg.stage_settings({'indexers.prowlarr.enabled':False},apply_live=True)
+ assert not MediaManagerConfig().indexers.prowlarr.enabled
+ assert result['restart_required']
+ cfg.activate_settings();assert MediaManagerConfig().database.host=='pending-db'

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { ImageOff } from 'lucide-svelte';
@@ -22,7 +23,7 @@
 			{/if}
 		</Card.Title>
 		<Card.Description class="truncate">
-			{result.overview !== '' ? result.overview : 'No overview available'}
+			{result.overview !== '' ? result.overview : mmT($mmLocale, "No overview available")}
 		</Card.Description>
 	</Card.Header>
 	<Card.Content class="flex flex-1 items-center justify-center">
@@ -40,7 +41,7 @@
 	</Card.Content>
 	<Card.Footer class="flex flex-col items-start gap-2 rounded-b-lg border-t bg-card p-4">
 		<Button class="w-full font-semibold" onclick={() => action()}>
-			Import using this metadata
+			{mmT($mmLocale, "Import using this metadata" )}
 		</Button>
 		<div class="flex w-full items-center gap-2">
 			{#if result.vote_average != null}
@@ -50,7 +51,7 @@
 							d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.561-.955L10 0l2.951 5.955 6.561.955-4.756 4.635 1.122 6.545z"
 						/></svg
 					>
-					Rating: {Math.round(result.vote_average)}/10
+					{mmT($mmLocale, "Rating:" )} {Math.round(result.vote_average)}/10
 				</span>
 			{/if}
 		</div>

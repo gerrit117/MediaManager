@@ -1,5 +1,7 @@
 <script lang="ts">
 	import '../app.css';
+	import {locale} from '$lib/i18n';
+	$effect(()=>{document.documentElement.lang=$locale;});
 	import { ModeWatcher } from 'mode-watcher';
 	import { Toaster } from '$lib/components/ui/sonner/index.js';
 	import { resolve } from '$app/paths';

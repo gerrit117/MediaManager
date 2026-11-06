@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import ArrowRight from '@lucide/svelte/icons/arrow-right';
 	import type { WithoutChildren } from 'bits-ui';
 	import { getEmblaContext } from './context.js';
@@ -33,5 +34,5 @@
 	{...restProps}
 >
 	<ArrowRight />
-	<span class="sr-only">Next slide</span>
+	<span class="sr-only">{mmT($mmLocale, "Next slide" )}</span>
 </Button>

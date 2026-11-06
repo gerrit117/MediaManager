@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { getFullyQualifiedMediaName, getTorrentQualityString } from '$lib/utils.js';
 	import CheckmarkX from '$lib/components/checkmark-x.svelte';
 	import type { components } from '$lib/api/api';
@@ -106,19 +107,19 @@
 </script>
 
 <Table.Root>
-	<Table.Caption>A list of all requests.</Table.Caption>
+	<Table.Caption>{mmT($mmLocale, "A list of all requests." )}</Table.Caption>
 	<Table.Header>
 		<Table.Row>
 			<Table.Head>{isShow ? 'Show' : 'Movie'}</Table.Head>
 			{#if isShow}
-				<Table.Head>Season</Table.Head>
+				<Table.Head>{mmT($mmLocale, "Season" )}</Table.Head>
 			{/if}
-			<Table.Head>Minimum Quality</Table.Head>
-			<Table.Head>Wanted Quality</Table.Head>
-			<Table.Head>Requested by</Table.Head>
-			<Table.Head>Approved</Table.Head>
-			<Table.Head>Approved by</Table.Head>
-			<Table.Head>Actions</Table.Head>
+			<Table.Head>{mmT($mmLocale, "Minimum Quality" )}</Table.Head>
+			<Table.Head>{mmT($mmLocale, "Wanted Quality" )}</Table.Head>
+			<Table.Head>{mmT($mmLocale, "Requested by" )}</Table.Head>
+			<Table.Head>{mmT($mmLocale, "Approved" )}</Table.Head>
+			<Table.Head>{mmT($mmLocale, "Approved by" )}</Table.Head>
+			<Table.Head>{mmT($mmLocale, "Actions" )}</Table.Head>
 		</Table.Row>
 	</Table.Header>
 	<Table.Body>
@@ -192,7 +193,7 @@
 											})
 										)}
 								>
-									Download manually
+									{mmT($mmLocale, "Download manually" )}
 								</Button>
 							{:else}
 								<Button
@@ -206,13 +207,13 @@
 											})
 										)}
 								>
-									Download manually
+									{mmT($mmLocale, "Download manually" )}
 								</Button>
 							{/if}
 						{/if}
 						{#if user().is_superuser || user().id === request.requested_by?.id}
 							<Button variant="destructive" size="sm" onclick={() => deleteRequest(request.id!)}
-								>Delete
+								>{mmT($mmLocale, "Delete" )}
 							</Button>
 						{/if}
 					</Table.Cell>
@@ -220,7 +221,7 @@
 			{/if}
 		{:else}
 			<Table.Row>
-				<Table.Cell colspan={8} class="text-center">There are currently no requests.</Table.Cell>
+				<Table.Cell colspan={8} class="text-center">{mmT($mmLocale, "There are currently no requests." )}</Table.Cell>
 			</Table.Row>
 		{/each}
 	</Table.Body>

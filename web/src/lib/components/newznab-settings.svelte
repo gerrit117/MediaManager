@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { onMount } from 'svelte';
 	import { env } from '$env/dynamic/public';
 	import * as Card from '$lib/components/ui/card/index.js';
@@ -71,10 +72,9 @@
 
 <Card.Root id="newznab">
 	<Card.Header>
-		<Card.Title>Treasure Maps · Direct indexer</Card.Title>
+		<Card.Title>{mmT($mmLocale, "Integrierter Indexer · Newznab (NZB)" )}</Card.Title>
 		<Card.Description>
-			Connect directly through the Newznab API. Prowlarr and Jackett are optional. Choose movie and
-			TV categories below after saving the connection.
+			{mmT($mmLocale, "Connect directly through the Newznab API. Prowlarr and Jackett are optional. Choose movie and TV categories below after saving the connection." )}
 		</Card.Description>
 	</Card.Header>
 	<Card.Content>
@@ -87,11 +87,11 @@
 		>
 			<label class="flex items-center gap-3">
 				<input type="checkbox" bind:checked={enabled} disabled={busy} />
-				<span>Enable direct searches</span>
+				<span>{mmT($mmLocale, "Enable direct searches" )}</span>
 			</label>
 			<div class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
 				<label class="flex min-w-0 flex-col gap-2">
-					<span>API URL</span>
+					<span>{mmT($mmLocale, "API URL" )}</span>
 					<input
 						type="url"
 						required
@@ -101,7 +101,7 @@
 					/>
 				</label>
 				<label class="flex min-w-0 flex-col gap-2">
-					<span>API key</span>
+					<span>{mmT($mmLocale, "API key" )}</span>
 					<input
 						type="password"
 						bind:value={apiKey}
@@ -114,22 +114,22 @@
 			</div>
 			<p class="text-sm text-muted-foreground">
 				{hasKey ? 'An API key is stored securely on the server.' : 'No API key is stored yet.'}
-				The connection test verifies your key with a search and starts no download.
+				{mmT($mmLocale, "The connection test verifies your key with a search and starts no download." )}
 			</p>
 			<div class="flex flex-wrap gap-3">
 				<button
 					type="button"
 					onclick={() => submit(true)}
 					disabled={busy}
-					class="rounded-md border px-4 py-2">Test connection</button
+					class="rounded-md border px-4 py-2">{mmT($mmLocale, "Test connection" )}</button
 				>
 				<button
 					type="submit"
 					disabled={busy}
-					class="rounded-md bg-primary px-4 py-2 text-primary-foreground">Save connection</button
+					class="rounded-md bg-primary px-4 py-2 text-primary-foreground">{mmT($mmLocale, "Save connection" )}</button
 				>
 			</div>
-			<p role="status">{message}</p>
+			<p role="status">{mmT($mmLocale, message)}</p>
 			{#if error}<p role="alert" class="text-destructive">{error}</p>{/if}
 		</form>
 	</Card.Content>

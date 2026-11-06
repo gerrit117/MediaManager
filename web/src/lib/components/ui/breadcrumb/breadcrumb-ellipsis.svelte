@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import Ellipsis from '@lucide/svelte/icons/ellipsis';
 	import type { WithElementRef, WithoutChildren } from 'bits-ui';
 	import type { HTMLAttributes } from 'svelte/elements';
@@ -19,5 +20,5 @@
 	{...restProps}
 >
 	<Ellipsis class="size-4" />
-	<span class="sr-only">More</span>
+	<span class="sr-only">{mmT($mmLocale, "More" )}</span>
 </span>

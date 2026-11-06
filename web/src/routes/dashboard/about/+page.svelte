@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
@@ -8,7 +9,7 @@
 </script>
 
 <svelte:head>
-	<title>About - MediaManager</title>
+	<title>{mmT($mmLocale, "About - MediaManager" )}</title>
 	<meta
 		content="About MediaManager - Learn more about your smart PVR application"
 		name="description"
@@ -26,11 +27,11 @@
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard', {})}>Home</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard', {})}>{mmT($mmLocale, "Home" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Page>About</Breadcrumb.Page>
+					<Breadcrumb.Page>{mmT($mmLocale, "About" )}</Breadcrumb.Page>
 				</Breadcrumb.Item>
 			</Breadcrumb.List>
 		</Breadcrumb.Root>
@@ -39,32 +40,30 @@
 
 <main class="mx-auto flex w-full flex-1 flex-col items-center gap-4 p-4 md:max-w-[80em]">
 	<img alt="Media Manager Logo" class="mb-4 h-24 w-24" src={logo} />
-	<h1 class="mb-2 text-4xl font-bold">About Media Manager</h1>
+	<h1 class="mb-2 text-4xl font-bold">{mmT($mmLocale, "About Media Manager" )}</h1>
 	<p class="mt-10 mb-6 max-w-2xl text-center text-lg">
-		<strong>Media Manager</strong> is an all-in-one solution for organizing and building your media library.
-		Built for simplicity and modernity, it helps you keep track of your favorite shows and movies and
-		explore trending content—all in one place.
+		<strong>Media Manager</strong> {mmT($mmLocale, "is an all-in-one solution for organizing and building your media library. Built for simplicity and modernity, it helps you keep track of your favorite shows and movies and explore trending content—all in one place." )}
 	</p>
 	<p class="mb-2 text-sm text-muted-foreground">
-		Version: {PUBLIC_VERSION}
+		{mmT($mmLocale, "Version:" )} {PUBLIC_VERSION}
 	</p>
 	<h2
 		class="mt-10 scroll-m-20 pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
 	>
-		Made with ❤️ by Maximilian Dorninger
+		{mmT($mmLocale, "Made with ❤️ by Maximilian Dorninger" )}
 	</h2>
 	<p class="flex flex-wrap items-center justify-center gap-4">
 		<iframe
 			height="225"
 			src="https://github.com/sponsors/maxdorninger/card"
 			style="border: 0;"
-			title="Sponsor maxdorninger"
+			title={mmT($mmLocale, "Sponsor maxdorninger")}
 			width="600"
 		></iframe>
 	</p>
 
 	<h2 class="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
-		Checkout the awesome sponsors of MediaManager ❤️
+		{mmT($mmLocale, "Checkout the awesome sponsors of MediaManager ❤️" )}
 	</h2>
 	<div class="flex flex-wrap items-center justify-center gap-4">
 		<a href="https://fosstodon.org/@aljazmerzen"
@@ -134,7 +133,7 @@
 	<h2
 		class="mt-24 scroll-m-20 pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
 	>
-		Metadata sources of MediaManager
+		{mmT($mmLocale, "Metadata sources of MediaManager" )}
 	</h2>
 
 	<div class="my-6 mb-6 flex items-center gap-2 text-sm text-muted-foreground sm:w-1/2 lg:w-1/3">
@@ -145,7 +144,7 @@
 				src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg"
 			/>
 			<span
-				>Metadata provided by TMDB. Please consider adding missing information or subscribing.</span
+				>{mmT($mmLocale, "Metadata provided by TMDB. Please consider adding missing information or subscribing." )}</span
 			>
 		</a>
 	</div>
@@ -157,7 +156,7 @@
 				src="https://www.thetvdb.com/images/attribution/logo2.png"
 			/>
 			<span
-				>Metadata provided by TheTVDB. Please consider adding missing information or subscribing.</span
+				>{mmT($mmLocale, "Metadata provided by TheTVDB. Please consider adding missing information or subscribing." )}</span
 			>
 		</a>
 	</div>

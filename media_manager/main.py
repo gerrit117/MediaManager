@@ -66,6 +66,9 @@ FRONTEND_FOLLOW_SYMLINKS = os.getenv("FRONTEND_FOLLOW_SYMLINKS", "").lower() == 
 
 log.info("Hello World!")
 app = FastAPI(root_path=BASE_PATH)
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from media_manager.api_language import http_error
+app.add_exception_handler(StarletteHTTPException,http_error)
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 origins = config.misc.cors_urls
 log.info(f"CORS URLs activated for following origins: {origins}")

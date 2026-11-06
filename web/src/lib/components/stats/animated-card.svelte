@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import Card from '$lib/components/stats/card.svelte';
 	import { animate } from 'animejs';
 	import { onMount } from 'svelte';
@@ -28,5 +29,5 @@
 </script>
 
 <Card {title} {footer}>
-	<span bind:this={element}>{numberString ?? 'Error'}</span>
+	<span bind:this={element}>{numberString ?? mmT($mmLocale, "Error")}</span>
 </Card>

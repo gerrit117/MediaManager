@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import { saveDirectoryPreview } from '$lib/utils.js';
@@ -17,10 +18,9 @@
 
 {#snippet filePathPreview()}
 	<p class="text-sm text-muted-foreground">
-		This is necessary to differentiate between versions of the same movie or show, for example a
-		1080p and a 4K version.
+		{mmT($mmLocale, "This is necessary to differentiate between versions of the same movie or show, for example a 1080p and a 4K version." )}
 	</p>
-	<Label for="file-suffix-display">The files will be saved in the following directory:</Label>
+	<Label for="file-suffix-display">{mmT($mmLocale, "The files will be saved in the following directory:" )}</Label>
 	<p class="text-sm text-muted-foreground" id="file-suffix-display">
 		{saveDirectoryPreview(media, filePathSuffix)}
 	</p>
@@ -28,16 +28,16 @@
 
 <Tabs.Root value="basic">
 	<Tabs.List>
-		<Tabs.Trigger value="basic">Standard Mode</Tabs.Trigger>
-		<Tabs.Trigger value="advanced">Advanced Mode</Tabs.Trigger>
+		<Tabs.Trigger value="basic">{mmT($mmLocale, "Standard Mode" )}</Tabs.Trigger>
+		<Tabs.Trigger value="advanced">{mmT($mmLocale, "Advanced Mode" )}</Tabs.Trigger>
 	</Tabs.List>
 	<Tabs.Content value="basic">
 		<div class="grid w-full items-center gap-1.5">
-			<Label for="file-suffix">Filepath suffix</Label>
+			<Label for="file-suffix">{mmT($mmLocale, "Filepath suffix" )}</Label>
 			<Select.Root bind:value={filePathSuffix} type="single">
 				<Select.Trigger class="w-[180px]">{filePathSuffix}</Select.Trigger>
 				<Select.Content>
-					<Select.Item value="">None</Select.Item>
+					<Select.Item value="">{mmT($mmLocale, "None" )}</Select.Item>
 					<Select.Item value="2160P">2160p</Select.Item>
 					<Select.Item value="1080P">1080p</Select.Item>
 					<Select.Item value="720P">720p</Select.Item>
@@ -49,7 +49,7 @@
 		</div>
 	</Tabs.Content>
 	<Tabs.Content value="advanced">
-		<Label for="file-suffix">Filepath suffix</Label>
+		<Label for="file-suffix">{mmT($mmLocale, "Filepath suffix" )}</Label>
 		<Input
 			type="text"
 			class="max-w-sm"

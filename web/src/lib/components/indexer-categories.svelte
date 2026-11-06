@@ -1,8 +1,10 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { onMount } from 'svelte';
 	import { env } from '$env/dynamic/public';
 	import * as Card from '$lib/components/ui/card/index.js';
 
+	let {providerFilter}:{providerFilter?:string}=$props();
 	type Indexer = {
 		provider: string;
 		protocol?: string;
@@ -64,26 +66,25 @@
 
 <Card.Root id="indexer-categories">
 	<Card.Header>
-		<Card.Title>Indexer categories</Card.Title>
+		<Card.Title>{mmT($mmLocale, "Indexer categories" )}</Card.Title>
 		<Card.Description>
-			Choose movie and TV categories from each indexer's advertised categories. An empty selection
-			keeps the provider's default search behavior.
+			{mmT($mmLocale, "Choose movie and TV categories from each indexer's advertised categories. An empty selection keeps the provider's default search behavior." )}
 		</Card.Description>
 	</Card.Header>
 	<Card.Content class="space-y-5">
 		<button type="button" onclick={load} disabled={busy} class="rounded-md border px-4 py-2">
-			Refresh categories
+			{mmT($mmLocale, "Refresh categories" )}
 		</button>
-		<p role="status">{message}</p>
-		{#each indexers as indexer (`${indexer.provider}:${indexer.indexer_id}`)}
+		<p role="status">{mmT($mmLocale, message)}</p>
+		{#each indexers.filter(i=>!providerFilter || i.provider===providerFilter) as indexer (`${indexer.provider}:${indexer.indexer_id}`)}
 			<section class="space-y-3 rounded-lg border p-4">
 				<div class="flex flex-wrap items-center justify-between gap-2"><h3 class="font-semibold">{indexer.name} · {indexer.provider}</h3><span class="rounded-full border px-3 py-1 text-sm">{indexer.protocol==='usenet' || indexer.provider==='newznab' ? 'Usenet / NZB' : indexer.protocol==='torrent' || indexer.provider==='jackett' ? 'Torrent' : 'NZB / Torrent'}</span></div>
 				{#if indexer.error}
-					<p role="alert">{indexer.error} Saved selections are retained.</p>
+					<p role="alert">{indexer.error} {mmT($mmLocale, "Saved selections are retained." )}</p>
 				{:else}
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<label class="flex min-w-0 flex-col gap-2">
-							<span>Movie categories</span>
+							<span>{mmT($mmLocale, "Movie categories" )}</span>
 							<select
 								multiple
 								size="8"
@@ -97,7 +98,7 @@
 							</select>
 						</label>
 						<label class="flex min-w-0 flex-col gap-2">
-							<span>TV categories</span>
+							<span>{mmT($mmLocale, "TV categories" )}</span>
 							<select
 								multiple
 								size="8"
@@ -115,7 +116,7 @@
 						type="button"
 						onclick={() => save(indexer)}
 						disabled={busy}
-						class="rounded-md border px-4 py-2">Save categories</button
+						class="rounded-md border px-4 py-2">{mmT($mmLocale, "Save categories" )}</button
 					>
 				{/if}
 			</section>

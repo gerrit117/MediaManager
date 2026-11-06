@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
@@ -92,16 +93,16 @@
 				role="combobox"
 				aria-expanded={open}
 			>
-				Select Library
+				{mmT($mmLocale, "Select Library" )}
 				<ChevronsUpDownIcon class="opacity-50" />
 			</Button>
 		{/snippet}
 	</Popover.Trigger>
 	<Popover.Content class="w-[200px] p-0">
 		<Command.Root>
-			<Command.Input placeholder="Search library..." />
+			<Command.Input placeholder={mmT($mmLocale, "Search library...")} />
 			<Command.List>
-				<Command.Empty>No library found.</Command.Empty>
+				<Command.Empty>{mmT($mmLocale, "No library found." )}</Command.Empty>
 				<Command.Group value="libraries">
 					{#each libraries as item (item.name)}
 						<Command.Item

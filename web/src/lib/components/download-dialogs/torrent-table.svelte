@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { ArrowDown, ArrowUp, LoaderCircle } from 'lucide-svelte';
 	import * as Table from '$lib/components/ui/table';
 	import { type Snippet } from 'svelte';
@@ -48,36 +49,36 @@
 	{#await torrentsPromise}
 		<div class="flex w-full max-w-sm items-center space-x-2">
 			<LoaderCircle class="animate-spin" />
-			<p>Releases werden geladen …</p>
+			<p>{mmT($mmLocale, "Releases werden geladen …" )}</p>
 		</div>
 	{:then data}
-		<h3 class="mb-2 text-lg font-semibold">Gefundene Releases:</h3>
+		<h3 class="mb-2 text-lg font-semibold">{mmT($mmLocale, "Gefundene Releases:" )}</h3>
 		{#if data?.length}
    {@const options = availableFacets(data)}
-   <div class="mb-4 space-y-3 rounded-lg border p-3" aria-label="Release-Schnellfilter">
+   <div class="mb-4 space-y-3 rounded-lg border p-3" aria-label={mmT($mmLocale, "Release-Schnellfilter")}>
     {#each Object.keys(options) as key}
      {@const group = key as keyof Facets}
      {#if options[group].length}
-      <div class="flex flex-wrap items-center gap-2" role="group" aria-label={facetLabels[group]}>
-       <span class="min-w-24 text-sm font-semibold">{facetLabels[group]}</span>
+      <div class="flex flex-wrap items-center gap-2" role="group" aria-label={mmT($mmLocale, facetLabels[group])}>
+       <span class="min-w-24 text-sm font-semibold">{mmT($mmLocale, facetLabels[group])}</span>
        {#each options[group] as tag}
-        <button type="button" aria-pressed={selected[group].includes(tag)} class="rounded-full border px-3 py-1.5 text-sm transition-colors aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground" onclick={() => toggleFilter(group, tag)}>{tag}</button>
+        <button type="button" aria-pressed={selected[group].includes(tag)} class="rounded-full border px-3 py-1.5 text-sm transition-colors aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground" onclick={() => toggleFilter(group, tag)}>{mmT($mmLocale,tag)}</button>
        {/each}
       </div>
      {/if}
     {/each}
     <div class="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
-     <span aria-live="polite">{data.filter((row: any) => matchesFacets(row, selected)).length} von {data.length} Releases</span>
-     <button type="button" class="underline" onclick={() => selected = emptyFacets()}>Filter zurücksetzen</button>
+     <span aria-live="polite">{data.filter((row: any) => matchesFacets(row, selected)).length} {mmT($mmLocale,"of")} {data.length} {mmT($mmLocale, "Releases" )}</span>
+     <button type="button" class="underline" onclick={() => selected = emptyFacets()}>{mmT($mmLocale, "Filter zurücksetzen" )}</button>
     </div>
-    <p class="text-xs text-muted-foreground">Tags aus dem Release-Namen; keine verifizierten Dateiinformationen. Innerhalb einer Gruppe gilt „oder“, zwischen Gruppen „und“.</p>
+    <p class="text-xs text-muted-foreground">{mmT($mmLocale, "Tags aus dem Release-Namen; keine verifizierten Dateiinformationen. Innerhalb einer Gruppe gilt „oder“, zwischen Gruppen „und“." )}</p>
    </div>
   {/if}
   <div class="max-w-full overflow-auto rounded-md border p-2">
 			<Table.Root>
 				<Table.Header>
 					<Table.Row>
-						<Table.Head>Title</Table.Head>
+						<Table.Head>{mmT($mmLocale, "Title" )}</Table.Head>
 						{#each columns as column (column.id)}
 							<Table.Head onclick={() => toggleSort(column.id)} class="cursor-pointer">
 								<div class="inline-flex items-center">
@@ -93,7 +94,7 @@
 								</div>
 							</Table.Head>
 						{/each}
-						<Table.Head class="text-right">Actions</Table.Head>
+						<Table.Head class="text-right">{mmT($mmLocale, "Actions" )}</Table.Head>
 					</Table.Row>
 				</Table.Header>
 				<Table.Body>
@@ -105,13 +106,13 @@
 							</Table.Row>
 						{:else}
 							<Table.Cell colspan={columns.length + 2}>
-								<div class="font-light text-center w-full">Keine passenden Releases gefunden.</div>
+								<div class="font-light text-center w-full">{mmT($mmLocale, "Keine passenden Releases gefunden." )}</div>
 							</Table.Cell>
 						{/each}
 					{:else}
 						<Table.Cell colspan={columns.length + 2}>
 							<div class="w-full text-center font-light">
-								Start searching by clicking the search button!
+								{mmT($mmLocale, "Start searching by clicking the search button!" )}
 							</div>
 						</Table.Cell>
 					{/if}
@@ -119,7 +120,7 @@
 			</Table.Root>
 		</div>
 	{:catch error}
-		<div class="w-full text-center text-red-500">Releases konnten nicht geladen werden.</div>
-		<div class="w-full text-center text-red-500">Error: {error.message}</div>
+		<div class="w-full text-center text-red-500">{mmT($mmLocale, "Releases konnten nicht geladen werden." )}</div>
+		<div class="w-full text-center text-red-500">{mmT($mmLocale, "Error:" )} {error.message}</div>
 	{/await}
 </div>

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
+	import RequestQuota from '$lib/components/request-quota.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Label } from '$lib/components/ui/label';
@@ -34,6 +36,7 @@
 		isSubmittingRequest = true;
 		submitRequestError = null;
 
+		const completed: string[] = [];
 		for (const id of selectedSeasonsIds) {
 			const { response, error } = await client.POST('/api/v1/tv/seasons/requests', {
 				body: {
@@ -44,10 +47,13 @@
 			});
 
 			if (!response.ok) {
-				toast.error('Failed to submit request: ' + error);
-				submitRequestError = `Failed to submit request for season ID ${id}: ${error}`;
+				submitRequestError = (error as any)?.detail ?? 'Anfrage fehlgeschlagen';
+				toast.error(submitRequestError!);
+				break;
 			}
+			completed.push(id);
 		}
+		selectedSeasonsIds = selectedSeasonsIds.filter(id => !completed.includes(id));
 
 		if (!submitRequestError) {
 			dialogOpen = false;
@@ -69,19 +75,19 @@
 			dialogOpen = true;
 		}}
 	>
-		Request Season
+		{mmT($mmLocale, "Request Season" )}
 	</Dialog.Trigger>
 	<Dialog.Content class="max-h-[90vh] w-fit min-w-[clamp(300px,50vw,600px)] overflow-y-auto">
 		<Dialog.Header>
-			<Dialog.Title>Request a Season for {getFullyQualifiedMediaName(show)}</Dialog.Title>
+			<Dialog.Title>{mmT($mmLocale, "Request a Season for" )} {getFullyQualifiedMediaName(show)}</Dialog.Title>
 			<Dialog.Description>
-				Select a season and desired qualities to submit a request.
+				{mmT($mmLocale, "Select a season and desired qualities to submit a request." )}
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="grid gap-4 py-4">
 			<!-- Season Select -->
 			<div class="grid grid-cols-[1fr_3fr] items-center gap-4 md:grid-cols-[100px_1fr]">
-				<Label class="text-right" for="season">Season</Label>
+				<Label class="text-right" for="season">{mmT($mmLocale, "Season" )}</Label>
 				<Select.Root bind:value={selectedSeasonsIds} type="multiple">
 					<Select.Trigger class="w-full" id="season">
 						{#each selectedSeasonsIds as seasonId (seasonId)}
@@ -89,13 +95,13 @@
 								Season {show.seasons.find((season) => season.id === seasonId)?.number},&nbsp;
 							{/if}
 						{:else}
-							Select one or more seasons
+							{mmT($mmLocale, "Select one or more seasons" )}
 						{/each}
 					</Select.Trigger>
 					<Select.Content>
 						{#each show.seasons as season (season.id)}
 							<Select.Item value={season.id || ''}>
-								Season {season.number}{season.name ? `: ${season.name}` : ''}
+								{mmT($mmLocale, "Season" )} {season.number}{season.name ? `: ${season.name}` : ''}
 							</Select.Item>
 						{/each}
 					</Select.Content>
@@ -104,7 +110,7 @@
 
 			<!-- Min Quality Select -->
 			<div class="grid grid-cols-[1fr_3fr] items-center gap-4 md:grid-cols-[100px_1fr]">
-				<Label class="text-right" for="min-quality">Min Quality</Label>
+				<Label class="text-right" for="min-quality">{mmT($mmLocale, "Min Quality" )}</Label>
 				<Select.Root bind:value={minQuality} type="single">
 					<Select.Trigger class="w-full" id="min-quality">
 						{minQuality ? getTorrentQualityString(parseInt(minQuality)) : 'Select Minimum Quality'}
@@ -119,7 +125,7 @@
 
 			<!-- Wanted Quality Select -->
 			<div class="grid grid-cols-[1fr_3fr] items-center gap-4 md:grid-cols-[100px_1fr]">
-				<Label class="text-right" for="wanted-quality">Wanted Quality</Label>
+				<Label class="text-right" for="wanted-quality">{mmT($mmLocale, "Wanted Quality" )}</Label>
 				<Select.Root bind:value={wantedQuality} type="single">
 					<Select.Trigger class="w-full" id="wanted-quality">
 						{wantedQuality
@@ -135,19 +141,20 @@
 			</div>
 
 			{#if submitRequestError}
-				<p class="col-span-full text-center text-sm text-red-500">{submitRequestError}</p>
+				<p class="col-span-full text-center text-sm text-red-500">{mmT($mmLocale, submitRequestError)}</p>
 			{/if}
 		</div>
+		<RequestQuota />
 		<Dialog.Footer>
 			<Button disabled={isSubmittingRequest} onclick={() => (dialogOpen = false)} variant="outline"
-				>Cancel
+				>{mmT($mmLocale, "Cancel" )}
 			</Button>
 			<Button disabled={isFormInvalid || isSubmittingRequest} onclick={handleRequestSeason}>
 				{#if isSubmittingRequest}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
-					Submitting...
+					{mmT($mmLocale, "Submitting..." )}
 				{:else}
-					Submit Request
+					{mmT($mmLocale, "Submit Request" )}
 				{/if}
 			</Button>
 		</Dialog.Footer>

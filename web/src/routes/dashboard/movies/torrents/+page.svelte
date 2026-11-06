@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
@@ -11,7 +12,7 @@
 </script>
 
 <svelte:head>
-	<title>Movie Downloads - MediaManager</title>
+	<title>{mmT($mmLocale, "Movie Downloads - MediaManager" )}</title>
 	<meta content="View and manage movie downloads in MediaManager" name="description" />
 </svelte:head>
 
@@ -26,15 +27,15 @@
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard', {})}>Home</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard', {})}>{mmT($mmLocale, "Home" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard/movies', {})}>Movies</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard/movies', {})}>{mmT($mmLocale, "Movies" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Page>Movie Downloads</Breadcrumb.Page>
+					<Breadcrumb.Page>{mmT($mmLocale, "Movie Downloads" )}</Breadcrumb.Page>
 				</Breadcrumb.Item>
 			</Breadcrumb.List>
 		</Breadcrumb.Root>
@@ -43,7 +44,7 @@
 
 <main class="mx-auto flex min-w-0 w-full flex-1 flex-col gap-4 p-4 md:max-w-[80em]">
 	<h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
-		Movie Downloads
+		{mmT($mmLocale, "Movie Downloads" )}
 	</h1>
 	<Accordion.Root class="w-full" type="single">
 		{#each page.data.torrents as movie (movie.movie_id)}
@@ -60,7 +61,7 @@
 				</Card.Root>
 			</div>
 		{:else}
-			<div class="col-span-full text-center text-muted-foreground">No Downloads added yet.</div>
+			<div class="col-span-full text-center text-muted-foreground">{mmT($mmLocale, "No Downloads added yet." )}</div>
 		{/each}
 	</Accordion.Root>
 </main>

@@ -171,6 +171,7 @@ def get_torrent_hash(torrent: IndexerQueryResult) -> str:
                 session=requests.Session(),
                 timeout=MediaManagerConfig().indexers.prowlarr.timeout_seconds,
             )
+            torrent.download_url = final_url
             return str(libtorrent.parse_magnet_uri(final_url).info_hash)
         except Exception:
             log.exception("Failed to download torrent file")

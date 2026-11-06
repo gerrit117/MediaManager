@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { ImageOff, LoaderCircle } from 'lucide-svelte';
@@ -63,7 +64,7 @@
 			{/if}
 		</Card.Title>
 		<Card.Description class="truncate"
-			>{result.overview !== '' ? result.overview : 'No overview available'}</Card.Description
+			>{result.overview !== '' ? result.overview : mmT($mmLocale, "No overview available")}</Card.Description
 		>
 	</Card.Header>
 	<Card.Content class="flex flex-1 items-center justify-center">
@@ -95,7 +96,7 @@
 			<Button class="w-full font-semibold" disabled={loading} onclick={() => addMedia()}>
 				{#if loading}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
-					<span class="animate-pulse">Loading...</span>
+					<span class="animate-pulse">{mmT($mmLocale, "Loading..." )}</span>
 				{:else}
 					{`Add ${isShow ? 'Show' : 'Movie'}`}
 				{/if}
@@ -109,12 +110,12 @@
 							d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.561-.955L10 0l2.951 5.955 6.561.955-4.756 4.635 1.122 6.545z"
 						/></svg
 					>
-					Rating: {Math.round(result.vote_average)}/10
+					{mmT($mmLocale, "Rating:" )} {Math.round(result.vote_average)}/10
 				</span>
 			{/if}
 		</div>
 		{#if errorMessage}
-			<p class="w-full rounded bg-red-50 px-2 py-1 text-xs text-red-500">{errorMessage}</p>
+			<p class="w-full rounded bg-red-50 px-2 py-1 text-xs text-red-500">{mmT($mmLocale, errorMessage)}</p>
 		{/if}
 	</Card.Footer>
 </Card.Root>

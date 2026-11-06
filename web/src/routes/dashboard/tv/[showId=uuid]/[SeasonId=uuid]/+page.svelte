@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { page } from '$app/state';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -17,11 +18,11 @@
 </script>
 
 <svelte:head>
-	<title>{getFullyQualifiedMediaName(show)} - Season {season.number} - MediaManager</title>
+	<title>{getFullyQualifiedMediaName(show)} {mmT($mmLocale, "- Season" )} {season.number} - MediaManager</title>
 	<meta
 		content="View episodes and manage downloads for {getFullyQualifiedMediaName(
 			show
-		)} Season {season.number} in MediaManager"
+		)} {mmT($mmLocale, "Season" )} {season.number} in MediaManager"
 		name="description"
 	/>
 </svelte:head>
@@ -37,11 +38,11 @@
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard', {})}>Home</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard', {})}>{mmT($mmLocale, "Home" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard/tv', {})}>Shows</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard/tv', {})}>{mmT($mmLocale, "Shows" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
@@ -52,14 +53,14 @@
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Page>Season {season.number}</Breadcrumb.Page>
+					<Breadcrumb.Page>{mmT($mmLocale, "Season" )} {season.number}</Breadcrumb.Page>
 				</Breadcrumb.Item>
 			</Breadcrumb.List>
 		</Breadcrumb.Root>
 	</div>
 </header>
 <h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
-	{getFullyQualifiedMediaName(show)} Season {season.number}
+	{getFullyQualifiedMediaName(show)} {mmT($mmLocale, "Season" )} {season.number}
 </h1>
 <main class="mx-auto flex w-full flex-1 flex-col gap-4 p-4 md:max-w-[80em]">
 	<div class="flex flex-col gap-4 md:flex-row md:items-stretch">
@@ -69,7 +70,7 @@
 		<div class="h-full w-full flex-auto rounded-xl md:w-1/4">
 			<Card.Root class="h-full w-full">
 				<Card.Header>
-					<Card.Title>Overview</Card.Title>
+					<Card.Title>{mmT($mmLocale, "Overview" )}</Card.Title>
 				</Card.Header>
 				<Card.Content>
 					<p class="leading-7 not-first:mt-6">
@@ -83,21 +84,21 @@
 		>
 			<Card.Root class="h-full w-full">
 				<Card.Header>
-					<Card.Title>Season Details</Card.Title>
+					<Card.Title>{mmT($mmLocale, "Season Details" )}</Card.Title>
 					<Card.Description>
-						A list of all downloaded/downloading versions of this season.
+						{mmT($mmLocale, "A list of all downloaded/downloading versions of this season." )}
 					</Card.Description>
 				</Card.Header>
 				<Card.Content>
 					<Table.Root>
 						<Table.Caption
-							>A list of all downloaded/downloading versions of this season.</Table.Caption
+							>{mmT($mmLocale, "A list of all downloaded/downloading versions of this season." )}</Table.Caption
 						>
 						<Table.Header>
 							<Table.Row>
-								<Table.Head>Quality</Table.Head>
-								<Table.Head>File Path Suffix</Table.Head>
-								<Table.Head>Imported</Table.Head>
+								<Table.Head>{mmT($mmLocale, "Quality" )}</Table.Head>
+								<Table.Head>{mmT($mmLocale, "File Path Suffix" )}</Table.Head>
+								<Table.Head>{mmT($mmLocale, "Imported" )}</Table.Head>
 							</Table.Row>
 						</Table.Header>
 						<Table.Body>
@@ -114,7 +115,7 @@
 									</Table.Cell>
 								</Table.Row>
 							{:else}
-								<span class="font-semibold">You haven't downloaded this season yet.</span>
+								<span class="font-semibold">{mmT($mmLocale, "You haven't downloaded this season yet." )}</span>
 							{/each}
 						</Table.Body>
 					</Table.Root>
@@ -125,19 +126,19 @@
 	<div class="flex-1 rounded-xl">
 		<Card.Root class="w-full">
 			<Card.Header>
-				<Card.Title>Episodes</Card.Title>
+				<Card.Title>{mmT($mmLocale, "Episodes" )}</Card.Title>
 				<Card.Description
-					>A list of all episodes for {getFullyQualifiedMediaName(show)} Season {season.number}
+					>{mmT($mmLocale, "A list of all episodes for" )} {getFullyQualifiedMediaName(show)} {mmT($mmLocale, "Season" )} {season.number}
 					.
 				</Card.Description>
 			</Card.Header>
 			<Card.Content class="w-full overflow-x-auto">
 				<Table.Root>
-					<Table.Caption>A list of all episodes.</Table.Caption>
+					<Table.Caption>{mmT($mmLocale, "A list of all episodes." )}</Table.Caption>
 					<Table.Header>
 						<Table.Row>
-							<Table.Head class="w-[100px]">Number</Table.Head>
-							<Table.Head class="min-w-[50px]">Title</Table.Head>
+							<Table.Head class="w-[100px]">{mmT($mmLocale, "Number" )}</Table.Head>
+							<Table.Head class="min-w-[50px]">{mmT($mmLocale, "Title" )}</Table.Head>
 						</Table.Row>
 					</Table.Header>
 					<Table.Body>

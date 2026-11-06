@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
@@ -51,7 +52,7 @@
 </script>
 
 <svelte:head>
-	<title>Add Movie - MediaManager</title>
+	<title>{mmT($mmLocale, "Add Movie - MediaManager" )}</title>
 	<meta content="Add a new movie to your MediaManager collection" name="description" />
 </svelte:head>
 
@@ -66,15 +67,15 @@
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard', {})}>Home</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard', {})}>{mmT($mmLocale, "Home" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard/movies', {})}>Movies</Breadcrumb.Link>
+					<Breadcrumb.Link href={resolve('/dashboard/movies', {})}>{mmT($mmLocale, "Movies" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Page>Add a Movie</Breadcrumb.Page>
+					<Breadcrumb.Page>{mmT($mmLocale, "Add a Movie" )}</Breadcrumb.Page>
 				</Breadcrumb.Item>
 			</Breadcrumb.List>
 		</Breadcrumb.Root>
@@ -84,14 +85,14 @@
 <main class="flex w-full max-w-[90vw] flex-1 flex-col items-center gap-4 p-4 pt-0">
 	<div class="grid w-full max-w-sm items-center gap-12">
 		<h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
-			Add a Movie
+			{mmT($mmLocale, "Add a Movie" )}
 		</h1>
 		<section>
-			<Label for="search-box">Movie Name</Label>
+			<Label for="search-box">{mmT($mmLocale, "Movie Name" )}</Label>
 			<Input
 				bind:value={searchTerm}
 				id="search-box"
-				placeholder="Movie Name"
+				placeholder={mmT($mmLocale, "Movie Name")}
 				type="text"
 				onkeydown={(e) => {
 					if (e.key === 'Enter' && !isSearching) {
@@ -99,25 +100,25 @@
 					}
 				}}
 			/>
-			<p class="text-sm text-muted-foreground">Search for a Movie to add.</p>
+			<p class="text-sm text-muted-foreground">{mmT($mmLocale, "Search for a Movie to add." )}</p>
 		</section>
 		<section>
 			<Collapsible.Root class="w-full space-y-1">
 				<Collapsible.Trigger>
 					<div class="flex items-center justify-between space-x-4 px-4">
-						<h4 class="text-sm font-semibold">Advanced Settings</h4>
+						<h4 class="text-sm font-semibold">{mmT($mmLocale, "Advanced Settings" )}</h4>
 						<Button class="w-9 p-0" size="sm" variant="ghost">
 							<ChevronDown />
-							<span class="sr-only">Toggle</span>
+							<span class="sr-only">{mmT($mmLocale, "Toggle" )}</span>
 						</Button>
 					</div>
 				</Collapsible.Trigger>
 				<Collapsible.Content class="space-y-1">
-					<Label for="metadata-provider-selector">Choose which Metadata Provider to query.</Label>
+					<Label for="metadata-provider-selector">{mmT($mmLocale, "Choose which Metadata Provider to query." )}</Label>
 					<RadioGroup.Root bind:value={metadataProvider} id="metadata-provider-selector">
 						<div class="flex items-center space-x-2">
 							<RadioGroup.Item id="option-one" value="tmdb" />
-							<Label for="option-one">TMDB (Recommended)</Label>
+							<Label for="option-one">{mmT($mmLocale, "TMDB (Recommended)" )}</Label>
 						</div>
 						<div class="flex items-center space-x-2">
 							<RadioGroup.Item id="option-two" value="tvdb" />
@@ -131,9 +132,9 @@
 			<Button onclick={() => search(searchTerm)} type="submit" disabled={isSearching}>
 				{#if isSearching}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
-					<span class="animate-pulse">Searching...</span>
+					<span class="animate-pulse">{mmT($mmLocale, "Searching..." )}</span>
 				{:else}
-					Search
+					{mmT($mmLocale, "Search" )}
 				{/if}
 			</Button>
 		</section>
@@ -142,7 +143,7 @@
 	<Separator class="my-8" />
 
 	{#if results && results.length === 0}
-		<h3 class="mx-auto">No Movie found.</h3>
+		<h3 class="mx-auto">{mmT($mmLocale, "No Movie found." )}</h3>
 	{:else if results}
 		<div
 			class="grid w-full auto-rows-min gap-4 sm:grid-cols-1

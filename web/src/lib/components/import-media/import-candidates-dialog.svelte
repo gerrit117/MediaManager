@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { toast } from 'svelte-sonner';
@@ -112,9 +113,9 @@
 	</Dialog.Trigger>
 	<Dialog.Content class="max-h-[90vh] w-[calc(100vw-2rem)] max-w-6xl min-w-0 overflow-y-auto">
 		<Dialog.Header>
-			<Dialog.Title>Import unknown {isTv ? 'show' : 'movie'} "{name}"</Dialog.Title>
+			<Dialog.Title>{mmT($mmLocale, "Import unknown" )} {isTv ? 'show' : 'movie'} "{name}"</Dialog.Title>
 			<Dialog.Description
-				>Select the {isTv ? 'show' : 'movie'} that is in this directory to import it!
+				>{mmT($mmLocale, "Select the" )} {isTv ? 'show' : 'movie'} {mmT($mmLocale, "that is in this directory to import it!" )}
 			</Dialog.Description>
 		</Dialog.Header>
 		<div
@@ -125,24 +126,24 @@
 					<SuggestedMediaCard result={candidate} action={() => handleImportMedia(candidate)}
 					></SuggestedMediaCard>
 				{:else}
-					Kein passender Titel gefunden. Du kannst unten manuell suchen.
+					{mmT($mmLocale, "Kein passender Titel gefunden. Du kannst unten manuell suchen." )}
 				{/each}
 			{:else}
 				<Spinner class="size-8"></Spinner>
 			{/if}
 			{#if submitRequestError}
-				<p class="col-span-full text-center text-sm text-red-500">{submitRequestError}</p>
+				<p class="col-span-full text-center text-sm text-red-500">{mmT($mmLocale, submitRequestError)}</p>
 			{/if}
 		</div>
 		<form class="flex min-w-0 flex-col gap-2 border-t pt-4 sm:flex-row" onsubmit={(event) => { event.preventDefault(); void handleManualSearch(); }}>
-			<input aria-label="Titel manuell suchen" class="min-w-0 flex-1 rounded-md border bg-background px-3 py-2" placeholder="Titel manuell suchen" bind:value={searchQuery} />
-			<select aria-label="Metadatenanbieter" class="rounded-md border bg-background px-3 py-2" bind:value={searchProvider}><option value="tmdb">TMDB</option><option value="tvdb">TVDB</option></select>
-			<Button type="submit" disabled={isSearching || isImporting || !searchQuery.trim()}>{isSearching ? 'Sucht …' : 'Titel suchen'}</Button>
+			<input aria-label={mmT($mmLocale, "Titel manuell suchen")} class="min-w-0 flex-1 rounded-md border bg-background px-3 py-2" placeholder={mmT($mmLocale, "Titel manuell suchen")} bind:value={searchQuery} />
+			<select aria-label={mmT($mmLocale, "Metadatenanbieter")} class="rounded-md border bg-background px-3 py-2" bind:value={searchProvider}><option value="tmdb">TMDB</option><option value="tvdb">TVDB</option></select>
+			<Button type="submit" disabled={isSearching || isImporting || !searchQuery.trim()}>{isSearching ? 'Sucht …' : mmT($mmLocale, "Titel suchen")}</Button>
 		</form>
-		{#if searchError}<p role="alert" class="text-sm text-destructive">{searchError}</p>{/if}
+		{#if searchError}<p role="alert" class="text-sm text-destructive">{mmT($mmLocale, searchError)}</p>{/if}
 		<Dialog.Footer>
 			<Button disabled={isImporting} onclick={() => (dialogOpen = false)} variant="outline"
-				>Cancel
+				>{mmT($mmLocale, "Cancel" )}
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>

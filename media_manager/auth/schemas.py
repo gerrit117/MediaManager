@@ -5,7 +5,8 @@ from pydantic import BaseModel
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
-    pass
+    monthly_request_limit: int | None = None
+    auto_approve_requests: bool = False
 
 
 class UserCreate(schemas.BaseUserCreate):

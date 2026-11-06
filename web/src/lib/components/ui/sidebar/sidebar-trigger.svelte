@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { cn } from '$lib/utils.js';
 	import PanelLeft from '@lucide/svelte/icons/panel-left';
@@ -30,5 +31,5 @@
 	{...restProps}
 >
 	<PanelLeft />
-	<span class="sr-only">Toggle Sidebar</span>
+	<span class="sr-only">{mmT($mmLocale, "Toggle Sidebar" )}</span>
 </Button>

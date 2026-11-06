@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import CheckmarkX from '$lib/components/checkmark-x.svelte';
 	import * as Table from '$lib/components/ui/table/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -74,13 +75,13 @@
 </script>
 
 <Table.Root>
-	<Table.Caption>A list of all users.</Table.Caption>
+	<Table.Caption>{mmT($mmLocale, "A list of all users." )}</Table.Caption>
 	<Table.Header>
 		<Table.Row>
-			<Table.Head>Email</Table.Head>
-			<Table.Head>Verified</Table.Head>
-			<Table.Head>Active</Table.Head>
-			<Table.Head>Admin</Table.Head>
+			<Table.Head>{mmT($mmLocale, "Email" )}</Table.Head>
+			<Table.Head>{mmT($mmLocale, "Verified" )}</Table.Head>
+			<Table.Head>{mmT($mmLocale, "Active" )}</Table.Head>
+			<Table.Head>{mmT($mmLocale, "Admin" )}</Table.Head>
 		</Table.Row>
 	</Table.Header>
 	<Table.Body>
@@ -107,7 +108,7 @@
 								dialogOpen = true;
 							}}
 						>
-							Edit
+							{mmT($mmLocale, "Edit" )}
 						</Button>
 						<Button
 							variant="destructive"
@@ -116,7 +117,7 @@
 								deleteDialogOpen = true;
 							}}
 						>
-							Delete
+							{mmT($mmLocale, "Delete" )}
 						</Button>
 					</div>
 				</Table.Cell>
@@ -127,15 +128,15 @@
 <Dialog.Root bind:open={dialogOpen}>
 	<Dialog.Content class="w-full max-w-[600px] rounded-lg p-6 shadow-lg">
 		<Dialog.Header>
-			<Dialog.Title class="mb-1 text-xl font-semibold">Edit user</Dialog.Title>
+			<Dialog.Title class="mb-1 text-xl font-semibold">{mmT($mmLocale, "Edit user" )}</Dialog.Title>
 			<Dialog.Description class="mb-4 text-sm">
-				Edit {selectedUser?.email}
+				{mmT($mmLocale, "Edit" )} {selectedUser?.email}
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="space-y-6">
 			<!-- Verified -->
 			<div>
-				<Label class="mb-1 block text-sm font-medium" for="verified">Verified</Label>
+				<Label class="mb-1 block text-sm font-medium" for="verified">{mmT($mmLocale, "Verified" )}</Label>
 				<RadioGroup.Root
 					class="flex gap-4"
 					onValueChange={(v) => {
@@ -145,18 +146,18 @@
 				>
 					<div class="flex items-center gap-1">
 						<RadioGroup.Item class="accent-green-600" id="verified-true" value="true" />
-						<Label class="text-sm" for="verified-true">True</Label>
+						<Label class="text-sm" for="verified-true">{mmT($mmLocale, "True" )}</Label>
 					</div>
 					<div class="flex items-center gap-1">
 						<RadioGroup.Item class="accent-red-600" id="verified-false" value="false" />
-						<Label class="text-sm" for="verified-false">False</Label>
+						<Label class="text-sm" for="verified-false">{mmT($mmLocale, "False" )}</Label>
 					</div>
 				</RadioGroup.Root>
 			</div>
 			<hr />
 			<!-- Active -->
 			<div>
-				<Label class="mb-1 block text-sm font-medium" for="active">Active</Label>
+				<Label class="mb-1 block text-sm font-medium" for="active">{mmT($mmLocale, "Active" )}</Label>
 				<RadioGroup.Root
 					class="flex gap-4"
 					onValueChange={(v) => {
@@ -166,18 +167,18 @@
 				>
 					<div class="flex items-center gap-1">
 						<RadioGroup.Item class="accent-green-600" id="active-true" value="true" />
-						<Label class="text-sm" for="active-true">True</Label>
+						<Label class="text-sm" for="active-true">{mmT($mmLocale, "True" )}</Label>
 					</div>
 					<div class="flex items-center gap-1">
 						<RadioGroup.Item class="accent-red-600" id="active-false" value="false" />
-						<Label class="text-sm" for="active-false">False</Label>
+						<Label class="text-sm" for="active-false">{mmT($mmLocale, "False" )}</Label>
 					</div>
 				</RadioGroup.Root>
 			</div>
 			<hr />
 			<!-- Super User -->
 			<div>
-				<Label class="mb-1 block text-sm font-medium" for="superuser">Admin</Label>
+				<Label class="mb-1 block text-sm font-medium" for="superuser">{mmT($mmLocale, "Admin" )}</Label>
 				<RadioGroup.Root
 					class="flex gap-4"
 					onValueChange={(v) => {
@@ -187,17 +188,17 @@
 				>
 					<div class="flex items-center gap-1">
 						<RadioGroup.Item class="accent-green-600" id="superuser-true" value="true" />
-						<Label class="text-sm" for="superuser-true">True</Label>
+						<Label class="text-sm" for="superuser-true">{mmT($mmLocale, "True" )}</Label>
 					</div>
 					<div class="flex items-center gap-1">
 						<RadioGroup.Item class="accent-red-600" id="superuser-false" value="false" />
-						<Label class="text-sm" for="superuser-false">False</Label>
+						<Label class="text-sm" for="superuser-false">{mmT($mmLocale, "False" )}</Label>
 					</div>
 				</RadioGroup.Root>
 			</div>
 			<!-- Email -->
 			<div>
-				<Label class="mb-1 block text-sm font-medium" for="email">Email</Label>
+				<Label class="mb-1 block text-sm font-medium" for="email">{mmT($mmLocale, "Email" )}</Label>
 				<Input
 					bind:value={newEmail}
 					class="w-full"
@@ -208,29 +209,28 @@
 			</div>
 			<!-- Password -->
 			<div>
-				<Label class="mb-1 block text-sm font-medium" for="superuser">Password</Label>
+				<Label class="mb-1 block text-sm font-medium" for="superuser">{mmT($mmLocale, "Password" )}</Label>
 				<Input
 					bind:value={newPassword}
 					class="w-full"
 					id="password"
-					placeholder="Keep empty to not change the password"
+					placeholder={mmT($mmLocale, "Keep empty to not change the password")}
 					type="password"
 				/>
 			</div>
 		</div>
 		<div class="mt-8 flex justify-end gap-2">
-			<Button onclick={() => (dialogOpen = false)} variant="outline">Cancel</Button>
-			<Button onclick={() => saveUser()} variant="destructive">Save</Button>
+			<Button onclick={() => (dialogOpen = false)} variant="outline">{mmT($mmLocale, "Cancel" )}</Button>
+			<Button onclick={() => saveUser()} variant="destructive">{mmT($mmLocale, "Save" )}</Button>
 		</div>
 	</Dialog.Content>
 </Dialog.Root>
 <AlertDialog.Root bind:open={deleteDialogOpen}>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
-			<AlertDialog.Title>Delete User</AlertDialog.Title>
+			<AlertDialog.Title>{mmT($mmLocale, "Delete User" )}</AlertDialog.Title>
 			<AlertDialog.Description>
-				Are you sure you want to delete the user <strong>{userToDelete?.email}</strong>? This action
-				cannot be undone.
+				{mmT($mmLocale, "Are you sure you want to delete the user" )} <strong>{userToDelete?.email}</strong>{mmT($mmLocale, "? This action cannot be undone." )}
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
@@ -238,12 +238,12 @@
 				onclick={() => {
 					deleteDialogOpen = false;
 					userToDelete = null;
-				}}>Cancel</AlertDialog.Cancel
+				}}>{mmT($mmLocale, "Cancel" )}</AlertDialog.Cancel
 			>
 			<AlertDialog.Action
 				onclick={() => deleteUser()}
 				class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-				>Delete</AlertDialog.Action
+				>{mmT($mmLocale, "Delete" )}</AlertDialog.Action
 			>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>

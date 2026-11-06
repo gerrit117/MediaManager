@@ -1,3 +1,5 @@
+from media_manager.auth.request_policy import apply_request_policy
+
 from sqlalchemy import delete, func, select
 from sqlalchemy.exc import (
     IntegrityError,
@@ -259,6 +261,7 @@ class TvRepository:
             else None,
         )
         try:
+            apply_request_policy(self.db, db_model, "tv")
             self.db.add(db_model)
             self.db.commit()
             self.db.refresh(db_model)

@@ -1,0 +1,436 @@
+Settings	Einstellungen
+Settings sections	Einstellungsbereiche
+Account	Konto
+My Account	Mein Konto
+You	Dein Konto
+Users	Benutzer
+User	User
+Admin	Admin
+Administrator	Administrator
+User management	Benutzerverwaltung
+Account profile	Benutzerprofil
+Search users	Benutzer suchen
+Edit profile	Profil bearbeiten
+Delete account	Konto löschen
+Save	Speichern
+Cancel	Abbrechen
+Close	Schließen
+Delete	Löschen
+Edit	Bearbeiten
+Actions	Aktionen
+Active	Aktiv
+Inactive	Deaktiviert
+Verified	Bestätigt
+Unverified	Unbestätigt
+Email	E-Mail
+Password	Passwort
+New Password	Neues Passwort
+Confirm Password	Passwort bestätigen
+Login	Anmelden
+Logout	Abmelden
+Log out	Abmelden
+Sign Up	Registrieren
+Create an account	Konto erstellen
+Forgot Password	Passwort vergessen
+Forgot your password?	Passwort vergessen?
+Back to Login	Zurück zur Anmeldung
+Reset Password	Passwort zurücksetzen
+Request New Reset Link	Neuen Link anfordern
+Trouble logging in?	Probleme bei der Anmeldung?
+Or continue with	Oder fortfahren mit
+Don't have an account? Sign up	Noch kein Konto? Registrieren
+Already have an account? Login	Bereits ein Konto? Anmelden
+Enter your email below to log in to your account	Melde dich mit deiner E-Mail-Adresse an
+Enter your information to create an account	Gib deine Daten ein, um ein Konto zu erstellen
+Enter your new password	Neues Passwort eingeben
+Enter your new password below.	Gib dein neues Passwort ein.
+Confirm your new password	Neues Passwort bestätigen
+Password reset email sent successfully!	E-Mail zum Zurücksetzen des Passworts gesendet!
+Didn't receive the email? Check your spam folder or	Keine E-Mail erhalten? Prüfe den Spamordner oder
+try again	versuche es erneut
+Account Pending Activation	Konto wartet auf Freischaltung
+Your account has been successfully created, but activation by an administrator is required.	Dein Konto wurde erstellt und muss von einem Administrator freigeschaltet werden.
+If you have any questions, please contact an administrator.	Bei Fragen wende dich an einen Administrator.
+Change your email or password	E-Mail oder Passwort ändern
+Change your email or password. Leave fields empty to not change them.	E-Mail oder Passwort ändern. Leere Felder bleiben unverändert.
+Keep empty to not change the email	Leer lassen, um die E-Mail beizubehalten
+Keep empty to not change the password	Leer lassen, um das Passwort beizubehalten
+Dashboard	Übersicht
+Home	Startseite
+Overview	Übersicht
+Movies	Filme
+Shows	Serien
+TV Shows	Serien
+Notifications	Benachrichtigungen
+About	Über
+More	Mehr
+Add a Movie	Film hinzufügen
+Add a Show	Serie hinzufügen
+Add a movie	Film hinzufügen
+Add a show	Serie hinzufügen
+Requests	Anfragen
+Downloads	Downloads
+Movie Downloads	Film-Downloads
+TV Downloads	Serien-Downloads
+Movie Requests	Filmanfragen
+Season Requests	Staffelanfragen
+Movie Name	Filmtitel
+Show Name	Serientitel
+Season	Staffel
+Season Details	Staffeldetails
+Episodes	Folgen
+Title	Titel
+Number	Nummer
+Quality	Qualität
+Min Quality	Mindestqualität
+Minimum Quality	Mindestqualität
+Wanted Quality	Gewünschte Qualität
+Approved	Genehmigt
+Approved by	Genehmigt von
+Requested by	Angefragt von
+Imported	Importiert
+Exists on file	Datei vorhanden
+None	Keine
+True	Ja
+False	Nein
+Success	Erfolgreich
+Error	Fehler
+Loading	Lädt
+Loading...	Lädt …
+Loading show data...	Seriendaten werden geladen …
+Searching...	Suche läuft …
+Search library...	Bibliothek durchsuchen …
+Search for a Movie to add.	Suche einen Film zum Hinzufügen.
+Search for a Show to add.	Suche eine Serie zum Hinzufügen.
+More recommendations	Weitere Empfehlungen
+Trending Movies	Beliebte Filme
+Trending Shows	Beliebte Serien
+No Movie found.	Kein Film gefunden.
+No Shows found.	Keine Serien gefunden.
+No movies added yet.	Noch keine Filme hinzugefügt.
+No TV shows added yet.	Noch keine Serien hinzugefügt.
+No Downloads added yet.	Noch keine Downloads hinzugefügt.
+No library found.	Keine Bibliothek gefunden.
+No season data available.	Keine Staffeldaten verfügbar.
+There are currently no requests.	Es liegen keine Anfragen vor.
+No read notifications	Keine gelesenen Benachrichtigungen
+No unread notifications	Keine ungelesenen Benachrichtigungen
+All caught up!	Alles erledigt!
+Mark as read	Als gelesen markieren
+Mark as unread	Als ungelesen markieren
+Total count of movies	Anzahl der Filme
+Total count of downloaded episodes	Anzahl heruntergeladener Folgen
+Detected TV shows!	Importierbare Serien!
+Detected movies!	Importierbare Filme!
+Count of detected TV shows ready to import	Anzahl importierbarer Serien
+Count of detected movies ready to import	Anzahl importierbarer Filme
+Download Movie	Film herunterladen
+Download Seasons	Staffeln herunterladen
+Download a Movie	Film herunterladen
+Download a Season	Staffel herunterladen
+Download Options	Downloadoptionen
+Download manually	Manuell herunterladen
+Request Movie	Film anfragen
+Request Season	Staffel anfragen
+Select desired qualities to submit a request.	Wähle die gewünschten Qualitäten für die Anfrage.
+Select a season and desired qualities to submit a request.	Wähle Staffeln und gewünschte Qualitäten für die Anfrage.
+Enable automatic download of future seasons	Zukünftige Staffeln automatisch herunterladen
+You haven't downloaded this season yet.	Diese Staffel wurde noch nicht heruntergeladen.
+A list of all requests.	Alle Anfragen.
+A list of all users.	Alle Benutzer.
+A list of all seasons.	Alle Staffeln.
+A list of all episodes.	Alle Folgen.
+A list of all downloaded/downloading versions of this movie.	Alle heruntergeladenen oder laufenden Versionen dieses Films.
+A list of all downloaded/downloading versions of this season.	Alle heruntergeladenen oder laufenden Versionen dieser Staffel.
+Search indexers	Indexer durchsuchen
+Standard Mode	Standardsuche
+Advanced Mode	Erweiterte Suche
+Advanced Settings	Erweiterte Einstellungen
+Enter a custom query	Eigenen Suchbegriff eingeben
+Start searching by clicking the search button!	Starte die Suche über die Suchschaltfläche!
+Search indexers and send releases to your download manager for this movie.	Suche Releases und übergib sie dem Downloadmanager.
+Search indexers and send releases to your download manager for a specific season or season packs.	Suche Releases einer Staffel oder Staffelpakete und übergib sie dem Downloadmanager.
+Enter the season's number you want to search for. The first, usually 1, or the last season number usually yield the most season packs. Note that only Seasons which are listed in the "Seasons" cell will be imported!	Gib die Staffelnummer ein. Die erste oder letzte Staffel liefert oft Staffelpakete. Importiert werden nur die unter „Staffeln“ aufgeführten Staffeln.
+Import movie	Film importieren
+Import TV show	Serie importieren
+Import using this metadata	Mit diesen Metadaten importieren
+Select Library	Bibliothek auswählen
+Choose which Metadata Provider to query.	Wähle den Metadatenanbieter für die Suche.
+Movie files	Filmdateien
+File Path Suffix	Dateinamenszusatz
+Filepath suffix	Dateinamenszusatz
+Set File Path Suffix	Dateinamenszusatz festlegen
+Set the filename suffix for the downloaded media files.	Lege einen Dateinamenszusatz für heruntergeladene Medien fest.
+The files will be saved in the following directory:	Die Dateien werden in folgendem Verzeichnis gespeichert:
+This is necessary to differentiate between versions of the same movie or show, for example a 1080p and a 4K version.	Damit lassen sich verschiedene Versionen unterscheiden, zum Beispiel 1080p und 4K.
+Also delete files on disk (this will only remove imported files, not downloads)	Auch Dateien löschen (nur importierte Dateien, keine Downloads)
+Delete associated files as well.	Zugehörige Dateien ebenfalls löschen.
+(Only files in the download location will be deleted)	(Nur Dateien im Downloadverzeichnis werden gelöscht)
+Delete User	Benutzer löschen
+Delete Project	Projekt löschen
+Edit User Details	Benutzerdetails bearbeiten
+Edit my details	Meine Daten bearbeiten
+Edit user	Benutzer bearbeiten
+Are you sure you want to delete the user	Möchtest du diesen Benutzer wirklich löschen
+? This action cannot be undone.	? Diese Aktion kann nicht rückgängig gemacht werden.
+This action cannot be undone. This will permanently delete	Diese Aktion löscht dauerhaft
+View Project	Projekt ansehen
+Share Project	Projekt teilen
+Indexers	Indexer
+Indexer services	Indexer-Dienste
+Integrated	Integriert
+Integrated indexer · Newznab (NZB)	Integrierter Indexer · Newznab (NZB)
+Indexer categories	Indexer-Kategorien
+Movie categories	Filmkategorien
+TV categories	Serienkategorien
+API URL	API-Adresse
+API key	API-Schlüssel
+Enable direct searches	Direkte Suche aktivieren
+Save connection	Verbindung speichern
+Save categories	Kategorien speichern
+Refresh categories	Kategorien aktualisieren
+Test connection	Verbindung testen
+Choose movie and TV categories from each indexer's advertised categories. An empty selection keeps the provider's default search behavior.	Wähle Film- und Serienkategorien aus den angebotenen Kategorien. Eine leere Auswahl verwendet den Standard des Anbieters.
+Connect directly through the Newznab API. Prowlarr and Jackett are optional. Choose movie and TV categories below after saving the connection.	Direkt über Newznab verbinden. Prowlarr und Jackett sind optional. Wähle nach dem Speichern die Film- und Serienkategorien.
+System & Downloads	System & Downloads
+Setup & system settings	Einrichtung & Systemeinstellungen
+Library & paths	Bibliothek & Pfade
+Metadata	Metadaten
+Download managers — NZB & Torrent	Downloadmanager — NZB & Torrent
+Sign-in	Anmeldung
+Save settings	Einstellungen speichern
+Saving …	Speichert …
+Configured — leave empty to keep	Hinterlegt — leer lassen zum Behalten
+Not configured	Noch nicht hinterlegt
+Set by environment variable	per Umgebungsvariable gesetzt
+Some pending settings require MediaManager to restart.	Für vorgemerkte Einstellungen ist ein Neustart von MediaManager erforderlich.
+Manage container paths, connections and language here. Existing configuration files are retained. Connections and metadata language apply immediately; paths, database and sign-in require a restart.	Containerpfade, Verbindungen und Sprache zentral verwalten. Vorhandene Konfigurationsdateien bleiben erhalten. Verbindungen und Metadatensprache werden direkt übernommen. Pfade, Datenbank und Anmeldung benötigen einen Neustart.
+Indexers and categories are in Indexer services. SABnzbd currently manages extraction rules and Usenet credentials.	Indexer und Kategorien findest du im Bereich Indexer-Dienste. Entpackungsregeln und Usenet-Zugangsdaten verwaltet derzeit SABnzbd.
+Settings saved and applied.	Änderungen gespeichert und übernommen.
+Settings saved. Some settings require an application restart.	Änderungen gespeichert. Für bestimmte Einstellungen ist ein Neustart der Anwendung erforderlich.
+Could not load settings.	Einstellungen konnten nicht geladen werden.
+Could not save settings.	Speichern fehlgeschlagen.
+Monthly requests	Anfragen pro Kalendermonat
+Unlimited requests	Unbegrenzte Anfragen
+Automatic approval	Automatische Genehmigung
+Request quota:	Anfragekontingent:
+Role	Rolle
+Account active	Konto aktiv
+Account verified	Konto bestätigt
+New password (leave empty to keep)	Neues Passwort (leer lassen zum Behalten)
+Administrators have unlimited, automatically approved requests.	Administratoren haben unbegrenzte, automatisch genehmigte Anfragen.
+Manage accounts, monthly quotas and automatic approval	Konten, Monatskontingente und automatische Genehmigung verwalten
+No other users found. Edit your own account above in Account.	Keine weiteren Benutzer gefunden. Dein eigenes Konto bearbeitest du oben im Bereich Account.
+Two roles: Admin manages the server. Users can search and request. One movie or season counts as one request. The shared quota resets at the start of each month in Europe/Berlin; deleting requests does not refund quota.	Zwei Rollen: Admin verwaltet den Server. User können suchen und anfragen. Ein Film oder eine Staffel zählt als eine Anfrage. Das gemeinsame Kontingent erneuert sich zum Monatsbeginn in Europe/Berlin; Löschen gibt kein Kontingent zurück.
+Continue setup	Einrichtung fortsetzen
+Finish setup / configure later	Einrichtung abschließen / später fortsetzen
+Connect indexers	Indexer verbinden
+Configure download manager	Downloadmanager konfigurieren
+Your database and administrator account are ready. Configure connections now; existing download managers can be reused.	Die Datenbank und dein Admin-Konto sind bereit. Richte jetzt die gewünschten Verbindungen ein — bestehende Downloadmanager kannst du weiterverwenden.
+Check library paths and restart the application to apply pending settings.	Bibliothekspfade prüfen und vorgemerkte Änderungen durch einen Containerneustart aktivieren.
+You can skip connections and configure them later. Downloads require a matching download manager. Configure NNTP credentials and extraction rules in SABnzbd.	Du kannst alle Verbindungen überspringen und später ergänzen. Ohne passenden Downloadmanager werden keine Downloads gestartet. NNTP-Zugänge und Entpackungsregeln verwaltest du derzeit in SABnzbd.
+: direct NZB indexer, or Prowlarr/Jackett in System.	: direkter NZB-Indexer oder Prowlarr/Jackett unter System.
+: SABnzbd for NZB, qBittorrent or Transmission for torrents. Managed services use hostnames sabnzbd and qbittorrent, both on port 8080.	: SABnzbd für NZB, qBittorrent oder Transmission für Torrents. Die automatisch bereitgestellten Dienste heißen sabnzbd und qbittorrent, jeweils Port 8080.
+Send to download manager	An Downloadmanager senden
+Download information	Download-Informationen
+Download actions	Download-Aktionen
+Download progress	Downloadfortschritt
+Progress	Fortschritt
+Total NZB and torrent downloads	NZB- und Torrent-Downloads insgesamt
+Also remove downloads from the download manager (NZB and torrent)	Auch Downloads aus dem jeweiligen Downloadmanager entfernen (NZB und Torrent)
+All downloads for this show.	Alle Downloads dieser Serie.
+All downloads for this movie.	Alle Downloads dieses Films.
+Quick release filters	Release-Schnellfilter
+Resolution	Auflösung
+Video source	Bildquelle
+Audio	Audio
+Download type	Downloadart
+Reset filters	Filter zurücksetzen
+Releases found:	Gefundene Releases:
+No matching releases found.	Keine passenden Releases gefunden.
+Could not load releases.	Releases konnten nicht geladen werden.
+Loading releases …	Releases werden geladen …
+Tags come from release names, not verified file metadata. Selections are OR within a group and AND across groups.	Tags aus dem Release-Namen; keine verifizierten Dateiinformationen. Innerhalb einer Gruppe gilt „oder“, zwischen Gruppen „und“.
+Search title manually	Titel manuell suchen
+Metadata provider	Metadatenanbieter
+German	Deutsch
+English	Englisch
+Mic/line dubbed	Mic/Line dubbed
+Paused	Pausiert
+Completed	Abgeschlossen
+Downloading	Lädt herunter
+Queued	Warteschlange
+Failed	Fehlgeschlagen
+Resume	Fortsetzen
+Retry	Erneut versuchen
+Edit NZB download	NZB-Download bearbeiten
+Delete NZB download	NZB-Download löschen
+Edit torrent	Torrent bearbeiten
+Delete torrent	Torrent löschen
+Switch to dark mode	Dunkles Design verwenden
+Switch to light mode	Helles Design verwenden
+Welcome to MediaManager!	Willkommen bei MediaManager!
+A new version of MediaManager is available!	Eine neue MediaManager-Version ist verfügbar!
+New version available!	Neue Version verfügbar!
+About Media Manager	Über MediaManager
+Metadata sources of MediaManager	Metadatenquellen von MediaManager
+Metadata provided by TMDB. Please consider adding missing information or subscribing.	Metadaten von TMDB. Unterstütze das Projekt durch Ergänzungen oder ein Abonnement.
+Metadata provided by TheTVDB. Please consider adding missing information or subscribing.	Metadaten von TheTVDB. Unterstütze das Projekt durch Ergänzungen oder ein Abonnement.
+Image Credit	Bildnachweis
+Made with ❤️ by Maximilian Dorninger	Mit ❤️ von Maximilian Dorninger
+Checkout the awesome sponsors of MediaManager ❤️	Die Unterstützer von MediaManager ❤️
+Sponsor maxdorninger	maxdorninger unterstützen
+Donate	Spenden
+Next	Weiter
+Previous	Zurück
+Next slide	Nächste Folie
+Previous slide	Vorherige Folie
+More pages	Weitere Seiten
+Toggle Sidebar	Seitenleiste umschalten
+Toggle	Umschalten
+Search	Suchen
+Search title	Titel suchen
+Connection saved.	Verbindung gespeichert.
+User saved.	Benutzer gespeichert.
+Could not load quotas.	Kontingente konnten nicht geladen werden.
+Could not save quota.	Kontingent konnte nicht gespeichert werden.
+Could not delete account.	Löschen fehlgeschlagen.
+Could not finish setup.	Einrichtung konnte nicht abgeschlossen werden.
+Monthly request quota exhausted. It resets on the first day of next month (Europe/Berlin).	Monatliches Anfragekontingent ausgeschöpft. Es wird am ersten Tag des nächsten Monats (Europe/Berlin) erneuert.
+Request failed	Anfrage fehlgeschlagen
+Manual	manuell
+Automatic	automatisch
+Unlimited	unbegrenzt
+By administrator	durch Admin
+Approval:	Genehmigung:
+Requests this month	Anfragen diesen Monat
+this month	diesen Monat
+New quota:	Neues Kontingent:
+Settings - MediaManager	Einstellungen - MediaManager
+Login - MediaManager	Anmelden - MediaManager
+Forgot Password - MediaManager	Passwort vergessen - MediaManager
+Reset Password - MediaManager	Passwort zurücksetzen - MediaManager
+Dashboard - MediaManager	Übersicht - MediaManager
+Movies - MediaManager	Filme - MediaManager
+TV Shows - MediaManager	Serien - MediaManager
+Notifications - MediaManager	Benachrichtigungen - MediaManager
+About - MediaManager	Über - MediaManager
+Movie Downloads - MediaManager	Film-Downloads - MediaManager
+Movie Requests - MediaManager	Filmanfragen - MediaManager
+Completed downloads (container path)	Abgeschlossene Downloads (Containerpfad)
+Thumbnails	Vorschaubilder
+Web interface URL	WebUI-Adresse
+Metadata: default language	Metadaten: Standardsprache
+Metadata: preferred languages (e.g. de,en)	Metadaten: bevorzugte Sprachen (z. B. de,en)
+Database: host	Datenbank: Host
+Database: port	Datenbank: Port
+Database: name	Datenbank: Name
+Database: username	Datenbank: Benutzer
+Database: password	Datenbank: Passwort
+Use SABnzbd (NZB)	SABnzbd verwenden (NZB)
+SABnzbd: URL including http(s)://	SABnzbd: Adresse mit http(s)://
+SABnzbd: port	SABnzbd: Port
+SABnzbd: API key	SABnzbd: API-Key
+SABnzbd: API path	SABnzbd: API-Pfad
+SABnzbd: category	SABnzbd: Kategorie
+SABnzbd: completed path inside download manager	SABnzbd: fertiger Pfad im Downloadmanager
+Use qBittorrent (torrent)	qBittorrent verwenden (Torrent)
+qBittorrent: address	qBittorrent: Adresse
+qBittorrent: port	qBittorrent: Port
+qBittorrent: username	qBittorrent: Benutzer
+qBittorrent: password	qBittorrent: Passwort
+qBittorrent: category	qBittorrent: Kategorie
+qBittorrent: category path	qBittorrent: Kategoriepfad
+Use Transmission (torrent)	Transmission verwenden (Torrent)
+Transmission: host	Transmission: Host
+Transmission: port	Transmission: Port
+Transmission: username	Transmission: Benutzer
+Transmission: password	Transmission: Passwort
+Transmission: HTTPS	Transmission: HTTPS
+Transmission: RPC path	Transmission: RPC-Pfad
+Use Prowlarr (NZB/torrent)	Prowlarr verwenden (NZB/Torrent)
+Prowlarr: URL	Prowlarr: Adresse
+Prowlarr: API key	Prowlarr: API-Key
+Use Jackett (torrent)	Jackett verwenden (Torrent)
+Jackett: URL	Jackett: Adresse
+Jackett: API key	Jackett: API-Key
+Jackett: indexers (comma-separated)	Jackett: Indexer (kommagetrennt)
+Session lifetime (seconds)	Anmeldedauer (Sekunden)
+Enable OIDC	OIDC verwenden
+OIDC: display name	OIDC: Anzeigename
+OIDC: discovery URL	OIDC: Discovery-Adresse
+OIDC: client ID	OIDC: Client-ID
+OIDC: client secret	OIDC: Client-Secret
+Not available	Nicht verfügbar
+No suitable title found. Search manually below.	Kein passender Titel gefunden. Du kannst unten manuell suchen.
+Metadata search failed. Please try again.	Metadatensuche fehlgeschlagen. Bitte erneut versuchen.
+Metadata search unavailable. Please try again.	Metadatensuche nicht erreichbar. Bitte erneut versuchen.
+Quota saved, but account details could not be saved. Please check.	Kontingent gespeichert, Kontodaten konnten nicht gespeichert werden. Bitte prüfen.
+Only a single torrent client can be enabled.	Bitte nur einen Torrent-Client aktivieren
+Enable the account before submitting requests.	Konto ist deaktiviert
+Could not find the user.	Benutzer nicht gefunden
+Unraid	Unraid
+TMDB (Recommended)	TMDB (empfohlen)
+Submit Request	Anfrage senden
+Submitting...	Wird gesendet …
+Request	Anfrage für
+Request a Season for	Staffel anfragen für
+Select one or more seasons	Eine oder mehrere Staffeln auswählen
+Select the	Wähle
+that is in this directory to import it!	aus diesem Verzeichnis zum Importieren!
+Import unknown	Unbekannten Titel importieren:
+A list of all episodes for	Alle Folgen für
+A list of all seasons for	Alle Staffeln für
+Date suffix:	Dateizusatz:
+An error occurred:	Ein Fehler ist aufgetreten:
+Error:	Fehler:
+Error loading show:	Fehler beim Laden der Serie:
+Login with	Anmelden mit
+Mark All as Read	Alle als gelesen markieren
+Unread Notifications	Ungelesene Benachrichtigungen
+Read Notifications (	Gelesene Benachrichtigungen (
+Version:	Version:
+Releases	Releases
+Send Reset Email	E-Mail zum Zurücksetzen senden
+Sending Reset Email...	E-Mail wird gesendet …
+Resetting Password...	Passwort wird zurückgesetzt …
+Enter your email address and we'll send you a link to reset your password.	Gib deine E-Mail-Adresse ein, um einen Link zum Zurücksetzen des Passworts zu erhalten.
+Saved selections are retained.	Gespeicherte Auswahlen bleiben erhalten.
+The connection test verifies your key with a search and starts no download.	Der Verbindungstest prüft den Schlüssel mit einer Suche und startet keinen Download.
+The custom query will override the default search string like 'A Minecraft Movie (2025)'.	Der eigene Suchbegriff ersetzt die Standardsuche, zum Beispiel „A Minecraft Movie (2025)“.
+The custom query will override the default search string like 'The Simpsons Season 3'. Note that only Seasons which are listed in the 'Seasons' cell will be imported!	Der eigene Suchbegriff ersetzt die Standardsuche. Importiert werden nur Staffeln, die unter „Staffeln“ aufgeführt sind.
+Enter a season number from 1 to	Gib eine Staffelnummer ein von 1 bis
+Rating:	Bewertung:
+Delete -	Löschen –
+The detected	Der erkannte Titel
+An importable	Ein importierbarer Titel
+was detected!	wurde erkannt!
+Download	Herunterladen
+edit	bearbeiten
+delete	löschen
+of	von
+No overview available	Keine Beschreibung verfügbar
+is an all-in-one solution for organizing and building your media library. Built for simplicity and modernity, it helps you keep track of your favorite shows and movies and explore trending content—all in one place.	organisiert deine Medienbibliothek und hilft dir, Filme und Serien zu verwalten sowie neue Inhalte zu entdecken.
+Unknown	Unbekannt
+TV	Serien
+Downloadstatus	Downloadstatus
+Administrator Controls	Administratorfunktionen
+Add Movie - MediaManager	Film hinzufügen – MediaManager
+Add TV Show - MediaManager	Serie hinzufügen – MediaManager
+TV Show Downloads - MediaManager	Serien-Downloads – MediaManager
+TV Show Requests - MediaManager	Serienanfragen – MediaManager
+Verify Account - MediaManager	Konto bestätigen – MediaManager
+- Season	– Staffel
+is in this directory:	befindet sich in diesem Verzeichnis:
+Imported count suffix	importiert.
+We've sent a password reset link to your email address if a SMTP server is configured. Check your inbox and follow the instructions to reset your password. If you didn't receive an email, please contact an administrator, the reset link will be in the logs of MediaManager.	Sofern ein E-Mail-Server eingerichtet ist, wurde ein Link zum Zurücksetzen gesendet. Prüfe dein Postfach. Wende dich andernfalls an einen Administrator.
+This action cannot be undone.	Diese Aktion kann nicht rückgängig gemacht werden.
+Queue paused	Warteschlange pausiert
+Extracting	Entpackt
+Moving	Verschiebt
+Post-processing	Nachbearbeitung
+Repairing	Repariert
+Verifying	Prüft
+Fetching repair data	Lädt Reparaturdaten
+Waiting for availability	Wartet auf Verfügbarkeit
+Unknown status	Status unbekannt
