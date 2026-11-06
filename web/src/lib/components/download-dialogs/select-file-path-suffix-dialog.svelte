@@ -29,13 +29,13 @@
 		<Dialog.Header>
 			<Dialog.Title class="mb-1 text-xl font-semibold">Set File Path Suffix</Dialog.Title>
 			<Dialog.Description class="mb-4 text-sm">
-				Set the filepath suffix for downloaded files of the torrent.
+				Set the filename suffix for the downloaded media files.
 			</Dialog.Description>
 		</Dialog.Header>
 		<FilePathSuffixSelector bind:filePathSuffix {media} />
 		<div class="mt-8 flex justify-between gap-2">
 			<Button onclick={() => (dialogOpen = false)} variant="secondary">Cancel</Button>
-			<Button onclick={() => onDownload()}>Download Torrent</Button>
+			<Button onclick={() => onDownload()}>An Downloadmanager senden</Button>
 		</div>
 	</Dialog.Content>
 </Dialog.Root>
