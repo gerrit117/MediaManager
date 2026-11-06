@@ -29,6 +29,8 @@ from media_manager.auth.users import (
 )
 from media_manager.config import MediaManagerConfig
 from media_manager.exceptions import (
+    BadRequestError,
+    bad_request_error_handler,
     ConflictError,
     InvalidConfigError,
     MediaAlreadyExistsError,
@@ -40,6 +42,7 @@ from media_manager.exceptions import (
     sqlalchemy_integrity_error_handler,
 )
 from media_manager.filesystem_checks import run_filesystem_checks
+from media_manager.indexer.router import router as indexer_router
 from media_manager.logging import LOGGING_CONFIG, setup_logging
 from media_manager.notification.router import router as notification_router
 from media_manager.scheduler import setup_scheduler
@@ -113,6 +116,7 @@ api_app.include_router(auth_metadata_router, tags=["openid"])
 if get_openid_router():
     api_app.include_router(get_openid_router(), tags=["openid"], prefix="/auth/oauth")
 
+api_app.include_router(indexer_router, prefix="/indexers", tags=["indexers"])
 api_app.include_router(tv_router.router, prefix="/tv", tags=["tv"])
 api_app.include_router(torrent_router.router, prefix="/torrent", tags=["torrent"])
 api_app.include_router(movies_router.router, prefix="/movies", tags=["movie"])
@@ -171,6 +175,7 @@ async def not_found_handler(request: Request, _exc: Exception) -> Response:
 
 # Register exception handlers for custom exceptions
 app.add_exception_handler(NotFoundError, not_found_error_exception_handler)
+app.add_exception_handler(BadRequestError, bad_request_error_handler)
 app.add_exception_handler(
     MediaAlreadyExistsError, media_already_exists_exception_handler
 )
