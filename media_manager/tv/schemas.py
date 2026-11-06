@@ -1,4 +1,5 @@
 import typing
+from datetime import date, datetime
 import uuid
 from uuid import UUID
 
@@ -24,6 +25,7 @@ class Episode(BaseModel):
     number: EpisodeNumber
     external_id: int
     title: str
+    air_date: date | None = None
 
 
 class Season(BaseModel):
@@ -54,6 +56,8 @@ class Show(BaseModel):
     metadata_provider: str
 
     continuous_download: bool = False
+    monitor_from: date | None = None
+    monitor_checked_at: datetime | None = None
     library: str = "Default"
     original_language: str | None = None
 
@@ -99,6 +103,7 @@ class RichSeasonRequest(SeasonRequest):
 
 
 class SeasonFile(BaseModel):
+    episode_numbers: list[int] | None = None
     source_files: list[str] | None = None
     model_config = ConfigDict(from_attributes=True)
 

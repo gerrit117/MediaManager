@@ -1,6 +1,7 @@
 from uuid import UUID
+from datetime import date, datetime
 
-from sqlalchemy import JSON, ForeignKey, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy import JSON, DateTime, ForeignKey, PrimaryKeyConstraint, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from media_manager.auth.db import User
@@ -19,6 +20,8 @@ class Show(Base):
     overview: Mapped[str]
     year: Mapped[int | None]
     ended: Mapped[bool] = mapped_column(default=False)
+    monitor_from: Mapped[date | None] = mapped_column(nullable=True)
+    monitor_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     continuous_download: Mapped[bool] = mapped_column(default=False)
     library: Mapped[str] = mapped_column(default="")
     original_language: Mapped[str | None] = mapped_column(default=None)
@@ -66,11 +69,13 @@ class Episode(Base):
     number: Mapped[int]
     external_id: Mapped[int]
     title: Mapped[str]
+    air_date: Mapped[date | None] = mapped_column(nullable=True)
 
     season: Mapped["Season"] = relationship(back_populates="episodes")
 
 
 class SeasonFile(Base):
+    episode_numbers: Mapped[list[int] | None] = mapped_column(JSON, nullable=True)
     source_files: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     __tablename__ = "season_file"
     __table_args__ = (PrimaryKeyConstraint("season_id", "file_path_suffix"),)
@@ -111,3 +116,13 @@ class SeasonRequest(Base):
         foreign_keys=[authorized_by_id], uselist=False
     )
     season = relationship("Season", back_populates="season_requests", uselist=False)
+
+
+class EpisodeDownload(Base):
+    __tablename__ = "episode_download"
+    episode_id: Mapped[UUID] = mapped_column(ForeignKey("episode.id", ondelete="CASCADE"), primary_key=True)
+    torrent_id: Mapped[UUID | None] = mapped_column(ForeignKey("torrent.id", ondelete="SET NULL"), nullable=True)
+    checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str]
+    release_title: Mapped[str]
+    error: Mapped[str | None] = mapped_column(nullable=True)

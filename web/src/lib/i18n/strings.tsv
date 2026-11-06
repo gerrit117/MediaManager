@@ -503,3 +503,30 @@ Select the matching title and import mode for this directory.	Den passenden Tite
 Existing show directory	Vorhandener Serienordner
 Existing movie directory	Vorhandener Filmordner
 Directory	Ordner
+Release rules	Release-Regeln
+Save release rules	Release-Regeln speichern
+Enforce release rules for every download	Release-Regeln bei jedem Download durchsetzen
+Language priority (de, en)	Sprachpriorität (de, en)
+Resolution priority (2160p, 1080p, 720p, 480p)	Auflösungspriorität (2160p, 1080p, 720p, 480p)
+Excluded release tags	Ausgeschlossene Release-Tags
+Allow releases with unidentified language	Releases mit nicht erkennbarer Sprache zulassen
+Monitor new episodes and seasons	Neue Folgen und Staffeln überwachen
+Searches every 30 minutes for aired episodes from activation onward, including weekly releases. Existing files and active downloads are skipped; improved language/resolution can be upgraded.	Sucht alle 30 Minuten nach ausgestrahlten Folgen ab der Aktivierung, auch bei wöchentlichen Veröffentlichungen. Vorhandene Dateien und laufende Downloads werden berücksichtigt; bessere Sprache oder Auflösung kann ein Upgrade auslösen.
+Monitoring since	Überwachung seit
+A submission could not be confirmed. Check the downloader before retrying; automatic resubmission is blocked.	Eine Übermittlung konnte nicht bestätigt werden. Vor erneutem Start den Downloadmanager prüfen; automatisches Doppelübermitteln ist gesperrt.
+Episodes without an air date are skipped until metadata is available.	Folgen ohne Sendetermin werden bis zur Aktualisierung der Metadaten übersprungen.
+Applies to integrated indexers, Prowlarr and Jackett, for manual and automatic NZB/torrent downloads. Language takes precedence over resolution; the first entry has highest priority.	Gilt für integrierte Indexer, Prowlarr und Jackett sowie manuelle und automatische NZB-/Torrent-Downloads. Sprache hat Vorrang vor Auflösung; der erste Eintrag hat die höchste Priorität.
+Release names provide language/source hints, not verified audio tracks. Unknown languages require explicit permission. Changes apply immediately; existing files and queued downloads are not replaced merely by saving.	Release-Namen liefern Hinweise auf Sprache und Quelle, aber keine geprüften Tonspuren. Unbekannte Sprachen benötigen eine ausdrückliche Freigabe. Änderungen gelten sofort; vorhandene Dateien und laufende Downloads werden allein durch Speichern nicht ersetzt.
+Higher priority	Höhere Priorität
+Lower priority	Niedrigere Priorität
+German	Deutsch
+English	Englisch
+Excluded release tag: {tag}	Ausgeschlossener Release-Tag: {tag}
+Resolution is not allowed by the release rules.	Diese Auflösung ist durch die Release-Regeln nicht erlaubt.
+Release language is not allowed or cannot be identified.	Die Release-Sprache ist nicht erlaubt oder nicht erkennbar.
+A release with higher language/resolution priority is available. Please refresh the search results.	Ein Release mit höherer Sprach-/Auflösungspriorität ist verfügbar. Bitte die Suchergebnisse aktualisieren.
+Release is excluded by the configured scoring rules.	Das Release ist durch die eingestellten Bewertungsregeln ausgeschlossen.
+Indexer search incomplete; release priorities cannot be verified. Please try again later.	Indexer-Suche unvollständig; Release-Prioritäten können nicht geprüft werden. Bitte später erneut versuchen.
+Monitoring updated.	Überwachung aktualisiert.
+Monitoring could not be updated.	Überwachung konnte nicht aktualisiert werden.
+Preferred release order	Release-Priorität

@@ -56,6 +56,11 @@ def lookup(data: dict, key: str):
 
 # Fields exposed deliberately: signing secrets and internal flags are never returned.
 FIELDS: list[tuple[str, str, str]] = [
+ ('indexers.release_policy.enabled','Enforce release rules for every download','bool'),
+ ('indexers.release_policy.languages','Language priority (de, en)','list'),
+ ('indexers.release_policy.resolutions','Resolution priority (2160p, 1080p, 720p, 480p)','list'),
+ ('indexers.release_policy.excluded_tags','Excluded release tags','list'),
+ ('indexers.release_policy.allow_unknown_language','Allow releases with unidentified language','bool'),
  ('misc.movie_directory','Filme','path'),('misc.tv_directory','Serien','path'),('misc.torrent_directory','Abgeschlossene Downloads (Containerpfad)','path'),('misc.image_directory','Vorschaubilder','path'),('misc.frontend_url','WebUI-Adresse','text'),
  ('metadata.tmdb.default_language','Metadaten: Standardsprache','text'),('metadata.tmdb.primary_languages','Metadaten: bevorzugte Sprachen (z. B. de,en)','list'),
  ('database.host','Datenbank: Host','text'),('database.port','Datenbank: Port','number'),('database.dbname','Datenbank: Name','text'),('database.user','Datenbank: Benutzer','text'),('database.password','Datenbank: Passwort','secret'),

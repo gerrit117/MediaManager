@@ -63,5 +63,8 @@ def setup_scheduler(config: MediaManagerConfig) -> BackgroundScheduler:
         id="update_all_non_ended_shows_metadata",
         replace_existing=True,
     )
+    from media_manager.tv.monitor import monitor_new_episodes
+    scheduler.add_job(monitor_new_episodes, CronTrigger(minute="7,37"),
+                      id="monitor_new_episodes", replace_existing=True, max_instances=1, coalesce=True)
     scheduler.start()
     return scheduler

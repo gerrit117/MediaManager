@@ -95,6 +95,8 @@ class DownloadManager:
         :param indexer_result: The indexer query result to download
         :return: The torrent object representing the download
         """
+        from media_manager.release_policy import assert_allowed
+        assert_allowed(indexer_result)
         log.info(f"Processing download request for: {indexer_result.title}")
 
         client = self._get_appropriate_client(indexer_result)

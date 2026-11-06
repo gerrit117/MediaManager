@@ -54,7 +54,7 @@ class IndexerQueryResult(BaseModel):
     @computed_field
     @property
     def season(self) -> list[int]:
-        pattern = r"\bS(\d+)\b"
+        pattern = r"(?<![a-z0-9])S(\d+)(?=E\d|\b)"
         matches = re.findall(pattern, self.title, re.IGNORECASE)
         if matches.__len__() == 2:
             result = list(range(int(matches[0]), int(matches[1]) + 1))

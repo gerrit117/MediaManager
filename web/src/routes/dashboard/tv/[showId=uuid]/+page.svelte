@@ -1,4 +1,8 @@
 <script lang="ts">
+    import {onMount} from 'svelte';
+    let monitorStatus = $state<any>(null);
+    onMount(async()=>{try{const r=await fetch('/api/v1/tv/shows/'+show.id+'/monitor');if(r.ok)monitorStatus=await r.json();}catch{}});
+
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -30,27 +34,23 @@
 
 	let continuousDownloadEnabled = $derived(show.continuous_download);
 
-	async function toggle_continuous_download() {
-		const { response } = await client.POST('/api/v1/tv/shows/{show_id}/continuousDownload', {
-			params: {
-				path: { show_id: show.id },
-				query: { continuous_download: !continuousDownloadEnabled }
-			}
-		});
-		console.log(
-			'Toggling continuous download for show',
-			show.name,
-			'to',
-			!continuousDownloadEnabled
-		);
-		if (!response.ok) {
-			const errorText = await response.text();
-			toast.error('Failed to toggle continuous download: ' + errorText);
-		} else {
-			continuousDownloadEnabled = !continuousDownloadEnabled;
-			toast.success('Continuous download toggled successfully.');
-		}
-	}
+	let monitorBusy=$state(false);
+    async function toggle_continuous_download() {
+        if(monitorBusy)return;
+        monitorBusy=true;
+        const desired=!continuousDownloadEnabled;
+        try {
+            const {response}=await client.POST('/api/v1/tv/shows/{show_id}/continuousDownload',{
+                params:{path:{show_id:show.id},query:{continuous_download:desired}}
+            });
+            if(!response.ok)throw new Error();
+            continuousDownloadEnabled=desired;
+            try{const r=await fetch('/api/v1/tv/shows/'+show.id+'/monitor');if(r.ok)monitorStatus=await r.json();}catch{}
+            toast.success(mmT($mmLocale,'Monitoring updated.'));
+        }catch{toast.error(mmT($mmLocale,'Monitoring could not be updated.'));}
+        finally{monitorBusy=false;}
+    }
+
 </script>
 
 <svelte:head>
@@ -128,12 +128,17 @@
 						{#if !show.ended}
 							<div class="flex items-center gap-3">
 								<Switch
+                                    disabled={monitorBusy}
 									bind:checked={() => continuousDownloadEnabled, toggle_continuous_download}
 									id="continuous-download-checkbox"
 								/>
 								<Label for="continuous-download-checkbox">
-									{mmT($mmLocale, "Enable automatic download of future seasons" )}
-                                    <span class="block text-xs text-muted-foreground">{mmT($mmLocale,"Monitors new seasons, not individual episodes added to an existing season.")}</span>
+									{mmT($mmLocale, "Monitor new episodes and seasons" )}
+                                    {#if monitorStatus?.since}<span class="block text-xs">{mmT($mmLocale,'Monitoring since')}: {monitorStatus.since}</span>{/if}
+                                    {#if monitorStatus?.uncertain}<span role="alert" class="block text-xs text-destructive">{mmT($mmLocale,'A submission could not be confirmed. Check the downloader before retrying; automatic resubmission is blocked.')}</span>{/if}
+                                    {#if monitorStatus?.missing_dates}<span class="block text-xs text-muted-foreground">{mmT($mmLocale,'Episodes without an air date are skipped until metadata is available.')}</span>{/if}
+
+                                    <span class="block text-xs text-muted-foreground">{mmT($mmLocale,"Searches every 30 minutes for aired episodes from activation onward, including weekly releases. Existing files and active downloads are skipped; improved language/resolution can be upgraded.")}</span>
 								</Label>
 							</div>
 						{/if}

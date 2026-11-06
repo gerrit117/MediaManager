@@ -25,7 +25,10 @@ def stack(*args):return run(*compose,'--env-file',str(root/'state/stack.env'),'-
 def exec_python(code):
  code='import media_manager.auth.request_policy;import media_manager.movies.models;import media_manager.tv.models;import media_manager.torrent.models;\n'+code
  service=stack('ps','-q','mediamanager').strip()
- return run('docker','exec','-i',service,'/app/.venv/bin/python','-c',code)
+ try:return run('docker','exec','-i',service,'/app/.venv/bin/python','-c',code)
+ except subprocess.CalledProcessError as error:
+  path=root/'exec-failure.log';path.write_bytes(error.output);path.chmod(0o600)
+  raise RuntimeError('Isolated Python check failed; see private exec-failure.log') from None
 try:
  for name in ['movies','tv','downloads']:
   p=root/name;p.mkdir();os.chown(p,99,100)
@@ -120,6 +123,8 @@ with Session(engine) as db:
  uid,user=new_user('user@example.com')
  assert request(user,'/api/v1/users/admin-create',{'email':'blocked@example.com','password':password},'POST')[0]==403
  assert request(client(),'/api/v1/users/admin-create',{'email':'blocked@example.com','password':password},'POST')[0]==401
+ assert request(user,'/api/v1/movies/'+movies[0]+'/torrents?public_indexer_result_id='+str(uuid.uuid4()),method='POST')[0]==403
+ assert request(user,'/api/v1/tv/torrents?show_id='+show+'&public_indexer_result_id='+str(uuid.uuid4()),method='POST')[0]==403
  policy='/api/v1/users/'+uid+'/request-policy'
  assert request(admin,policy,{'monthly_request_limit':2,'auto_approve_requests':True},'PUT')[0]==200
  payload=lambda mid:{'movie_id':mid,'min_quality':3,'wanted_quality':2}
@@ -144,6 +149,8 @@ with Session(engine) as db:
  assert request(user,'/api/v1/requests/quota')[1]['used']==0
  assert request(user,'/api/v1/movies/requests',payload(movies[6]),'POST')[0]==201
  assert request(user,'/api/v1/requests/quota')[1]['used']==1
+ episode_checks=(repo/'tests/integration/episode_checks.py').read_text().replace('SHOW_ID',repr(show))
+ assert 'no backfill passed' in exec_python(episode_checks)
  secrets_before=[(root/'state/secrets'/n).read_bytes() for n in ['app_db_password','db_admin_password']]
  stack('down');subprocess.run(command,env=env,stdout=subprocess.DEVNULL,check=True)
  for _ in range(90):

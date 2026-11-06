@@ -61,6 +61,25 @@ def retry_torrent_download(
     service: torrent_service_dep,
     torrent: torrent_dep,
 ) -> None:
+    from media_manager.release_policy import assert_allowed, validate_selection, same_coverage
+    from media_manager.indexer.schemas import IndexerQueryResult
+    from media_manager.indexer.service import IndexerService
+    from media_manager.indexer.repository import IndexerRepository
+    from media_manager.config import MediaManagerConfig
+    from media_manager.indexer.utils import evaluate_indexer_query_results
+    result=IndexerQueryResult(title=torrent.title, download_url='', seeders=3, flags=[], size=0, usenet=torrent.usenet, age=0, indexer=None)
+    assert_allowed(result)
+    if MediaManagerConfig().indexers.release_policy.enabled:
+        media=service.get_show_of_torrent(torrent) or service.get_movie_of_torrent(torrent)
+        if media is None:
+            from fastapi import HTTPException
+            raise HTTPException(409,'Cannot verify release rules without an associated movie or series.')
+        indexers=IndexerService(IndexerRepository(service.torrent_repository.db))
+        if hasattr(media,'seasons'):
+            candidates=indexers.search_season(media,result.season[0]) if result.season else []
+        else:candidates=indexers.search_movie(media)
+        candidates=evaluate_indexer_query_results(candidates,media,is_tv=hasattr(media,'seasons'))
+        validate_selection(result,[r for r in candidates if same_coverage(result,r)])
     service.download_manager.retry_download(torrent)
 
 

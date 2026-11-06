@@ -19,11 +19,15 @@ def catalogue_suffix(directory: Path) -> str:
 def episode_numbers(files: list[str], season: int) -> set[int]:
     result = set()
     for name in files:
+        stem = Path(name).stem if Path(name).suffix.lower() in VIDEO_EXTENSIONS else Path(name).name
         # S01E01, S01E01E02 and 1x01 naming; avoid interpreting resolution/year as an episode.
-        for match in re.finditer(r'(?i)(?<![a-z0-9])s(\d{1,3})((?:e\d{1,3})+)', Path(name).stem):
+        for match in re.finditer(r'(?i)(?<![a-z0-9])s(\d{1,3})(e\d{1,3}(?:[._+ -]?e\d{1,3})*)', stem):
             if int(match[1]) == season:
                 result.update(int(n) for n in re.findall(r'e(\d+)', match[2], re.I))
-        for match in re.finditer(r'(?i)(?<![a-z0-9])(\d{1,3})x(\d{1,3})(?!\d)', Path(name).stem):
+        for match in re.finditer(r'(?i)(?<![a-z0-9])(\d{1,3})x(\d{1,3})(?!\d)', stem):
             if int(match[1]) == season:
                 result.add(int(match[2]))
+        for match in re.finditer(r'(?i)(?<![a-z0-9])s(\d{1,3})e(\d{1,3})-(?:e)?(\d{1,3})(?!\d)',stem):
+            if int(match[1])==season and 0<=int(match[3])-int(match[2])<=100:
+                result.update(range(int(match[2]),int(match[3])+1))
     return result

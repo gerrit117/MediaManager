@@ -17,7 +17,7 @@
 
 	let selected = $state<Facets>(emptyFacets());
 	function toggleFilter(group: keyof Facets, tag: string) { selected = { ...selected, [group]: selected[group].includes(tag) ? selected[group].filter(x => x !== tag) : [...selected[group], tag] }; }
-	let sortBy = $state({ col: 'score', ascending: false });
+	let sortBy = $state({ col: '', ascending: false });
 
 	function getSortedColumnState(column: string | undefined): boolean | null {
 		if (sortBy.col !== column) return null;
@@ -32,6 +32,7 @@
 		}
 	}
 	function sort(data: any[], column: string, ascending: boolean): any[] {
+        if (!column) return data;
 		let modifier = ascending ? 1 : -1;
 		return [...data].sort((a, b) => {
 			if (a[column] < b[column]) {
@@ -69,6 +70,7 @@
     {/each}
     <div class="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
      <span aria-live="polite">{data.filter((row: any) => matchesFacets(row, selected)).length} {mmT($mmLocale,"of")} {data.length} {mmT($mmLocale, "Releases" )}</span>
+     <button type="button" class="underline" aria-pressed={!sortBy.col} onclick={() => sortBy = {col:'',ascending:false}}>{mmT($mmLocale,"Preferred release order")}</button>
      <button type="button" class="underline" onclick={() => selected = emptyFacets()}>{mmT($mmLocale, "Filter zurücksetzen" )}</button>
     </div>
     <p class="text-xs text-muted-foreground">{mmT($mmLocale, "Tags aus dem Release-Namen; keine verifizierten Dateiinformationen. Innerhalb einer Gruppe gilt „oder“, zwischen Gruppen „und“." )}</p>
