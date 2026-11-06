@@ -1,0 +1,24 @@
+FROM node:24-alpine AS frontend
+WORKDIR /frontend
+COPY web/package*.json ./
+RUN npm ci
+COPY web/ ./
+ARG VERSION=1.12.3-usenet.1
+RUN BASE_PATH=/web PUBLIC_API_URL= PUBLIC_VERSION=${VERSION} npm run build
+
+# Preserve the tested release runtime and its dependency lock; no master migration.
+FROM quay.io/maxdorninger/mediamanager@sha256:83b80dce26f8cdbbf8afec06784a85e7eedcba05ad4be57d2f70b006304d7a8c AS runtime
+ARG VERSION=1.12.3-usenet.1
+ENV PUBLIC_VERSION=${VERSION} UV_NO_SYNC=1 UV_CACHE_DIR=/cache/uv
+LABEL org.opencontainers.image.source="https://github.com/gerrit117/MediaManager" \
+      org.opencontainers.image.version="1.12.3-usenet.1" \
+      org.opencontainers.image.description="MediaManager Usenet edition; requests and torrent clients retained"
+COPY --chown=1000:1000 media_manager/ /app/media_manager/
+COPY --from=frontend --chown=1000:1000 /frontend/build/ /app/web/build/
+
+FROM runtime AS checks
+ENV CONFIG_DIR=/tmp/mediamanager-tests
+COPY tests/ /app/tests/
+RUN /app/.venv/bin/python -m pytest -q /app/tests
+
+FROM runtime AS production
