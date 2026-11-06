@@ -27,6 +27,7 @@
 
 	const tableColumnHeadings = [
 		{ name: 'Size', id: 'size' },
+		{ name: 'Downloadart', id: 'usenet' },
 		{ name: 'Seeders', id: 'seeders' },
 		{ name: 'Score', id: 'score' },
 		{ name: 'Indexer', id: 'indexer' },
@@ -91,7 +92,7 @@
 	bind:open={dialogueState}
 	triggerText="Download Movie"
 	title="Download a Movie"
-	description="Search indexers and send releases to your download manager for a specific season or season packs."
+	description="Search indexers and send releases to your download manager for this movie."
 >
 	<SearchTabs
 		bind:tabState
@@ -111,7 +112,8 @@
 		{#snippet rowSnippet(torrent)}
 			<Table.Cell class="font-medium">{torrent.title}</Table.Cell>
 			<Table.Cell>{(torrent.size / 1024 / 1024 / 1024).toFixed(2)}GB</Table.Cell>
-			<Table.Cell>{torrent.seeders}</Table.Cell>
+			<Table.Cell>{torrent.usenet ? 'Usenet / NZB' : 'Torrent'}</Table.Cell>
+			<Table.Cell>{torrent.usenet ? '—' : torrent.seeders}</Table.Cell>
 			<Table.Cell>{torrent.score}</Table.Cell>
 			<Table.Cell>{torrent.indexer ?? 'Unknown'}</Table.Cell>
 			<Table.Cell>
