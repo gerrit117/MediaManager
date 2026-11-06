@@ -88,3 +88,7 @@ OIDC remains disabled by default; the upstream email-association concern in issu
 - Live browser checks passed at 390/768/1440/1920 pixels, with no horizontal overflow or browser errors.
 - Advanced-search Enter submits once; manual import search recovers after a network error. Both request-list APIs remain available.
 - A self-created NZB was submitted paused to the real SABnzbd category and removed; all other queue entries were unchanged. No third-party download or forced import was started for these checks.
+
+## 1.12.3-usenet.2
+
+Release-name quick filters, consistent protocol labels, corrected request editing, private staged administrator settings and a first-run setup wizard. See [setup and web settings](configuration/web-settings.md) for scope and rollback. The master workflow now publishes a tested fork image to GHCR; no individual feature-branch upload triggers publication.
