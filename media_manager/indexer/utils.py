@@ -1,4 +1,5 @@
 import logging
+import re
 from urllib.parse import urljoin
 
 import requests
@@ -12,6 +13,13 @@ from media_manager.tv.schemas import Show
 log = logging.getLogger(__name__)
 
 
+def _keyword_matches(keyword: str, title: str) -> bool:
+    """Match complete keywords, including punctuation such as DD+."""
+    return bool(keyword.strip()) and re.search(
+        rf"(?<!\w){re.escape(keyword)}(?!\w)", title, re.IGNORECASE
+    ) is not None
+
+
 def evaluate_indexer_query_result(
     query_result: IndexerQueryResult, ruleset: ScoringRuleSet
 ) -> tuple[IndexerQueryResult, bool]:
@@ -23,7 +31,7 @@ def evaluate_indexer_query_result(
                 log.debug(f"Applying rule {rule.name} to {query_result.title}")
                 if (
                     any(
-                        keyword.lower() in query_result.title.lower()
+                        _keyword_matches(keyword, query_result.title)
                         for keyword in rule.keywords
                     )
                     and not rule.negate
@@ -34,7 +42,7 @@ def evaluate_indexer_query_result(
                     query_result.score += rule.score_modifier
                 elif (
                     not any(
-                        keyword.lower() in query_result.title.lower()
+                        _keyword_matches(keyword, query_result.title)
                         for keyword in rule.keywords
                     )
                     and rule.negate
