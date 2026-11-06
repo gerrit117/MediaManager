@@ -1,9 +1,10 @@
 name: Usenet edition checks
 on:
-  push:
-    branches: [master, usenet-stable]
   pull_request:
   workflow_dispatch:
+concurrency:
+  group: usenet-checks-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
