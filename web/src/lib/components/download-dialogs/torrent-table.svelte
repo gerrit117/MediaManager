@@ -44,7 +44,7 @@
 	}
 </script>
 
-<div class="mt-4 items-center">
+<div class="mt-4 w-full min-w-0 items-center">
 	{#await torrentsPromise}
 		<div class="flex w-full max-w-sm items-center space-x-2">
 			<LoaderCircle class="animate-spin" />
