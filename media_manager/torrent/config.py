@@ -28,6 +28,8 @@ class SabnzbdConfig(BaseSettings):
     api_key: str = ""
     enabled: bool = False
     base_path: str = "/api"
+    category: str = "mediamanager"
+    remote_download_directory: str = ""
 
 
 class TorrentConfig(BaseSettings):
