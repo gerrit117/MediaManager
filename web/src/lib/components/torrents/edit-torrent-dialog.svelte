@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import type { components } from '$lib/api/api';
 	import { Switch } from '$lib/components/ui/switch';
@@ -13,6 +13,7 @@
 	}: {
 		torrent: components['schemas']['MovieTorrent'] | components['schemas']['RichSeasonTorrent'];
 	} = $props();
+	let label = $derived(torrent.usenet ? 'NZB-Download' : 'Torrent');
 	let dialogOpen = $state(false);
 	let importedState = $derived(torrent.imported);
 
@@ -31,7 +32,7 @@
 			}
 		});
 		if (error) {
-			toast.error('Failed to update torrent.');
+			toast.error('Download konnte nicht aktualisiert werden.');
 			return;
 		}
 		await invalidateAll();
@@ -40,23 +41,21 @@
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
-	<Dialog.Trigger>
-		<Button class="w-full" onclick={() => (dialogOpen = true)}>Edit Torrent</Button>
-	</Dialog.Trigger>
+	<Dialog.Trigger aria-label={`${label} bearbeiten`} class={buttonVariants({ variant: 'secondary' })}>Bearbeiten</Dialog.Trigger>
 	<Dialog.Content class="w-full max-w-[600px] rounded-lg p-6 shadow-lg">
 		<Dialog.Header>
-			<Dialog.Title class="mb-1 text-xl font-semibold">Edit Torrent</Dialog.Title>
+			<Dialog.Title class="mb-1 text-xl font-semibold">{label} bearbeiten</Dialog.Title>
 			<Dialog.Description class="mb-4 text-sm">
-				Edit torrent "{torrent.torrent_title}".
+				{label} bearbeiten "{torrent.torrent_title}".
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="flex gap-2">
-			<Label for="imported-state">Torrent {importedState ? 'is' : 'is not'} imported.</Label>
+			<Label for="imported-state">{label} {importedState ? 'ist' : 'ist nicht'} importiert.</Label>
 			<Switch bind:checked={importedState} id="imported-state" />
 		</div>
 		<Dialog.Footer class="mt-8 flex justify-between gap-2">
 			<Button onclick={() => closeDialog()} variant="secondary">Cancel</Button>
-			<Button onclick={() => saveTorrent()}>Save Torrent</Button>
+			<Button onclick={() => saveTorrent()}>Speichern</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>
