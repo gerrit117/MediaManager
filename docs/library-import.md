@@ -11,4 +11,4 @@ Catalogued files retain their original paths. Changing container mount paths lat
 
 ## Series monitoring
 
-The series details page offers **Enable automatic download of future seasons**. Metadata refresh can create requests for newly discovered seasons. This is season-based monitoring, not automatic tracking of each new episode in an existing season; search timing follows the configured scheduled jobs.
+The series details page offers **Monitor new episodes and seasons**. It tracks aired episodes from activation onward, including weekly releases inside an existing season, and retains claims across restarts. See [episode monitoring and release rules](episode-monitoring.md) for scheduling, exclusions and upgrade behavior.

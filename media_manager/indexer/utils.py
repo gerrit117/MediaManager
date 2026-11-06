@@ -90,6 +90,8 @@ def evaluate_indexer_query_results(
     scoring_rulesets: list[ScoringRuleSet] = (
         MediaManagerConfig().indexers.scoring_rule_sets
     )
+    for result in query_results:
+        result.score = 0
     for ruleset in scoring_rulesets:
         if (
             (media.library in ruleset.libraries)
@@ -116,7 +118,8 @@ def evaluate_indexer_query_results(
                     )
 
     query_results = [result for result in query_results if result.score >= 0]
-    query_results.sort(reverse=True)
+    from media_manager.release_policy import allowed_results
+    query_results = allowed_results(query_results)
     log.info(f"{len(query_results)} passed the scoring rulesets")
     return query_results
 

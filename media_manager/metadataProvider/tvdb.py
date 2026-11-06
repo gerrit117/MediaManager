@@ -97,6 +97,7 @@ class TvdbMetadataProvider(AbstractMetadataProvider):
                     number=episode["number"],
                     external_id=episode["id"],
                     title=episode["name"],
+                    air_date=episode.get("aired") or None,
                 )
                 for episode in s["episodes"]
             ]

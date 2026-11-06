@@ -380,7 +380,7 @@ def search_for_torrents_for_movie(
 @router.post(
     "/{movie_id}/torrents",
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(current_active_user)],
+    dependencies=[Depends(current_superuser)],
 )
 def download_torrent_for_movie(
     movie_service: movie_service_dep,

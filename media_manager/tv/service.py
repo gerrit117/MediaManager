@@ -2,7 +2,7 @@ import pprint
 import re
 import shutil
 from pathlib import Path
-from media_manager.library import video_files, catalogue_suffix, episode_numbers
+from media_manager.library import video_files as library_video_files, catalogue_suffix, episode_numbers
 from typing import overload
 
 from sqlalchemy.exc import IntegrityError
@@ -364,10 +364,14 @@ class TvService:
         season_files = self.tv_repository.get_season_files_by_season_id(
             season_id=season_id
         )
+        present = set()
         for season_file in season_files:
-            if self.season_file_exists_on_file(season_file=season_file):
+            if season_file.episode_numbers:
+                present.update(episode_numbers([p for p in (season_file.source_files or []) if Path(p).is_file()], self.get_season(season_id).number))
+            elif self.season_file_exists_on_file(season_file=season_file):
                 return True
-        return False
+        expected = {e.number for e in self.get_season(season_id).episodes}
+        return bool(expected) and expected.issubset(present)
 
     def season_file_exists_on_file(self, season_file: SeasonFile) -> bool:
         """
@@ -376,6 +380,8 @@ class TvService:
         :param season_file: The season file to check.
         :return: True if the file exists, False otherwise.
         """
+        if season_file.episode_numbers:
+            return bool(season_file.source_files) and all(Path(p).is_file() for p in season_file.source_files)
         if season_file.source_files is not None:
             season = self.tv_repository.get_season(season_file.season_id)
             expected = {episode.number for episode in season.episodes}
@@ -489,6 +495,15 @@ class TvService:
         indexer_result = self.indexer_service.get_result(
             result_id=public_indexer_result_id
         )
+        if MediaManagerConfig().indexers.release_policy.enabled:
+            from fastapi import HTTPException
+            media = self.tv_repository.get_show_by_id(show_id)
+            if not evaluate_indexer_query_results([indexer_result],media,is_tv=True):
+                raise HTTPException(409,'Release is excluded by the configured scoring rules.')
+        from media_manager.release_policy import validate_selection, same_coverage
+        if MediaManagerConfig().indexers.release_policy.enabled:
+            candidates = self.get_all_available_torrents_for_a_season(indexer_result.season[0], show_id) if indexer_result.season else []
+            validate_selection(indexer_result, [r for r in candidates if same_coverage(indexer_result,r)])
         show_torrent = self.torrent_service.download(indexer_result=indexer_result)
         self.torrent_service.pause_download(torrent=show_torrent)
 
@@ -501,7 +516,8 @@ class TvService:
                     season_id=season.id,
                     quality=indexer_result.quality,
                     torrent_id=show_torrent.id,
-                    file_path_suffix=override_show_file_path_suffix,
+                    file_path_suffix=override_show_file_path_suffix or ("MANUAL-"+str(indexer_result.id) if episode_numbers([indexer_result.title],season_number) else ""),
+                    episode_numbers=sorted(episode_numbers([indexer_result.title],season_number)) or None,
                 )
                 self.tv_repository.add_season_file(season_file=season_file)
         except IntegrityError:
@@ -547,12 +563,12 @@ class TvService:
             if (
                 (torrent.quality.value < season_request.wanted_quality.value)
                 or (torrent.quality.value > season_request.min_quality.value)
-                or (torrent.seeders < 3)
+                or (not torrent.usenet and torrent.seeders < 3)
             ):
                 log.info(
                     f"Skipping torrent {torrent.title} with quality {torrent.quality} for season {season.id}, because it does not match the requested quality {season_request.wanted_quality}"
                 )
-            elif torrent.season != [season.number]:
+            elif torrent.season != [season.number] or episode_numbers([torrent.title], season.number):
                 log.info(
                     f"Skipping torrent {torrent.title} with quality {torrent.quality} for season {season.id}, because it contains to many/wrong seasons {torrent.season} (wanted: {season.number})"
                 )
@@ -568,7 +584,8 @@ class TvService:
             )
             return False
 
-        available_torrents.sort()
+        from media_manager.release_policy import allowed_results
+        available_torrents = allowed_results(available_torrents,available_only=True)
 
         torrent = self.torrent_service.download(indexer_result=available_torrents[0])
         season_file = SeasonFile(
@@ -664,6 +681,7 @@ class TvService:
         video_files: list[Path],
         subtitle_files: list[Path],
         file_path_suffix: str = "",
+        wanted_episodes: list[int] | None = None,
     ) -> tuple[bool, int]:
         season_path = self.get_root_season_directory(
             show=show, season_number=season.number
@@ -678,6 +696,8 @@ class TvService:
             raise Exception(msg) from e  # noqa: TRY002 # TODO: resolve this
 
         for episode in season.episodes:
+            if wanted_episodes is not None and episode.number not in wanted_episodes:
+                continue
             try:
                 imported = self.import_episode(
                     show=show,
@@ -731,7 +751,18 @@ class TvService:
                 video_files=video_files,
                 subtitle_files=subtitle_files,
                 file_path_suffix=season_file.file_path_suffix,
+                wanted_episodes=season_file.episode_numbers,
             )
+            if season_import_success and season_file.episode_numbers:
+                from media_manager.tv.models import SeasonFile as FileModel, EpisodeDownload, Episode as EpisodeModel
+                from sqlalchemy import select
+                paths = library_video_files(self.get_root_season_directory(show, season.number))
+                paths = [p for p in paths if Path(p).stem.endswith(season_file.file_path_suffix) and set(season_file.episode_numbers) & episode_numbers([p],season.number)]
+                record = self.tv_repository.db.get(FileModel,(season.id,season_file.file_path_suffix))
+                record.source_files = paths
+                for job in self.tv_repository.db.scalars(select(EpisodeDownload).where(EpisodeDownload.torrent_id==torrent.id)):
+                    job.status = 'imported'; job.error = None
+                self.tv_repository.db.commit()
             success.append(season_import_success)
             if season_import_success:
                 log.info(
@@ -795,9 +826,7 @@ class TvService:
             year=fresh_show_data.year,
             ended=fresh_show_data.ended,
             imdb_id=fresh_show_data.imdb_id,
-            continuous_download=db_show.continuous_download
-            if fresh_show_data.ended is False
-            else False,
+            continuous_download=db_show.continuous_download,
         )
 
         # Process seasons and episodes
@@ -823,7 +852,7 @@ class TvService:
                     ep.external_id: ep for ep in existing_season.episodes
                 }
                 for fresh_episode_data in fresh_season_data.episodes:
-                    if fresh_episode_data.number in existing_episode_external_ids:
+                    if fresh_episode_data.external_id in existing_episode_external_ids:
                         # Update existing episode
                         existing_episode = existing_episode_external_ids[
                             fresh_episode_data.external_id
@@ -835,6 +864,8 @@ class TvService:
                             episode_id=existing_episode.id,
                             title=fresh_episode_data.title,
                         )
+                        from media_manager.tv.models import Episode as EpisodeModel
+                        self.tv_repository.db.get(EpisodeModel, existing_episode.id).air_date = fresh_episode_data.air_date
                     else:
                         # Add new episode
                         log.debug(
@@ -845,6 +876,7 @@ class TvService:
                             number=fresh_episode_data.number,
                             external_id=fresh_episode_data.external_id,
                             title=fresh_episode_data.title,
+                            air_date=fresh_episode_data.air_date,
                         )
                         self.tv_repository.add_episode_to_season(
                             season_id=existing_season.id, episode_data=episode_schema
@@ -860,6 +892,7 @@ class TvService:
                         number=ep_data.number,
                         external_id=ep_data.external_id,
                         title=ep_data.title,
+                        air_date=ep_data.air_date,
                     )
                     for ep_data in fresh_season_data.episodes
                 ]
@@ -911,7 +944,7 @@ class TvService:
         return import_candidates
 
     def catalogue_existing_tv_show(self, tv_show: Show, source_directory: Path) -> bool:
-        files = video_files(source_directory)
+        files = library_video_files(source_directory)
         found = False
         for season in tv_show.seasons:
             season_files = [p for p in files if episode_numbers([p], season.number)]
@@ -1112,25 +1145,7 @@ def update_all_non_ended_shows_metadata() -> None:
                 db_show=show, metadata_provider=metadata_provider
             )
 
-            # Automatically add season requests for new seasons
-            existing_seasons = [x.id for x in show.seasons]
-            new_seasons = [
-                x for x in updated_show.seasons if x.id not in existing_seasons
-            ]
-
-            if show.continuous_download:
-                for new_season in new_seasons:
-                    log.info(
-                        f"Automatically adding season request for new season {new_season.number} of show {updated_show.name}"
-                    )
-                    tv_service.add_season_request(
-                        SeasonRequest(
-                            min_quality=Quality.sd,
-                            wanted_quality=Quality.uhd,
-                            season_id=new_season.id,
-                            authorized=True,
-                        )
-                    )
+            new_seasons = [] if updated_show is None else [x for x in updated_show.seasons if x.id not in {s.id for s in show.seasons}]
 
             if updated_show:
                 log.debug(

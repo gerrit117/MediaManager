@@ -248,7 +248,7 @@ def set_continuous_download(
     show: show_dep, tv_service: tv_service_dep, continuous_download: bool
 ) -> PublicShow:
     """
-    Toggle whether future seasons of a show will be automatically downloaded.
+    Toggle monitoring of newly aired episodes and seasons from activation.
     """
     tv_service.set_show_continuous_download(
         show=show, continuous_download=continuous_download
@@ -482,3 +482,15 @@ def get_total_count_of_downloaded_episodes(tv_service: tv_service_dep) -> int:
     Get the total count of downloaded episodes across all shows.
     """
     return tv_service.get_total_downloaded_episoded_count()
+
+
+@router.get('/shows/{show_id}/monitor', dependencies=[Depends(current_active_user)])
+def get_episode_monitor_status(tv_service: tv_service_dep, tv_show: show_dep):
+    from sqlalchemy import select
+    from media_manager.tv.models import EpisodeDownload, Episode, Season
+    jobs=tv_service.tv_repository.db.scalars(select(EpisodeDownload).join(Episode).join(Season).where(Season.show_id==tv_show.id)).all()
+    return {'enabled':tv_show.continuous_download,'since':tv_show.monitor_from,
+            'submitted':sum(j.status=='submitted' for j in jobs),
+            'imported':sum(j.status=='imported' for j in jobs),
+            'uncertain':sum(j.status in {'submitting','uncertain'} for j in jobs),
+            'missing_dates':sum(e.air_date is None for s in tv_show.seasons if s.number>0 for e in s.episodes)}

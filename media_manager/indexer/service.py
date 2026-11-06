@@ -43,6 +43,7 @@ class IndexerService:
         """
         log.debug(f"Searching for: {query}")
         results = []
+        complete = bool(self.indexers)
 
         for indexer in self.indexers:
             try:
@@ -52,6 +53,7 @@ class IndexerService:
                     f"Indexer {indexer.__class__.__name__} returned {len(indexer_results)} results for query: {query}"
                 )
             except Exception:
+                complete = False
                 log.exception(
                     f"Indexer {indexer.__class__.__name__} failed for query '{query}'"
                 )
@@ -59,6 +61,9 @@ class IndexerService:
         for result in results:
             self.repository.save_result(result=result)
 
+        if not complete and MediaManagerConfig().indexers.release_policy.enabled:
+            from fastapi import HTTPException
+            raise HTTPException(503,'Indexer search incomplete; release priorities cannot be verified. Please try again later.')
         return results
 
     def search_movie(self, movie: Movie) -> list[IndexerQueryResult]:
@@ -66,12 +71,14 @@ class IndexerService:
         query = remove_special_chars_and_parentheses(query)
 
         results = []
+        complete = bool(self.indexers)
         for indexer in self.indexers:
             try:
                 indexer_results = indexer.search_movie(query=query, movie=movie)
                 if indexer_results:
                     results.extend(indexer_results)
             except Exception:
+                complete = False
                 log.exception(
                     f"Indexer {indexer.__class__.__name__} failed for movie search '{query}'"
                 )
@@ -79,6 +86,9 @@ class IndexerService:
         for result in results:
             self.repository.save_result(result=result)
 
+        if not complete and MediaManagerConfig().indexers.release_policy.enabled:
+            from fastapi import HTTPException
+            raise HTTPException(503,'Indexer search incomplete; release priorities cannot be verified. Please try again later.')
         return results
 
     def search_season(self, show: Show, season_number: int) -> list[IndexerQueryResult]:
@@ -86,6 +96,7 @@ class IndexerService:
         query = remove_special_chars_and_parentheses(query)
 
         results = []
+        complete = bool(self.indexers)
         for indexer in self.indexers:
             try:
                 indexer_results = indexer.search_season(
@@ -94,6 +105,7 @@ class IndexerService:
                 if indexer_results:
                     results.extend(indexer_results)
             except Exception:
+                complete = False
                 log.exception(
                     f"Indexer {indexer.__class__.__name__} failed for season search '{query}'"
                 )
@@ -101,4 +113,7 @@ class IndexerService:
         for result in results:
             self.repository.save_result(result=result)
 
+        if not complete and MediaManagerConfig().indexers.release_policy.enabled:
+            from fastapi import HTTPException
+            raise HTTPException(503,'Indexer search incomplete; release priorities cannot be verified. Please try again later.')
         return results

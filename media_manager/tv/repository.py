@@ -179,6 +179,7 @@ class TvRepository:
                                 number=episode.number,
                                 external_id=episode.external_id,
                                 title=episode.title,
+                                air_date=episode.air_date,
                             )
                             for episode in season.episodes
                         ],
@@ -610,6 +611,7 @@ class TvRepository:
                     number=ep_schema.number,
                     external_id=ep_schema.external_id,
                     title=ep_schema.title,
+                    air_date=ep_schema.air_date,
                 )
                 for ep_schema in season_data.episodes
             ],
@@ -645,6 +647,10 @@ class TvRepository:
         )
         existing_db_episode = self.db.execute(stmt).scalar_one_or_none()
         if existing_db_episode:
+            existing_db_episode.title=episode_data.title
+            existing_db_episode.external_id=episode_data.external_id
+            existing_db_episode.air_date=episode_data.air_date
+            self.db.commit()
             return EpisodeSchema.model_validate(existing_db_episode)
 
         db_episode = Episode(
@@ -653,6 +659,7 @@ class TvRepository:
             number=episode_data.number,
             external_id=episode_data.external_id,
             title=episode_data.title,
+            air_date=episode_data.air_date,
         )
 
         self.db.add(db_episode)
@@ -704,6 +711,10 @@ class TvRepository:
             continuous_download is not None
             and db_show.continuous_download != continuous_download
         ):
+            if continuous_download and db_show.monitor_from is None:
+                from datetime import datetime
+                from zoneinfo import ZoneInfo
+                db_show.monitor_from = datetime.now(ZoneInfo('Europe/Berlin')).date()
             db_show.continuous_download = continuous_download
             updated = True
         if imdb_id is not None and db_show.imdb_id != imdb_id:
