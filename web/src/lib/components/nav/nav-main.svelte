@@ -31,13 +31,13 @@
 					<Sidebar.MenuItem {...props}>
 						<Sidebar.MenuButton>
 							{#snippet tooltipContent()}
-								{mainItem.title}
+								{mmT($mmLocale,mainItem.title)}
 							{/snippet}
 							{#snippet child({ props })}
 								<!-- eslint-disable svelte/no-navigation-without-resolve -->
 								<a href={mainItem.url} {...props}>
 									<mainItem.icon />
-									<span>{mainItem.title}</span>
+									<span>{mmT($mmLocale,mainItem.title)}</span>
 								</a>
 								<!-- eslint-enable svelte/no-navigation-without-resolve -->
 							{/snippet}
@@ -56,7 +56,7 @@
 									{#each mainItem.items as subItem (subItem.title)}
 										<Sidebar.MenuSubItem>
 											<Sidebar.MenuSubButton href={subItem.url}>
-												<span>{subItem.title}</span>
+												<span>{mmT($mmLocale,subItem.title)}</span>
 											</Sidebar.MenuSubButton>
 										</Sidebar.MenuSubItem>
 									{/each}
