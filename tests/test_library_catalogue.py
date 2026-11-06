@@ -71,3 +71,13 @@ def test_catalogued_paths_ignore_json_null_from_legacy_imports():
     db=Mock();db.scalars.return_value.all.return_value=[None,[],['/media/own.mkv']]
     assert MovieRepository(db).catalogued_source_files()==['/media/own.mkv']
     assert TvRepository(db).catalogued_source_files()==['/media/own.mkv']
+
+
+def test_catalogued_partial_show_is_not_suggested_for_reimport(tmp_path,monkeypatch):
+    folder=tmp_path/'Own partial show';folder.mkdir();file=folder/'Own.S01E01.mkv';file.write_bytes(b'own')
+    monkeypatch.setattr('media_manager.tv.service.MediaManagerConfig',lambda:SimpleNamespace(misc=SimpleNamespace(tv_directory=tmp_path)))
+    monkeypatch.setattr('media_manager.tv.service.get_importable_media_directories',lambda root:[folder])
+    service=TvService.__new__(TvService);service.tv_repository=Mock();service.tv_repository.catalogued_source_files.return_value=[str(file)]
+    service.get_import_candidates=Mock(side_effect=AssertionError('Already catalogued'))
+    assert service.get_importable_tv_shows(Mock(),discover_only=True)==[]
+    service.get_import_candidates.assert_not_called()

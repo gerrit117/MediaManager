@@ -572,3 +572,33 @@ Cross-origin scan requests are not allowed.	Scan-Anfragen von einer fremden Herk
 Catalogued series	Erfasste Serien
 Catalogued episodes	Erfasste Folgen
 Match individual directories	Einzelne Ordner zuordnen
+Media library	Mediathek
+Search library	Mediathek durchsuchen
+Sort library	Mediathek sortieren
+Title A–Z	Titel A–Z
+Newest first	Neueste zuerst
+Oldest first	Älteste zuerst
+Monitored	Überwacht
+Available	Verfügbar
+Year unknown	Jahr unbekannt
+No matching titles.	Keine passenden Titel.
+Directories needing review	Ordner zur Zuordnung
+Metadata assignment	Metadaten-Zuordnung
+Edit details	Details bearbeiten
+Find the correct title	Richtigen Titel zuordnen
+Load metadata	Metadaten laden
+Save details	Details speichern
+Details saved.	Details gespeichert.
+Only change the provider ID when correcting an assignment. Files, requests and monitoring settings are preserved.	Ändere die Anbieter-ID nur für eine Korrektur der Zuordnung. Dateien, Anfragen und Überwachungseinstellungen bleiben erhalten.
+Change the metadata assignment? Files stay in place; existing seasons and episodes remain linked by number. Check episode ordering after saving.	Metadaten-Zuordnung ändern? Dateien bleiben am Speicherort; vorhandene Staffeln und Folgen bleiben anhand ihrer Nummer verknüpft. Prüfe danach die Episodenreihenfolge.
+Metadata loaded. Review the details and save.	Metadaten geladen. Prüfe die Details und speichere sie.
+Details could not be saved.	Details konnten nicht gespeichert werden.
+Metadata could not be loaded. Check the provider and ID, then retry.	Metadaten konnten nicht geladen werden. Prüfe Anbieter und ID und versuche es erneut.
+Title not found.	Titel nicht gefunden.
+Changing the metadata identity requires confirmation.	Das Ändern der Metadaten-Zuordnung muss bestätigt werden.
+The metadata identity has changed. Reload this page before editing.	Die Zuordnung wurde inzwischen geändert. Lade die Seite vor der Bearbeitung neu.
+This provider ID already belongs to another title. No records were merged.	Diese Anbieter-ID gehört bereits zu einem anderen Titel. Es wurden keine Einträge zusammengeführt.
+A title is required.	Ein Titel ist erforderlich.
+Details saved, but the provider did not supply a poster.	Details gespeichert, aber der Anbieter liefert kein Cover.
+Details saved, but the poster could not be refreshed.	Details gespeichert, aber das Cover konnte nicht aktualisiert werden.
+Year	Jahr
