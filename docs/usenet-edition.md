@@ -70,7 +70,7 @@ remote_download_directory = "/downloads/mediamanager"
 
 The remote directory must map to the same completed-download location as `misc.torrent_directory` inside MediaManager. If torrent clients and SABnzbd use separate completed directories, configure their mounts accordingly; do not point an unrelated client at the SABnzbd category directory. A general download-client settings UI is planned separately.
 
-Original upstream Docker/documentation publication jobs are restricted to the upstream repository. This fork runs its own regression-check workflow and does not attempt to publish to upstream registries or pages. It does not automatically merge upstream changes. Review/backport new fixes individually.
+Original upstream Docker/documentation publication jobs are restricted to the upstream repository. This fork runs its own regression-check workflow on pull requests or manual dispatch and does not attempt to publish to upstream registries or pages. It does not automatically merge upstream changes. Review/backport new fixes individually.
 
 ## Verification limits
 
@@ -83,3 +83,8 @@ OIDC remains disabled by default; the upstream email-association concern in issu
 - 92 backend tests passed (including protocol routing and compatibility cases).
 - Isolated real qBittorrent and Transmission 4.1.4: add an own magnet, pause, resume, query progress and delete succeeded. The test network had no Internet access; this checks client control, not a complete peer transfer.
 - The frontend dependency lock was repaired so a clean `npm ci` build is reproducible; package declarations were not changed.
+
+- Clean Docker frontend build and the 92 backend tests passed in the edition image.
+- Live browser checks passed at 390/768/1440/1920 pixels, with no horizontal overflow or browser errors.
+- Advanced-search Enter submits once; manual import search recovers after a network error. Both request-list APIs remain available.
+- A self-created NZB was submitted paused to the real SABnzbd category and removed; all other queue entries were unchanged. No third-party download or forced import was started for these checks.
