@@ -155,8 +155,8 @@
 	<div class="flex-1 rounded-xl">
 		<Card.Root class="h-full w-full">
 			<Card.Header>
-				<Card.Title>Torrent Information</Card.Title>
-				<Card.Description>A list of all torrents associated with this movie.</Card.Description>
+				<Card.Title>Download-Informationen</Card.Title>
+				<Card.Description>Alle Downloads dieses Films.</Card.Description>
 			</Card.Header>
 			<Card.Content class="flex flex-col gap-4">
 				<TorrentTable isShow={false} torrents={movie.torrents} movieId={movie.id} />

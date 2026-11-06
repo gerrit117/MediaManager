@@ -5,6 +5,7 @@
 
 	type Indexer = {
 		provider: string;
+		protocol?: string;
 		indexer_id: string;
 		name: string;
 		categories: { id: number; name: string }[];
@@ -76,7 +77,7 @@
 		<p role="status">{message}</p>
 		{#each indexers as indexer (`${indexer.provider}:${indexer.indexer_id}`)}
 			<section class="space-y-3 rounded-lg border p-4">
-				<h3 class="font-semibold">{indexer.name} · {indexer.provider}</h3>
+				<div class="flex flex-wrap items-center justify-between gap-2"><h3 class="font-semibold">{indexer.name} · {indexer.provider}</h3><span class="rounded-full border px-3 py-1 text-sm">{indexer.protocol==='usenet' || indexer.provider==='newznab' ? 'Usenet / NZB' : indexer.protocol==='torrent' || indexer.provider==='jackett' ? 'Torrent' : 'NZB / Torrent'}</span></div>
 				{#if indexer.error}
 					<p role="alert">{indexer.error} Saved selections are retained.</p>
 				{:else}

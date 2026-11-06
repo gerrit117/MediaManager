@@ -1,0 +1,101 @@
+"""First-run wizard, served before the normal application or DB migrations."""
+import hmac
+import json
+import os
+import secrets
+from pathlib import Path
+
+from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
+from pydantic import BaseModel, Field
+from media_manager.configuration import config_file, atomic_json
+
+class SetupInput(BaseModel):
+    code: str
+    database_host: str = Field(min_length=1)
+    database_port: int = Field(default=5432,ge=1,le=65535)
+    database_name: str = Field(min_length=1)
+    database_user: str = Field(min_length=1)
+    database_password: str = Field(min_length=1)
+    movie_directory: str = '/data/movies'
+    tv_directory: str = '/data/tv'
+    download_directory: str = '/downloads'
+    admin_email: str
+    admin_password: str = Field(min_length=12)
+
+
+def render_html() -> str:
+    fields = [('code','Einrichtungscode (aus setup-code)','password'),('database_host','PostgreSQL-Host','text'),('database_port','PostgreSQL-Port','number'),('database_name','Datenbankname','text'),('database_user','Datenbankbenutzer','text'),('database_password','Datenbankpasswort','password'),('movie_directory','Filmpfad im Container','text'),('tv_directory','Serienpfad im Container','text'),('download_directory','Downloadpfad im Container','text'),('admin_email','Admin-E-Mail','email'),('admin_password','Admin-Passwort (mindestens 12 Zeichen)','password')]
+    defaults={'database_port':'5432','movie_directory':'/data/movies','tv_directory':'/data/tv','download_directory':'/downloads'}
+    inputs=''.join(f'<label>{label}<input required name="{key}" type="{kind}" value="{defaults.get(key, "")}" {"minlength=12" if key=="admin_password" else ""}></label>' for key,label,kind in fields)
+    return '''<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MediaManager einrichten</title><style>body{font:16px system-ui;background:#101416;color:#edf4f3;margin:0;padding:24px}main{max-width:720px;margin:auto}form{display:grid;gap:18px}label{display:grid;gap:8px}input,button{font:inherit;padding:12px;border-radius:10px;background:#202a2c;color:inherit;border:1px solid #465453;min-width:0}button{background:#247c6b}p{line-height:1.5}#message{white-space:pre-wrap}</style><main><h1>Willkommen bei MediaManager</h1><p>PostgreSQL und die Bibliothek verbinden, danach mit deinem neuen Administratorkonto anmelden. Indexer und Downloadmanager richtest du anschließend unter Einstellungen ein.</p><p>Der private Einrichtungscode liegt im Konfigurationsordner in <code>setup-code</code>. Es werden keine vorhandenen Konfigurationen überschrieben. PostgreSQL muss bereits erreichbar sein; ein bestehender Server wird nicht automatisch installiert.</p><form id="form">'''+inputs+'''<button>Prüfen & Einrichtung abschließen</button></form><p role="status" id="message"></p><script>const form=document.querySelector('form'),message=document.querySelector('#message');form.onsubmit=async e=>{e.preventDefault();const button=form.querySelector('button');button.disabled=true;const data=Object.fromEntries(new FormData(form));data.database_port=Number(data.database_port);try{const response=await fetch('/setup/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!response.ok)throw Error((await response.json()).detail||'Einrichtung fehlgeschlagen');message.textContent='Einrichtung gespeichert. MediaManager startet jetzt. Gleich kannst du dich anmelden.';form.remove();setInterval(async()=>{try{const health=await fetch('/api/v1/health');if(health.ok&&health.headers.get('content-type')?.includes('application/json'))location.href='/web/login/';}catch{}},3000);}catch(error){message.textContent=error.message;button.disabled=false;}};</script></main></html>'''
+
+
+def create_setup_app(stop=lambda:None) -> FastAPI:
+    config = config_file()
+    config.parent.mkdir(parents=True,exist_ok=True)
+    code_file=config.parent/'setup-code'
+    if not code_file.exists():
+        code_file.write_text(os.getenv('MEDIAMANAGER_SETUP_CODE') or secrets.token_urlsafe(24));code_file.chmod(0o600)
+    app=FastAPI()
+
+    @app.get('/{path:path}',response_class=HTMLResponse)
+    def index(path:str): return render_html()
+
+    @app.post('/setup/complete')
+    def complete(body:SetupInput,tasks:BackgroundTasks):
+        if config.exists(): raise HTTPException(409,'Bereits eingerichtet')
+        if not hmac.compare_digest(body.code,code_file.read_text().strip()): raise HTTPException(403,'Einrichtungscode ist falsch')
+        from media_manager.auth.schemas import UserCreate
+        try: UserCreate(email=body.admin_email,password=body.admin_password)
+        except Exception: raise HTTPException(400,'Admin-E-Mail oder Passwort ungültig') from None
+        for folder in (body.movie_directory,body.tv_directory,body.download_directory):
+            p=Path(folder)
+            if not p.is_absolute(): raise HTTPException(400,'Containerpfade müssen absolut sein')
+            try:
+                p.mkdir(parents=True,exist_ok=True)
+                import tempfile
+                with tempfile.TemporaryFile(dir=p):pass
+            except OSError: raise HTTPException(400,'Bibliotheks- oder Downloadpfad nicht schreibbar; UID/GID und Mounts prüfen') from None
+        try:
+            import psycopg
+            with psycopg.connect(host=body.database_host,port=body.database_port,dbname=body.database_name,user=body.database_user,password=body.database_password,connect_timeout=5) as connection:
+                connection.execute('SELECT 1')
+                exists=connection.execute("SELECT to_regclass('public.user')").fetchone()[0]
+                if exists and connection.execute('SELECT count(*) FROM "user"').fetchone()[0]:
+                    raise HTTPException(409,'Datenbank enthält bereits Benutzer. Bestehende Konfiguration verwenden; kein neues Administratorkonto wird angelegt.')
+        except HTTPException:raise
+        except Exception:raise HTTPException(400,'PostgreSQL nicht erreichbar oder Zugangsdaten ungültig') from None
+        data={'database':{'host':body.database_host,'port':body.database_port,'dbname':body.database_name,'user':body.database_user,'password':body.database_password},'misc':{'movie_directory':body.movie_directory,'tv_directory':body.tv_directory,'torrent_directory':body.download_directory,'image_directory':'/data/images'},'auth':{'token_secret':secrets.token_hex(32),'admin_emails':[body.admin_email]},'metadata':{'tmdb':{'default_language':'de','primary_languages':['de','en']}}}
+        # The generated initial TOML contains only scalar/list values; strings are JSON-escaped.
+        lines=[]
+        def table(prefix,values):
+            scalars={k:v for k,v in values.items() if not isinstance(v,dict)}
+            if scalars:
+                lines.append('['+prefix+']')
+                lines.extend(k+' = '+json.dumps(v,ensure_ascii=True) for k,v in scalars.items())
+                lines.append('')
+            for key,value in values.items():
+                if isinstance(value,dict):table(prefix+'.'+key if prefix else key,value)
+        table('',data)
+        atomic_json(config.parent/'initial-admin.json',{'email':body.admin_email,'password':body.admin_password})
+        # Exclusive creation prevents overwriting a configuration supplied concurrently.
+        try:
+            descriptor=os.open(config,os.O_CREAT|os.O_EXCL|os.O_WRONLY,0o600)
+        except FileExistsError:raise HTTPException(409,'Konfiguration wurde inzwischen angelegt') from None
+        with os.fdopen(descriptor,'w') as stream:stream.write('\n'.join(lines));stream.flush();os.fsync(stream.fileno())
+        tasks.add_task(stop)
+        return {'saved':True}
+    return app
+
+
+def run():
+    import uvicorn
+    config=uvicorn.Config(create_setup_app(lambda:setattr(server,'should_exit',True)),host='0.0.0.0',port=int(os.getenv('PORT','8000')),access_log=False)
+    server=uvicorn.Server(config)
+    server.run()
+
+if __name__=='__main__':
+    if not config_file().exists():run()
+    from media_manager.configuration import activate_settings
+    activate_settings()

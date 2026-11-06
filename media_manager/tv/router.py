@@ -322,13 +322,14 @@ def update_request(
     """
     Update an existing season request.
     """
-    updated_season_request: SeasonRequest = SeasonRequest.model_validate(season_request)
-    request = tv_service.get_season_request_by_id(
-        season_request_id=updated_season_request.id
-    )
-    if request.requested_by.id == user.id or user.is_superuser:
-        updated_season_request.requested_by = UserRead.model_validate(user)
-        tv_service.update_season_request(season_request=updated_season_request)
+    request = tv_service.get_season_request_by_id(season_request_id=season_request.id)
+    if not request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    if not user.is_superuser and (not request.requested_by or request.requested_by.id != user.id):
+        raise HTTPException(status_code=403, detail="Not authorized to edit this request")
+    request.min_quality = season_request.min_quality
+    request.wanted_quality = season_request.wanted_quality
+    tv_service.update_season_request(season_request=request)
     return
 
 

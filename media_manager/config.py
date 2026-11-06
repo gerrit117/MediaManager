@@ -8,6 +8,7 @@ from pydantic_settings import (
     PydanticBaseSettingsSource,
     SettingsConfigDict,
     TomlConfigSettingsSource,
+    JsonConfigSettingsSource,
 )
 
 from media_manager.auth.config import AuthConfig
@@ -80,6 +81,7 @@ class MediaManagerConfig(BaseSettings):
             init_settings,
             env_settings,
             dotenv_settings,
+            JsonConfigSettingsSource(settings_cls, json_file=Path(config_path).parent / "settings.json"),
             TomlConfigSettingsSource(settings_cls),
             file_secret_settings,
         )

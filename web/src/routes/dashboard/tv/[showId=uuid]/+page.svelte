@@ -205,8 +205,8 @@
 	<div class="flex-1 rounded-xl">
 		<Card.Root>
 			<Card.Header>
-				<Card.Title>Torrent Information</Card.Title>
-				<Card.Description>A list of all torrents associated with this show.</Card.Description>
+				<Card.Title>Download-Informationen</Card.Title>
+				<Card.Description>Alle Downloads dieser Serie.</Card.Description>
 			</Card.Header>
 
 			<Card.Content class="w-full overflow-x-auto">

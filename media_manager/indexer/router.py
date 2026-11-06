@@ -35,6 +35,7 @@ class IndexerCategories(BaseModel):
     provider: str
     indexer_id: str
     name: str
+    protocol: str = "mixed"
     categories: list[Category] = Field(default_factory=list)
     selection: CategorySelection = Field(default_factory=CategorySelection)
     error: str | None = None
@@ -50,6 +51,7 @@ def discover_categories() -> list[IndexerCategories]:
             provider="newznab",
             indexer_id="treasure-maps",
             name="Treasure Maps",
+            protocol="usenet",
             selection=CategorySelection.model_validate(
                 saved.get("newznab:treasure-maps", {})
             ),
@@ -70,6 +72,7 @@ def discover_categories() -> list[IndexerCategories]:
                         provider="prowlarr",
                         indexer_id=identifier,
                         name=indexer["name"],
+                        protocol=str(indexer.get("protocol", "mixed")).lower(),
                         categories=prowlarr_categories(
                             indexer.get("capabilities", {}).get("categories", [])
                         ),
@@ -93,6 +96,7 @@ def discover_categories() -> list[IndexerCategories]:
                 provider="jackett",
                 indexer_id=identifier,
                 name=identifier,
+                protocol="torrent",
                 selection=CategorySelection.model_validate(
                     saved.get(f"jackett:{identifier}", {})
                 ),
