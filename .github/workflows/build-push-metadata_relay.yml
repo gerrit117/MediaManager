@@ -17,6 +17,7 @@ on:
 
 jobs:
   lint-code:
+    if: github.repository == 'maxdorninger/MediaManager'
     name:  Lint Python Code
     runs-on: ubuntu-latest
     steps:
@@ -26,6 +27,7 @@ jobs:
           src: "./metadata_relay"
 
   build-and-push:
+    if: github.repository == 'maxdorninger/MediaManager'
     needs: lint-code
     strategy:
       fail-fast: false
@@ -118,6 +120,7 @@ jobs:
             VERSION=${{ steps.version.outputs.version }}
 
   publish-manifests:
+    if: github.repository == 'maxdorninger/MediaManager'
     needs: build-and-push
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
