@@ -1,13 +1,12 @@
 <script lang="ts">
 	import {
 		convertTorrentSeasonRangeToIntegerRange,
-		convertTorrentEpisodeRangeToIntegerRange,
 		getTorrentQualityString,
 		getTorrentStatusString
 	} from '$lib/utils.js';
 	import CheckmarkX from '$lib/components/checkmark-x.svelte';
 	import * as Table from '$lib/components/ui/table';
-	import type { MovieTorrent, RichSeasonTorrent, UserRead } from '$lib/api/api';
+	import type { components } from '$lib/api/api';
 	import { getContext } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import client from '$lib/api';
@@ -22,15 +21,19 @@
 		showId,
 		movieId
 	}: {
-		torrents: MovieTorrent[] | RichSeasonTorrent[];
+		torrents:
+			| components['schemas']['MovieTorrent'][]
+			| components['schemas']['RichSeasonTorrent'][];
 		isShow: boolean;
 		showId?: string;
 		movieId?: string;
 	} = $props();
 
-	let user: () => UserRead = getContext('user');
+	let user: () => components['schemas']['UserRead'] = getContext('user');
 
-	async function retryTorrentDownload(torrent: MovieTorrent | RichSeasonTorrent) {
+	async function retryTorrentDownload(
+		torrent: components['schemas']['MovieTorrent'] | components['schemas']['RichSeasonTorrent']
+	) {
 		console.log(`Retrying download for torrent ${torrent.torrent_title}`);
 		const { error } = await client.POST('/api/v1/torrent/{torrent_id}/retry', {
 			params: {
@@ -56,7 +59,6 @@
 			<Table.Head>Name</Table.Head>
 			{#if isShow}
 				<Table.Head>Seasons</Table.Head>
-				<Table.Head>Episodes</Table.Head>
 			{/if}
 			<Table.Head>Download Status</Table.Head>
 			<Table.Head>Quality</Table.Head>
@@ -91,10 +93,9 @@
 				</Table.Cell>
 				{#if isShow}
 					<Table.Cell>
-						{convertTorrentSeasonRangeToIntegerRange((torrent as RichSeasonTorrent).seasons!)}
-					</Table.Cell>
-					<Table.Cell>
-						{convertTorrentEpisodeRangeToIntegerRange((torrent as RichSeasonTorrent).episodes!)}
+						{convertTorrentSeasonRangeToIntegerRange(
+							(torrent as components['schemas']['RichSeasonTorrent']).seasons!
+						)}
 					</Table.Cell>
 				{/if}
 				<Table.Cell>

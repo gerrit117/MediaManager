@@ -1,5 +1,4 @@
 import logging
-import re
 from urllib.parse import urljoin
 
 import requests
@@ -24,11 +23,7 @@ def evaluate_indexer_query_result(
                 log.debug(f"Applying rule {rule.name} to {query_result.title}")
                 if (
                     any(
-                        re.search(
-                            rf"\b{re.escape(keyword)}\b",
-                            query_result.title,
-                            re.IGNORECASE,
-                        )
+                        keyword.lower() in query_result.title.lower()
                         for keyword in rule.keywords
                     )
                     and not rule.negate
@@ -39,11 +34,7 @@ def evaluate_indexer_query_result(
                     query_result.score += rule.score_modifier
                 elif (
                     not any(
-                        re.search(
-                            rf"\b{re.escape(keyword)}\b",
-                            query_result.title,
-                            re.IGNORECASE,
-                        )
+                        keyword.lower() in query_result.title.lower()
                         for keyword in rule.keywords
                     )
                     and rule.negate
@@ -164,3 +155,5 @@ def follow_redirects_to_final_torrent_url(
         )
         msg = "An error occurred during the request"
         raise RuntimeError(msg) from e
+
+    return current_url

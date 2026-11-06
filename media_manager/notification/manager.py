@@ -70,7 +70,7 @@ class NotificationManager:
 
         logger.info(f"Initialized {len(self.providers)} notification providers")
 
-    async def send_notification(self, title: str, message: str) -> None:
+    def send_notification(self, title: str, message: str) -> None:
         if not self.providers:
             logger.warning("No notification providers configured")
 
@@ -79,7 +79,7 @@ class NotificationManager:
         for provider in self.providers:
             provider_name = provider.__class__.__name__
             try:
-                success = await provider.send_notification(notification)
+                success = provider.send_notification(notification)
                 if success:
                     logger.info(f"Notification sent successfully via {provider_name}")
                 else:

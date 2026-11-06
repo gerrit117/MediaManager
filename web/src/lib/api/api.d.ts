@@ -191,23 +191,6 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
-	'/api/v1/users/': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		/** Admin Create User */
-		post: operations['admin_create_user_api_v1_users__post'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
 	'/api/v1/users/me': {
 		parameters: {
 			query?: never;
@@ -547,6 +530,74 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/api/v1/tv/seasons/requests': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Get Season Requests
+		 * @description Get all season requests.
+		 */
+		get: operations['get_season_requests_api_v1_tv_seasons_requests_get'];
+		/**
+		 * Update Request
+		 * @description Update an existing season request.
+		 */
+		put: operations['update_request_api_v1_tv_seasons_requests_put'];
+		/**
+		 * Request A Season
+		 * @description Create a new season request.
+		 */
+		post: operations['request_a_season_api_v1_tv_seasons_requests_post'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/tv/seasons/requests/{season_request_id}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		/**
+		 * Authorize Request
+		 * @description Authorize or de-authorize a season request.
+		 */
+		patch: operations['authorize_request_api_v1_tv_seasons_requests__season_request_id__patch'];
+		trace?: never;
+	};
+	'/api/v1/tv/seasons/requests/{request_id}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		post?: never;
+		/**
+		 * Delete Season Request
+		 * @description Delete a season request.
+		 */
+		delete: operations['delete_season_request_api_v1_tv_seasons_requests__request_id__delete'];
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/api/v1/tv/seasons/{season_id}': {
 		parameters: {
 			query?: never;
@@ -575,10 +626,10 @@ export interface paths {
 			cookie?: never;
 		};
 		/**
-		 * Get Episode Files
-		 * @description Get episode files associated with a specific season.
+		 * Get Season Files
+		 * @description Get files associated with a specific season.
 		 */
-		get: operations['get_episode_files_api_v1_tv_seasons__season_id__files_get'];
+		get: operations['get_season_files_api_v1_tv_seasons__season_id__files_get'];
 		put?: never;
 		post?: never;
 		delete?: never;
@@ -845,6 +896,58 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/api/v1/movies/requests': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Get All Movie Requests
+		 * @description Get all movie requests.
+		 */
+		get: operations['get_all_movie_requests_api_v1_movies_requests_get'];
+		put?: never;
+		/**
+		 * Create Movie Request
+		 * @description Create a new movie request.
+		 */
+		post: operations['create_movie_request_api_v1_movies_requests_post'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/movies/requests/{movie_request_id}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		/**
+		 * Update Movie Request
+		 * @description Update an existing movie request.
+		 */
+		put: operations['update_movie_request_api_v1_movies_requests__movie_request_id__put'];
+		post?: never;
+		/**
+		 * Delete Movie Request
+		 * @description Delete a movie request.
+		 */
+		delete: operations['delete_movie_request_api_v1_movies_requests__movie_request_id__delete'];
+		options?: never;
+		head?: never;
+		/**
+		 * Authorize Request
+		 * @description Authorize or de-authorize a movie request.
+		 */
+		patch: operations['authorize_request_api_v1_movies_requests__movie_request_id__patch'];
+		trace?: never;
+	};
 	'/api/v1/movies/{movie_id}': {
 		parameters: {
 			query?: never;
@@ -1092,32 +1195,10 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
 	schemas: {
-		/** AdminUserCreate */
-		AdminUserCreate: {
-			/**
-			 * Email
-			 * Format: email
-			 */
-			email: string;
-			/** Password */
-			password?: string | null;
-			/**
-			 * Is Superuser
-			 * @default false
-			 */
-			is_superuser?: boolean;
-			/**
-			 * Is Verified
-			 * @default true
-			 */
-			is_verified?: boolean;
-		};
 		/** AuthMetadata */
 		AuthMetadata: {
 			/** Oauth Providers */
 			oauth_providers: string[];
-			/** Registration Enabled */
-			registration_enabled: boolean;
 		};
 		/** BearerResponse */
 		BearerResponse: {
@@ -1202,6 +1283,26 @@ export interface components {
 			/** Token */
 			token: string;
 		};
+		/** CreateMovieRequest */
+		CreateMovieRequest: {
+			min_quality: components['schemas']['Quality'];
+			wanted_quality: components['schemas']['Quality'];
+			/**
+			 * Movie Id
+			 * Format: uuid
+			 */
+			movie_id: string;
+		};
+		/** CreateSeasonRequest */
+		CreateSeasonRequest: {
+			min_quality: components['schemas']['Quality'];
+			wanted_quality: components['schemas']['Quality'];
+			/**
+			 * Season Id
+			 * Format: uuid
+			 */
+			season_id: string;
+		};
 		/** Episode */
 		Episode: {
 			/**
@@ -1215,8 +1316,6 @@ export interface components {
 			external_id: number;
 			/** Title */
 			title: string;
-			/** Overview */
-			overview?: string | null;
 		};
 		/** ErrorModel */
 		ErrorModel: {
@@ -1261,8 +1360,6 @@ export interface components {
 			readonly quality: components['schemas']['Quality'];
 			/** Season */
 			readonly season: number[];
-			/** Episode */
-			readonly episode: number[];
 		};
 		/** LibraryItem */
 		LibraryItem: {
@@ -1331,6 +1428,33 @@ export interface components {
 			/** Imdb Id */
 			imdb_id?: string | null;
 		};
+		/** MovieRequest */
+		MovieRequest: {
+			min_quality: components['schemas']['Quality'];
+			wanted_quality: components['schemas']['Quality'];
+			/**
+			 * Id
+			 * Format: uuid
+			 */
+			id?: string;
+			/**
+			 * Movie Id
+			 * Format: uuid
+			 */
+			movie_id: string;
+			requested_by?: components['schemas']['UserRead'] | null;
+			/**
+			 * Authorized
+			 * @default false
+			 */
+			authorized: boolean;
+			authorized_by?: components['schemas']['UserRead'] | null;
+		};
+		/** MovieRequestBase */
+		MovieRequestBase: {
+			min_quality: components['schemas']['Quality'];
+			wanted_quality: components['schemas']['Quality'];
+		};
 		/** MovieTorrent */
 		MovieTorrent: {
 			/**
@@ -1379,45 +1503,6 @@ export interface components {
 		OAuth2AuthorizeResponse: {
 			/** Authorization Url */
 			authorization_url: string;
-		};
-		/** PublicEpisode */
-		PublicEpisode: {
-			/**
-			 * Id
-			 * Format: uuid
-			 */
-			id: string;
-			/** Number */
-			number: number;
-			/**
-			 * Downloaded
-			 * @default false
-			 */
-			downloaded: boolean;
-			/** Title */
-			title: string;
-			/** Overview */
-			overview?: string | null;
-			/** External Id */
-			external_id: number;
-		};
-		/** PublicEpisodeFile */
-		PublicEpisodeFile: {
-			/**
-			 * Episode Id
-			 * Format: uuid
-			 */
-			episode_id: string;
-			quality: components['schemas']['Quality'];
-			/** Torrent Id */
-			torrent_id: string | null;
-			/** File Path Suffix */
-			file_path_suffix: string;
-			/**
-			 * Downloaded
-			 * @default false
-			 */
-			downloaded: boolean;
 		};
 		/** PublicMovie */
 		PublicMovie: {
@@ -1495,7 +1580,25 @@ export interface components {
 			/** External Id */
 			external_id: number;
 			/** Episodes */
-			episodes: components['schemas']['PublicEpisode'][];
+			episodes: components['schemas']['Episode'][];
+		};
+		/** PublicSeasonFile */
+		PublicSeasonFile: {
+			/**
+			 * Season Id
+			 * Format: uuid
+			 */
+			season_id: string;
+			quality: components['schemas']['Quality'];
+			/** Torrent Id */
+			torrent_id: string | null;
+			/** File Path Suffix */
+			file_path_suffix: string;
+			/**
+			 * Downloaded
+			 * @default false
+			 */
+			downloaded: boolean;
 		};
 		/** PublicShow */
 		PublicShow: {
@@ -1534,6 +1637,29 @@ export interface components {
 		 * @enum {integer}
 		 */
 		Quality: 1 | 2 | 3 | 4 | 5;
+		/** RichMovieRequest */
+		RichMovieRequest: {
+			min_quality: components['schemas']['Quality'];
+			wanted_quality: components['schemas']['Quality'];
+			/**
+			 * Id
+			 * Format: uuid
+			 */
+			id?: string;
+			/**
+			 * Movie Id
+			 * Format: uuid
+			 */
+			movie_id: string;
+			requested_by?: components['schemas']['UserRead'] | null;
+			/**
+			 * Authorized
+			 * @default false
+			 */
+			authorized: boolean;
+			authorized_by?: components['schemas']['UserRead'] | null;
+			movie: components['schemas']['Movie'];
+		};
 		/** RichMovieTorrent */
 		RichMovieTorrent: {
 			/**
@@ -1549,6 +1675,30 @@ export interface components {
 			metadata_provider: string;
 			/** Torrents */
 			torrents: components['schemas']['MovieTorrent'][];
+		};
+		/** RichSeasonRequest */
+		RichSeasonRequest: {
+			min_quality: components['schemas']['Quality'];
+			wanted_quality: components['schemas']['Quality'];
+			/**
+			 * Id
+			 * Format: uuid
+			 */
+			id?: string;
+			/**
+			 * Season Id
+			 * Format: uuid
+			 */
+			season_id: string;
+			requested_by?: components['schemas']['UserRead'] | null;
+			/**
+			 * Authorized
+			 * @default false
+			 */
+			authorized: boolean;
+			authorized_by?: components['schemas']['UserRead'] | null;
+			show: components['schemas']['Show'];
+			season: components['schemas']['Season'];
 		};
 		/** RichSeasonTorrent */
 		RichSeasonTorrent: {
@@ -1569,8 +1719,6 @@ export interface components {
 			file_path_suffix: string;
 			/** Seasons */
 			seasons: number[];
-			/** Episodes */
-			episodes: number[];
 		};
 		/** RichShowTorrent */
 		RichShowTorrent: {
@@ -1671,6 +1819,16 @@ export interface components {
 		 * @enum {integer}
 		 */
 		TorrentStatus: 1 | 2 | 3 | 4;
+		/** UpdateSeasonRequest */
+		UpdateSeasonRequest: {
+			min_quality: components['schemas']['Quality'];
+			wanted_quality: components['schemas']['Quality'];
+			/**
+			 * Id
+			 * Format: uuid
+			 */
+			id: string;
+		};
 		/** UserCreate */
 		UserCreate: {
 			/**
@@ -1745,10 +1903,6 @@ export interface components {
 			msg: string;
 			/** Error Type */
 			type: string;
-			/** Input */
-			input?: unknown;
-			/** Context */
-			ctx?: Record<string, never>;
 		};
 	};
 	responses: never;
@@ -1757,49 +1911,6 @@ export interface components {
 	headers: never;
 	pathItems: never;
 }
-export type AuthMetadata = components['schemas']['AuthMetadata'];
-export type BearerResponse = components['schemas']['BearerResponse'];
-export type BodyAuthCookieLoginApiV1AuthCookieLoginPost =
-	components['schemas']['Body_auth_cookie_login_api_v1_auth_cookie_login_post'];
-export type BodyAuthJwtLoginApiV1AuthJwtLoginPost =
-	components['schemas']['Body_auth_jwt_login_api_v1_auth_jwt_login_post'];
-export type BodyResetForgotPasswordApiV1AuthForgotPasswordPost =
-	components['schemas']['Body_reset_forgot_password_api_v1_auth_forgot_password_post'];
-export type BodyResetResetPasswordApiV1AuthResetPasswordPost =
-	components['schemas']['Body_reset_reset_password_api_v1_auth_reset_password_post'];
-export type BodyVerifyRequestTokenApiV1AuthRequestVerifyTokenPost =
-	components['schemas']['Body_verify_request_token_api_v1_auth_request_verify_token_post'];
-export type BodyVerifyVerifyApiV1AuthVerifyPost =
-	components['schemas']['Body_verify_verify_api_v1_auth_verify_post'];
-export type Episode = components['schemas']['Episode'];
-export type ErrorModel = components['schemas']['ErrorModel'];
-export type HttpValidationError = components['schemas']['HTTPValidationError'];
-export type IndexerQueryResult = components['schemas']['IndexerQueryResult'];
-export type LibraryItem = components['schemas']['LibraryItem'];
-export type MediaImportSuggestion = components['schemas']['MediaImportSuggestion'];
-export type MetaDataProviderSearchResult = components['schemas']['MetaDataProviderSearchResult'];
-export type Movie = components['schemas']['Movie'];
-export type MovieTorrent = components['schemas']['MovieTorrent'];
-export type Notification = components['schemas']['Notification'];
-export type OAuth2AuthorizeResponse = components['schemas']['OAuth2AuthorizeResponse'];
-export type PublicEpisode = components['schemas']['PublicEpisode'];
-export type PublicEpisodeFile = components['schemas']['PublicEpisodeFile'];
-export type PublicMovie = components['schemas']['PublicMovie'];
-export type PublicMovieFile = components['schemas']['PublicMovieFile'];
-export type PublicSeason = components['schemas']['PublicSeason'];
-export type PublicShow = components['schemas']['PublicShow'];
-export type Quality = components['schemas']['Quality'];
-export type RichMovieTorrent = components['schemas']['RichMovieTorrent'];
-export type RichSeasonTorrent = components['schemas']['RichSeasonTorrent'];
-export type RichShowTorrent = components['schemas']['RichShowTorrent'];
-export type Season = components['schemas']['Season'];
-export type Show = components['schemas']['Show'];
-export type Torrent = components['schemas']['Torrent'];
-export type TorrentStatus = components['schemas']['TorrentStatus'];
-export type UserCreate = components['schemas']['UserCreate'];
-export type UserRead = components['schemas']['UserRead'];
-export type UserUpdate = components['schemas']['UserUpdate'];
-export type ValidationError = components['schemas']['ValidationError'];
 export type $defs = Record<string, never>;
 export interface operations {
 	hello_world_api_v1_health_get: {
@@ -2190,39 +2301,6 @@ export interface operations {
 				};
 				content: {
 					'application/json': components['schemas']['UserRead'][];
-				};
-			};
-		};
-	};
-	admin_create_user_api_v1_users__post: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['AdminUserCreate'];
-			};
-		};
-		responses: {
-			/** @description Successful Response */
-			201: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['UserRead'];
-				};
-			};
-			/** @description Validation Error */
-			422: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['HTTPValidationError'];
 				};
 			};
 		};
@@ -2980,6 +3058,148 @@ export interface operations {
 			};
 		};
 	};
+	get_season_requests_api_v1_tv_seasons_requests_get: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Successful Response */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['RichSeasonRequest'][];
+				};
+			};
+		};
+	};
+	update_request_api_v1_tv_seasons_requests_put: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateSeasonRequest'];
+			};
+		};
+		responses: {
+			/** @description Successful Response */
+			204: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+			/** @description Validation Error */
+			422: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['HTTPValidationError'];
+				};
+			};
+		};
+	};
+	request_a_season_api_v1_tv_seasons_requests_post: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreateSeasonRequest'];
+			};
+		};
+		responses: {
+			/** @description Successful Response */
+			204: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+			/** @description Validation Error */
+			422: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['HTTPValidationError'];
+				};
+			};
+		};
+	};
+	authorize_request_api_v1_tv_seasons_requests__season_request_id__patch: {
+		parameters: {
+			query?: {
+				authorized_status?: boolean;
+			};
+			header?: never;
+			path: {
+				season_request_id: string;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Successful Response */
+			204: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+			/** @description Validation Error */
+			422: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['HTTPValidationError'];
+				};
+			};
+		};
+	};
+	delete_season_request_api_v1_tv_seasons_requests__request_id__delete: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				request_id: string;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Successful Response */
+			204: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+			/** @description Validation Error */
+			422: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['HTTPValidationError'];
+				};
+			};
+		};
+	};
 	get_season_api_v1_tv_seasons__season_id__get: {
 		parameters: {
 			query?: never;
@@ -3012,7 +3232,7 @@ export interface operations {
 			};
 		};
 	};
-	get_episode_files_api_v1_tv_seasons__season_id__files_get: {
+	get_season_files_api_v1_tv_seasons__season_id__files_get: {
 		parameters: {
 			query?: never;
 			header?: never;
@@ -3030,7 +3250,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['PublicEpisodeFile'][];
+					'application/json': components['schemas']['PublicSeasonFile'][];
 				};
 			};
 			/** @description Validation Error */
@@ -3490,6 +3710,154 @@ export interface operations {
 				};
 				content: {
 					'application/json': components['schemas']['LibraryItem'][];
+				};
+			};
+		};
+	};
+	get_all_movie_requests_api_v1_movies_requests_get: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Successful Response */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['RichMovieRequest'][];
+				};
+			};
+		};
+	};
+	create_movie_request_api_v1_movies_requests_post: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreateMovieRequest'];
+			};
+		};
+		responses: {
+			/** @description Successful Response */
+			201: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['MovieRequest'];
+				};
+			};
+			/** @description Validation Error */
+			422: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['HTTPValidationError'];
+				};
+			};
+		};
+	};
+	update_movie_request_api_v1_movies_requests__movie_request_id__put: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				movie_request_id: string;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['MovieRequestBase'];
+			};
+		};
+		responses: {
+			/** @description Successful Response */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['MovieRequest'];
+				};
+			};
+			/** @description Validation Error */
+			422: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['HTTPValidationError'];
+				};
+			};
+		};
+	};
+	delete_movie_request_api_v1_movies_requests__movie_request_id__delete: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				movie_request_id: string;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Successful Response */
+			204: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+			/** @description Validation Error */
+			422: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['HTTPValidationError'];
+				};
+			};
+		};
+	};
+	authorize_request_api_v1_movies_requests__movie_request_id__patch: {
+		parameters: {
+			query?: {
+				authorized_status?: boolean;
+			};
+			header?: never;
+			path: {
+				movie_request_id: string;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Successful Response */
+			204: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+			/** @description Validation Error */
+			422: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['HTTPValidationError'];
 				};
 			};
 		};

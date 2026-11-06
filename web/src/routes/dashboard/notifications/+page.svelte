@@ -6,11 +6,11 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 
 	import client from '$lib/api';
-	import type { Notification } from '$lib/api/api';
+	import type { components } from '$lib/api/api';
 	import { resolve } from '$app/paths';
 
-	let unreadNotifications: Notification[] = [];
-	let readNotifications: Notification[] = [];
+	let unreadNotifications: components['schemas']['Notification'][] = [];
+	let readNotifications: components['schemas']['Notification'][] = [];
 	let loading = true;
 	let showRead = false;
 	let markingAllAsRead = false;

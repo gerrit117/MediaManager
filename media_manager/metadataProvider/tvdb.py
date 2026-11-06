@@ -1,7 +1,7 @@
 import logging
 from typing import override
 
-import httpx
+import requests
 
 import media_manager.metadataProvider.utils
 from media_manager.config import MediaManagerConfig
@@ -14,8 +14,6 @@ from media_manager.tv.schemas import Episode, Season, SeasonNumber, Show
 
 log = logging.getLogger(__name__)
 
-_client = httpx.AsyncClient(timeout=30.0)
-
 
 class TvdbMetadataProvider(AbstractMetadataProvider):
     name = "tvdb"
@@ -24,46 +22,37 @@ class TvdbMetadataProvider(AbstractMetadataProvider):
         config = MediaManagerConfig().metadata.tvdb
         self.url = config.tvdb_relay_url
 
-    async def __get_show(self, show_id: int) -> dict:
-        response = await _client.get(url=f"{self.url}/tv/shows/{show_id}", timeout=60)
-        return response.json()
+    def __get_show(self, show_id: int) -> dict:
+        return requests.get(url=f"{self.url}/tv/shows/{show_id}", timeout=60).json()
 
-    async def __get_season(self, show_id: int) -> dict:
-        response = await _client.get(
-            url=f"{self.url}/tv/seasons/{show_id}", timeout=60
-        )
-        return response.json()
+    def __get_season(self, show_id: int) -> dict:
+        return requests.get(url=f"{self.url}/tv/seasons/{show_id}", timeout=60).json()
 
-    async def __search_tv(self, query: str) -> dict:
-        response = await _client.get(
+    def __search_tv(self, query: str) -> dict:
+        return requests.get(
             url=f"{self.url}/tv/search", params={"query": query}, timeout=60
-        )
-        return response.json()
+        ).json()
 
-    async def __get_trending_tv(self) -> dict:
-        response = await _client.get(url=f"{self.url}/tv/trending", timeout=60)
-        return response.json()
+    def __get_trending_tv(self) -> dict:
+        return requests.get(url=f"{self.url}/tv/trending", timeout=60).json()
 
-    async def __get_movie(self, movie_id: int) -> dict:
-        response = await _client.get(url=f"{self.url}/movies/{movie_id}", timeout=60)
-        return response.json()
+    def __get_movie(self, movie_id: int) -> dict:
+        return requests.get(url=f"{self.url}/movies/{movie_id}", timeout=60).json()
 
-    async def __search_movie(self, query: str) -> dict:
-        response = await _client.get(
+    def __search_movie(self, query: str) -> dict:
+        return requests.get(
             url=f"{self.url}/movies/search", params={"query": query}, timeout=60
-        )
-        return response.json()
+        ).json()
 
-    async def __get_trending_movies(self) -> dict:
-        response = await _client.get(url=f"{self.url}/movies/trending", timeout=60)
-        return response.json()
+    def __get_trending_movies(self) -> dict:
+        return requests.get(url=f"{self.url}/movies/trending", timeout=60).json()
 
     @override
-    async def download_show_poster_image(self, show: Show) -> bool:
-        show_metadata = await self.__get_show(show_id=show.external_id)
+    def download_show_poster_image(self, show: Show) -> bool:
+        show_metadata = self.__get_show(show_id=show.external_id)
 
         if show_metadata["image"] is not None:
-            await media_manager.metadataProvider.utils.download_poster_image(
+            media_manager.metadataProvider.utils.download_poster_image(
                 storage_path=self.storage_path,
                 poster_url=show_metadata["image"],
                 uuid=show.id,
@@ -74,15 +63,13 @@ class TvdbMetadataProvider(AbstractMetadataProvider):
         return False
 
     @override
-    async def get_show_metadata(
-        self, show_id: int, language: str | None = None
-    ) -> Show:
+    def get_show_metadata(self, show_id: int, language: str | None = None) -> Show:
         """
 
         :param show_id: The external id of the show
         :param language: does nothing, TVDB does not support multiple languages
         """
-        series = await self.__get_show(show_id)
+        series = self.__get_show(show_id)
         seasons = []
         seasons_ids = [season["id"] for season in series["seasons"]]
 
@@ -94,10 +81,11 @@ class TvdbMetadataProvider(AbstractMetadataProvider):
                 if remote_id.get("type") == 2:
                     imdb_id = remote_id.get("id")
 
-        season_payloads = [await self.__get_season(show_id=sid) for sid in seasons_ids]
-        for s in season_payloads:
-            # Filter to "aired order" only; mixing aired/dvd orders duplicates
-            # (show_id, season_number) and violates the seasons unique constraint.
+        for season in seasons_ids:
+            s = self.__get_season(show_id=season)
+            # the seasons need to be filtered to a certain type,
+            # otherwise the same season will be imported in aired and dvd order,
+            # which causes duplicate season number + show ids which in turn violates a unique constraint of the season table
             if s["type"]["id"] != 1:
                 log.info(
                     f"Season {s['type']['id']} will not be downloaded because it is not a 'aired order' season"
@@ -134,11 +122,11 @@ class TvdbMetadataProvider(AbstractMetadataProvider):
         )
 
     @override
-    async def search_show(
+    def search_show(
         self, query: str | None = None
     ) -> list[MetaDataProviderSearchResult]:
         if query:
-            results = await self.__search_tv(query=query)
+            results = self.__search_tv(query=query)
             formatted_results = []
             for result in results:
                 try:
@@ -163,7 +151,7 @@ class TvdbMetadataProvider(AbstractMetadataProvider):
                 except Exception:
                     log.warning("Error processing search result", exc_info=True)
             return formatted_results
-        results = await self.__get_trending_tv()
+        results = self.__get_trending_tv()
         formatted_results = []
         for result in results:
             try:
@@ -193,16 +181,20 @@ class TvdbMetadataProvider(AbstractMetadataProvider):
         return formatted_results
 
     @override
-    async def search_movie(
+    def search_movie(
         self, query: str | None = None
     ) -> list[MetaDataProviderSearchResult]:
         if query:
-            results = await self.__search_movie(query=query)
-            results = [r for r in results[0:20] if r["type"] == "movie"]
+            results = self.__search_movie(query=query)
+            results = results[0:20]
             log.debug(f"got {len(results)} results from TVDB search")
-            movie_payloads = [await self.__get_movie(r["tvdb_id"]) for r in results]
             formatted_results = []
-            for result in movie_payloads:
+            for result in results:
+                if result["type"] != "movie":
+                    continue
+
+                result = self.__get_movie(result["tvdb_id"])
+
                 try:
                     try:
                         year = result["year"]
@@ -224,12 +216,12 @@ class TvdbMetadataProvider(AbstractMetadataProvider):
                 except Exception:
                     log.warning("Error processing search result", exc_info=True)
             return formatted_results
-        results = await self.__get_trending_movies()
+        results = self.__get_trending_movies()
         results = results[0:20]
         log.debug(f"got {len(results)} results from TVDB search")
-        movie_payloads = [await self.__get_movie(r["id"]) for r in results]
         formatted_results = []
-        for result in movie_payloads:
+        for result in results:
+            result = self.__get_movie(result["id"])
             try:
                 try:
                     year = result["year"]
@@ -260,11 +252,11 @@ class TvdbMetadataProvider(AbstractMetadataProvider):
         return formatted_results
 
     @override
-    async def download_movie_poster_image(self, movie: Movie) -> bool:
-        movie_metadata = await self.__get_movie(movie.external_id)
+    def download_movie_poster_image(self, movie: Movie) -> bool:
+        movie_metadata = self.__get_movie(movie.external_id)
 
         if movie_metadata["image"] is not None:
-            await media_manager.metadataProvider.utils.download_poster_image(
+            media_manager.metadataProvider.utils.download_poster_image(
                 storage_path=self.storage_path,
                 poster_url=movie_metadata["image"],
                 uuid=movie.id,
@@ -275,16 +267,14 @@ class TvdbMetadataProvider(AbstractMetadataProvider):
         return False
 
     @override
-    async def get_movie_metadata(
-        self, movie_id: int, language: str | None = None
-    ) -> Movie:
+    def get_movie_metadata(self, movie_id: int, language: str | None = None) -> Movie:
         """
 
         :param movie_id: the external id of the movie
         :param language: does nothing, TVDB does not support multiple languages
         :return: returns a Movie object
         """
-        movie = await self.__get_movie(movie_id=movie_id)
+        movie = self.__get_movie(movie_id=movie_id)
 
         # get imdb id from remote ids
         imdb_id = None

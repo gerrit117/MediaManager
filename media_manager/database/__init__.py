@@ -1,17 +1,14 @@
 import logging
 import os
-from collections.abc import AsyncIterator
+from collections.abc import Generator
+from contextvars import ContextVar
 from typing import Annotated
 
 from fastapi import Depends
+from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import URL
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 from media_manager.database.config import DbConfig
 
@@ -19,8 +16,8 @@ log = logging.getLogger(__name__)
 
 Base = declarative_base()
 
-engine: AsyncEngine | None = None
-SessionLocal: async_sessionmaker[AsyncSession] | None = None
+engine: Engine | None = None
+SessionLocal: sessionmaker | None = None
 
 
 def build_db_url(
@@ -43,7 +40,7 @@ def build_db_url(
 def init_engine(
     db_config: DbConfig | None = None,
     url: str | URL | None = None,
-) -> AsyncEngine:
+) -> Engine:
     """
     Initialize the global SQLAlchemy engine and session factory.
     Pass either a DbConfig-like object or a full URL. Only initializes once.
@@ -67,7 +64,7 @@ def init_engine(
                 db_config.dbname,
             )
 
-    engine = create_async_engine(
+    engine = create_engine(
         url,
         echo=False,
         pool_size=10,
@@ -75,23 +72,33 @@ def init_engine(
         pool_timeout=30,
         pool_recycle=1800,
     )
-    SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     log.debug("SQLAlchemy engine initialized")
     return engine
 
 
-async def get_async_session() -> AsyncIterator[AsyncSession]:
+def get_engine() -> Engine:
+    if engine is None:
+        msg = "Engine not initialized. Call init_engine(...) first."
+        raise RuntimeError(msg)
+    return engine
+
+
+def get_session() -> Generator[Session]:
     if SessionLocal is None:
         msg = "Session factory not initialized. Call init_engine(...) first."
         raise RuntimeError(msg)
-    async with SessionLocal() as db:
-        try:
-            yield db
-            await db.commit()
-        except Exception:
-            await db.rollback()
-            log.critical("", exc_info=True)
-            raise
+    db = SessionLocal()
+    try:
+        yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        log.critical("", exc_info=True)
+        raise
+    finally:
+        db.close()
 
 
-DbSessionDependency = Annotated[AsyncSession, Depends(get_async_session)]
+db_session: ContextVar[Session] = ContextVar("db_session")
+DbSessionDependency = Annotated[Session, Depends(get_session)]

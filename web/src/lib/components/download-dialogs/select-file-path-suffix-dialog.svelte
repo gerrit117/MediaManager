@@ -2,7 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import FilePathSuffixSelector from '$lib/components/download-dialogs/file-path-suffix-selector.svelte';
-	import type { Movie, Show } from '$lib/api/api';
+	import type { components } from '$lib/api/api';
 
 	let {
 		filePathSuffix = $bindable(),
@@ -10,7 +10,7 @@
 		callback
 	}: {
 		filePathSuffix: string;
-		media: Movie | Show;
+		media: components['schemas']['Movie'] | components['schemas']['Show'];
 		callback: () => void;
 	} = $props();
 	let dialogOpen = $state(false);

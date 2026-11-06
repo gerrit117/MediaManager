@@ -13,11 +13,9 @@
 	import { resolve } from '$app/paths';
 
 	let {
-		oauthProviderNames,
-		registrationEnabled
+		oauthProviderNames
 	}: {
 		oauthProviderNames: string[];
-		registrationEnabled: boolean;
 	} = $props();
 
 	let email = $state('');
@@ -127,12 +125,10 @@
 				>Login with {name}</Button
 			>
 		{/each}
-		{#if registrationEnabled}
-			<div class="mt-4 text-center text-sm">
-				<Button href={resolve('/login/signup/', {})} variant="link"
-					>Don't have an account? Sign up</Button
-				>
-			</div>
-		{/if}
+		<div class="mt-4 text-center text-sm">
+			<Button href={resolve('/login/signup/', {})} variant="link"
+				>Don't have an account? Sign up</Button
+			>
+		</div>
 	</Card.Content>
 </Card.Root>

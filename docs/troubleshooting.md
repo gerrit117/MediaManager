@@ -1,12 +1,13 @@
 # Troubleshooting
 
-!!! info Always check the container and browser logs for more specific error messages
+!!! info
+    Always check the container and browser logs for more specific error messages
 
 <details>
 
 <summary>Authentication Issues</summary>
 
-**I can't log in with OAuth/OIDC?**
+#### I can't log in with OAuth/OIDC?
 
 Verify provider configurationVerify your OAuth provider's configuration. See the OAuth documentationCheck callback URICheck if the callback URI you set in your OIDC providers settings is correct. See the callback URI documentationCheck frontend URLCheck the frontend url in your config file. It should match the URL you use to access MediaManager.
 
@@ -34,7 +35,7 @@ The reason is that hard linking only works within the same filesystem. If your d
 
 <summary>Torrent Search Issues</summary>
 
-**I get no search results for torrents?**
+#### I get no search results for torrents?
 
 Switch to advanced tabTry switching to the advanced tab when searching for torrents.Increase timeout for slow indexersIf you use "slow" indexers, try increasing the timeout threshold.Check logsIf you still don't get any search results, check the logs, they will provide more information on what is going wrong.
 
@@ -55,11 +56,12 @@ Switch to advanced tabTry switching to the advanced tab when searching for torre
 * If you get a 401 or 403 error when pulling the image from GHCR, this is not a permission issue with the repository/image. It errors because your Docker client is misconfigured.
 * This is not a MediaManager issue per se, so please don't open an issue about this on the MediaManager GitHub repo.
 
-**Possible Fixes:**
+#### Possible Fixes:
 
 * [Unable to pull image from GitHub Container Registry (Stack Overflow)](https://stackoverflow.com/questions/74656167/unable-to-pull-image-from-github-container-registry-ghcr)
 * [Try pulling the image from Quay.io](installation/docker.md#docker-images)
 
 </details>
 
-!!! info If it still doesn't work, [please open an Issue.](https://github.com/maxdorninger/MediaManager/issues) It is possible that a bug is causing the issue.
+!!! info
+    If it still doesn't work, [please open an Issue.](https://github.com/maxdorninger/MediaManager/issues) It is possible that a bug is causing the issue.
