@@ -48,11 +48,11 @@
 			console.log('Login successful!');
 			console.log('Received User Data: ', response);
 			successMessage = 'Login successful! Redirecting...';
-			toast.success(successMessage);
+			toast.success(mmT($mmLocale,successMessage));
 			const target = new URLSearchParams(window.location.search).get('next');
 			await goto(target === '/web/dashboard/settings/' ? resolve('/dashboard/settings', {}) : resolve('/dashboard', {}));
 		} else {
-			toast.error('Login failed!');
+			toast.error(mmT($mmLocale,'Login failed!'));
 			errorMessage = `Login failed! Please check your credentials and try again.`;
 		}
 	}
@@ -106,7 +106,7 @@
 			{#if successMessage}
 				<Alert.Root variant="default">
 					<Alert.Title>{mmT($mmLocale, "Success" )}</Alert.Title>
-					<Alert.Description>{successMessage}</Alert.Description>
+					<Alert.Description>{mmT($mmLocale,successMessage)}</Alert.Description>
 				</Alert.Root>
 			{/if}
 

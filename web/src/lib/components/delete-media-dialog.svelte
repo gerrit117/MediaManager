@@ -24,7 +24,7 @@
 
 	async function delete_movie() {
 		if (!media.id) {
-			toast.error('Movie ID is missing');
+			toast.error(mmT($mmLocale,'Movie ID is missing'));
 			return;
 		}
 		const { error } = await client.DELETE('/api/v1/movies/{movie_id}', {
@@ -34,9 +34,9 @@
 			}
 		});
 		if (error) {
-			toast.error('Failed to delete movie: ' + error.detail);
+			toast.error(mmT($mmLocale,'Failed to delete movie: ' + error.detail));
 		} else {
-			toast.success('Movie deleted successfully.');
+			toast.success(mmT($mmLocale,'Movie deleted successfully.'));
 			deleteDialogOpen = false;
 			await goto(resolve('/dashboard/movies', {}), { invalidateAll: true });
 		}
@@ -50,9 +50,9 @@
 			}
 		});
 		if (error) {
-			toast.error('Failed to delete show: ' + error.detail);
+			toast.error(mmT($mmLocale,'Failed to delete show: ' + error.detail));
 		} else {
-			toast.success('Show deleted successfully.');
+			toast.success(mmT($mmLocale,'Show deleted successfully.'));
 			deleteDialogOpen = false;
 			await goto(resolve('/dashboard/tv', {}), { invalidateAll: true });
 		}

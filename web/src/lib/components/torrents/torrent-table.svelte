@@ -59,10 +59,10 @@
 			}
 		});
 		if (error) {
-			toast.error((error as { detail?: string })?.detail ?? 'Downloadmanager-Anfrage fehlgeschlagen.');
+			toast.error(mmT($mmLocale,(error as { detail?: string })?.detail ?? 'Downloadmanager-Anfrage fehlgeschlagen.'));
 		} else {
 			console.log(`Successfully retried download for torrent ${torrent.torrent_title}`);
-			toast.success('Downloadmanager-Anfrage gesendet.');
+			toast.success(mmT($mmLocale,'Downloadmanager-Anfrage gesendet.'));
 		}
 		await invalidateAll();
 	}

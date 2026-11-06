@@ -33,7 +33,7 @@
 			}
 		});
 		if (error) {
-			toast.error('Download konnte nicht aktualisiert werden.');
+			toast.error(mmT($mmLocale,'Download konnte nicht aktualisiert werden.'));
 			return;
 		}
 		await invalidateAll();

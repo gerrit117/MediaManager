@@ -48,7 +48,7 @@
 
 			if (!response.ok) {
 				submitRequestError = (error as any)?.detail ?? 'Anfrage fehlgeschlagen';
-				toast.error(submitRequestError!);
+				toast.error(mmT($mmLocale,submitRequestError!));
 				break;
 			}
 			completed.push(id);
@@ -61,7 +61,7 @@
 			selectedSeasonsIds = [];
 			minQuality = undefined;
 			wantedQuality = undefined;
-			toast.success('Season request(s) submitted successfully!');
+			toast.success(mmT($mmLocale,'Season request(s) submitted successfully!'));
 		}
 
 		isSubmittingRequest = false;

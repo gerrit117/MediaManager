@@ -434,3 +434,45 @@ Verifying	Prüft
 Fetching repair data	Lädt Reparaturdaten
 Waiting for availability	Wartet auf Verfügbarkeit
 Unknown status	Status unbekannt
+Failed to update library	Bibliothek konnte nicht aktualisiert werden
+Library updated to {library}	Bibliothek geändert zu {library}
+Movie ID is missing	Film-ID fehlt
+Failed to delete movie: {detail}	Film konnte nicht gelöscht werden: {detail}
+Movie deleted successfully.	Film gelöscht.
+Failed to delete show: {detail}	Serie konnte nicht gelöscht werden: {detail}
+Show deleted successfully.	Serie gelöscht.
+Failed to update request status: {detail}	Anfragestatus konnte nicht geändert werden: {detail}
+Request approved successfully.	Anfrage genehmigt.
+Request unapproved successfully.	Genehmigung zurückgenommen.
+Request deleted successfully	Anfrage gelöscht
+Failed to delete request	Anfrage konnte nicht gelöscht werden
+Movie request submitted successfully!	Filmanfrage gesendet!
+Season request(s) submitted successfully!	Staffelanfragen gesendet!
+Failed to update user	Benutzer konnte nicht geändert werden
+Updated details successfully.	Kontodaten geändert.
+Failed to import	Import fehlgeschlagen
+Imported successfully!	Import erfolgreich!
+Searching indexers...	Indexer werden durchsucht …
+Found {count} releases.	{count} Releases gefunden.
+Login successful! Redirecting...	Anmeldung erfolgreich! Weiterleitung …
+Login failed!	Anmeldung fehlgeschlagen!
+Login failed! Please check your credentials and try again.	Anmeldung fehlgeschlagen! Prüfe die Zugangsdaten und versuche es erneut.
+Registration successful! Please login.	Registrierung erfolgreich! Bitte melde dich an.
+Registration failed	Registrierung fehlgeschlagen
+Could not load indexer categories.	Indexer-Kategorien konnten nicht geladen werden.
+Could not load categories.	Kategorien konnten nicht geladen werden.
+Could not save categories.	Kategorien konnten nicht gespeichert werden.
+Save a direct indexer connection or configure Prowlarr or Jackett to select categories.	Verbinde den integrierten Indexer oder richte Prowlarr beziehungsweise Jackett ein, um Kategorien auszuwählen.
+Saved categories for {indexer}.	Kategorien für {indexer} gespeichert.
+Saved. Direct searches are enabled.	Gespeichert. Direkte Suche ist aktiviert.
+Saved. Direct searches are disabled.	Gespeichert. Direkte Suche ist deaktiviert.
+Check the indexer settings and try again.	Prüfe die Indexer-Einstellungen und versuche es erneut.
+The indexer request failed.	Indexer-Anfrage fehlgeschlagen.
+Connection and API key verified. No download was started.	Verbindung und API-Schlüssel geprüft. Es wurde kein Download gestartet.
+Available categories: {count}	Verfügbare Kategorien: {count}
+Could not delete download: {detail}	Download konnte nicht gelöscht werden: {detail}
+Download deleted.	Download gelöscht.
+Could not update download.	Download konnte nicht aktualisiert werden.
+Download manager request failed.	Downloadmanager-Anfrage fehlgeschlagen.
+Download manager request sent.	Downloadmanager-Anfrage gesendet.
+Download submitted to the download manager.	Download an den Downloadmanager übergeben.

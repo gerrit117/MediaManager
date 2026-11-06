@@ -58,14 +58,14 @@
 			const errorMessage = `There already is a Season File using the Filepath Suffix '${filePathSuffix}'. Try again with a different Filepath Suffix.`;
 			console.warn(errorMessage);
 			torrentsError = errorMessage;
-			if (dialogueState) toast.info(errorMessage);
+			if (dialogueState) toast.info(mmT($mmLocale,errorMessage));
 		} else if (!response.ok) {
 			const errorMessage = (error as { detail?: string } | undefined)?.detail ?? `Downloadmanager-Anfrage fehlgeschlagen: ${response.statusText}`;
 			console.error(errorMessage);
 			torrentsError = errorMessage;
-			toast.error(errorMessage);
+			toast.error(mmT($mmLocale,errorMessage));
 		} else {
-			toast.success('Download an den Downloadmanager übergeben.');
+			toast.success(mmT($mmLocale,'Download an den Downloadmanager übergeben.'));
 		}
 		await invalidateAll();
 	}
@@ -87,10 +87,10 @@
 			.then((data) => data?.data)
 			.finally(() => (isLoading = false));
 
-		toast.info('Searching indexers...');
+		toast.info(mmT($mmLocale,'Searching indexers...'));
 
 		torrentsData = await torrentsPromise;
-		toast.info('Found ' + torrentsData?.length + ' releases.');
+		toast.info(mmT($mmLocale,'Found ' + torrentsData?.length + ' releases.'));
 	}
 </script>
 

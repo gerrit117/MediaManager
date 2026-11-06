@@ -67,9 +67,9 @@
 			});
 		}
 		if (response.error) {
-			toast.error('Failed to update library');
+			toast.error(mmT($mmLocale,'Failed to update library'));
 		} else {
-			toast.success(`Library updated to ${selectedLabel}`);
+			toast.success(mmT($mmLocale,`Library updated to ${selectedLabel}`));
 			media.library = selectedLabel;
 		}
 		await invalidateAll();

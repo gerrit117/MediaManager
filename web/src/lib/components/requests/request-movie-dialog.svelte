@@ -43,10 +43,10 @@
 			dialogOpen = false;
 			minQuality = undefined;
 			wantedQuality = undefined;
-			toast.success('Movie request submitted successfully!');
+			toast.success(mmT($mmLocale,'Movie request submitted successfully!'));
 		} else {
 			submitRequestError = (error as any)?.detail ?? 'Anfrage fehlgeschlagen';
-			toast.error(submitRequestError);
+			toast.error(mmT($mmLocale,submitRequestError));
 		}
 		await invalidateAll();
 	}

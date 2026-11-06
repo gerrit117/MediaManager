@@ -58,12 +58,12 @@
 		}
 		if (response.ok) {
 			toast.success(
-				`Request ${!currentAuthorizedStatus ? 'approved' : 'unapproved'} successfully.`
+				mmT($mmLocale,!currentAuthorizedStatus?'Request approved successfully.':'Request unapproved successfully.')
 			);
 		} else {
 			const errorText = await response.text();
 			console.error(`Failed to update request status ${response.statusText}`, errorText);
-			toast.error(`Failed to update request status: ${response.statusText}`);
+			toast.error(mmT($mmLocale,`Failed to update request status: ${response.statusText}`));
 		}
 		await invalidateAll();
 	}
@@ -97,10 +97,10 @@
 			response = data.response;
 		}
 		if (response.ok) {
-			toast.success('Request deleted successfully');
+			toast.success(mmT($mmLocale,'Request deleted successfully'));
 		} else {
 			console.error(`Failed to delete request ${response.statusText}`, await response.text());
-			toast.error('Failed to delete request');
+			toast.error(mmT($mmLocale,'Failed to delete request'));
 		}
 		await invalidateAll();
 	}

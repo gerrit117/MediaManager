@@ -41,9 +41,9 @@
 		});
 
 		if (error) {
-			toast.error(`Failed to update user ${selectedUser.email}: ${error}`);
+			toast.error(mmT($mmLocale,`Failed to update user ${selectedUser.email}: ${error}`));
 		} else {
-			toast.success(`User ${selectedUser.email} updated successfully.`);
+			toast.success(mmT($mmLocale,`User ${selectedUser.email} updated successfully.`));
 			dialogOpen = false;
 			selectedUser = null;
 			newPassword = '';
@@ -64,9 +64,9 @@
 		});
 
 		if (error) {
-			toast.error(`Failed to delete user ${userToDelete.email}: ${error}`);
+			toast.error(mmT($mmLocale,`Failed to delete user ${userToDelete.email}: ${error}`));
 		} else {
-			toast.success(`User ${userToDelete.email} deleted successfully.`);
+			toast.success(mmT($mmLocale,`User ${userToDelete.email} deleted successfully.`));
 			deleteDialogOpen = false;
 			userToDelete = null;
 		}

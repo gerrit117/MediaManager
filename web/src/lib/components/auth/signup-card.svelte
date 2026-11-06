@@ -44,9 +44,9 @@
 
 		if (response.ok) {
 			successMessage = 'Registration successful! Please login.';
-			toast.success(successMessage);
+			toast.success(mmT($mmLocale,successMessage));
 		} else {
-			toast.error('Registration failed');
+			toast.error(mmT($mmLocale,'Registration failed'));
 		}
 	}
 </script>
@@ -100,7 +100,7 @@
 				<Alert.Root variant="default">
 					<CheckCircle2Icon class="size-4" />
 					<Alert.Title>{mmT($mmLocale, "Success" )}</Alert.Title>
-					<Alert.Description>{successMessage}</Alert.Description>
+					<Alert.Description>{mmT($mmLocale,successMessage)}</Alert.Description>
 				</Alert.Root>
 			{/if}
 			{#if isLoading}

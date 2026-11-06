@@ -20,9 +20,9 @@
 			}
 		});
 		if (error) {
-			toast.error(`Failed to update user`);
+			toast.error(mmT($mmLocale,`Failed to update user`));
 		} else {
-			toast.success(`Updated details successfully.`);
+			toast.success(mmT($mmLocale,`Updated details successfully.`));
 			dialogOpen = false;
 		}
 		newPassword = '';

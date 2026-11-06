@@ -29,7 +29,7 @@
     <div class="mt-4 grid min-w-0 gap-4 md:grid-cols-2">
      {#each fields.filter(f=>f.key.startsWith(group+'.')) as field (field.key)}
       <label class="flex min-w-0 flex-col gap-2 text-sm" for={'setting-'+field.key}>
-       <span>{mmT($mmLocale, field.label)}{field.environment?' · per Umgebungsvariable gesetzt':''}</span>
+       <span>{mmT($mmLocale, field.label)}{field.environment?' · '+mmT($mmLocale,'Set by environment variable'):''}</span>
        {#if field.kind==='bool'}
         <input id={'setting-'+field.key} type="checkbox" class="size-5 accent-primary" bind:checked={field.value} disabled={field.environment||busy}/>
        {:else if field.kind==='number'}

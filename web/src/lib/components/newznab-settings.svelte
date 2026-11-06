@@ -49,7 +49,7 @@
 				);
 			}
 			if (test) {
-				message = `${result.message} ${result.categories} categories available.`;
+				message = mmT($mmLocale,result.message)+' '+mmT($mmLocale,'Available categories: {count}'.replace('{count}',String(result.categories)));
 			} else {
 				url = result.url;
 				enabled = result.enabled;
@@ -130,7 +130,7 @@
 				>
 			</div>
 			<p role="status">{mmT($mmLocale, message)}</p>
-			{#if error}<p role="alert" class="text-destructive">{error}</p>{/if}
+			{#if error}<p role="alert" class="text-destructive">{mmT($mmLocale,error)}</p>{/if}
 		</form>
 	</Card.Content>
 </Card.Root>

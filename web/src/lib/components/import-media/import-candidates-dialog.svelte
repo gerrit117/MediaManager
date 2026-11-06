@@ -93,9 +93,9 @@
 		isImporting = false;
 
 		if (errored) {
-			toast.error('Failed to import');
+			toast.error(mmT($mmLocale,'Failed to import'));
 		} else {
-			toast.success('Imported successfully!');
+			toast.success(mmT($mmLocale,'Imported successfully!'));
 		}
 		await invalidateAll();
 		dialogOpen = false;

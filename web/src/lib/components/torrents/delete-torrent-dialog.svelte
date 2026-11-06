@@ -25,9 +25,9 @@
 			}
 		});
 		if (error) {
-			toast.error(`Download konnte nicht gelöscht werden: ${error}`);
+			toast.error(mmT($mmLocale,`Download konnte nicht gelöscht werden: ${error}`));
 		} else {
-			toast.success('Download gelöscht.');
+			toast.success(mmT($mmLocale,'Download gelöscht.'));
 			dialogueState = false;
 		}
 		await invalidateAll();

@@ -4,3 +4,5 @@ const t=createTranslator(entries);
 test('explicit languages, with German and English source labels',()=>{assert.equal(t('de','Settings'),'Einstellungen');assert.equal(t('en','Benutzerverwaltung'),'User management');assert.equal(t('de','Automatic approval'),'Automatische Genehmigung');assert.equal(t('en','Integriert'),'Integrated');});
 test('metadata and identifiers are not translated by guessing',()=>{assert.equal(t('en','Some movie title'),'Some movie title');assert.equal(t('de','API-ID-123'),'API-ID-123');});
 test('dictionary has no conflicting duplicate keys and no blank values',()=>{const map=new Map();for(const [key,value] of entries){assert.ok(key&&value);assert.ok(!map.has(key)||map.get(key)===value);map.set(key,value);}});
+
+test('explicit message templates preserve user-provided text',()=>{assert.equal(t('de','Found 12 releases.'),'12 Releases gefunden.');assert.equal(t('en','Kategorien für $1.Movies gespeichert.'),'Saved categories for $1.Movies.');});
