@@ -17,6 +17,9 @@ class AbstractMetadataProvider(ABC):
     def name(self) -> str:
         pass
 
+    def get_show_identifiers(self, show_id: int) -> dict[str, str]:
+        return {self.name: str(show_id)}
+
     @abstractmethod
     def get_show_metadata(self, show_id: int, language: str | None = None) -> Show:
         raise NotImplementedError()

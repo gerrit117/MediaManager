@@ -602,3 +602,43 @@ A title is required.	Ein Titel ist erforderlich.
 Details saved, but the provider did not supply a poster.	Details gespeichert, aber der Anbieter liefert kein Cover.
 Details saved, but the poster could not be refreshed.	Details gespeichert, aber das Cover konnte nicht aktualisiert werden.
 Year	Jahr
+TMDB API key (optional)	TMDB-API-Key (optional)
+Delete series	Serie löschen
+Delete movie	Film löschen
+Series already exists	Serie bereits vorhanden
+Add series	Serie hinzufügen
+Add movie	Film hinzufügen
+Import destination	Zielbibliothek
+Import destination updated	Zielbibliothek aktualisiert
+Used for future imports. Existing files stay in place. To correct a title or provider ID, use metadata editing.	Gilt für künftige Importe. Vorhandene Dateien bleiben am bisherigen Ort. Titel und Anbieter-ID lassen sich über die Metadatenbearbeitung korrigieren.
+Movie collections	Filmreihen
+Refresh collections	Filmreihen aktualisieren
+Refreshing…	Wird aktualisiert …
+Search collections	Filmreihen suchen
+Collection members are matched against your own library. Opening a missing movie lets you search or request it.	Die Teile werden mit deiner eigenen Bibliothek abgeglichen. Öffne einen fehlenden Film, um ihn zu suchen oder anzufragen.
+No collections cached. An administrator can refresh them using TMDB or an existing Radarr metadata connection.	Noch keine Filmreihen gespeichert. Ein Administrator kann sie über TMDB oder eine vorhandene Radarr-Metadatenverbindung laden.
+Collections could not be loaded.	Filmreihen konnten nicht geladen werden.
+Movie could not be added.	Film konnte nicht hinzugefügt werden.
+Air date unknown	Ausstrahlungsdatum unbekannt
+Check download	Download prüfen
+Specials	Extras
+Search season	Staffel suchen
+Request season	Staffel anfragen
+Request episode	Folge anfragen
+Release rules and monthly request policies apply.	Release-Regeln und monatliche Anfragelimits gelten auch hier.
+Searching…	Suche läuft …
+Search releases	Releases suchen
+Episode requests	Folgenanfragen
+No episode requests.	Keine Folgenanfragen.
+Requests could not be loaded.	Anfragen konnten nicht geladen werden.
+Revoke approval	Genehmigung zurücknehmen
+Pending approval	Wartet auf Genehmigung
+Delete request?	Anfrage löschen?
+Delete request	Anfrage löschen
+Download submitted	Download übergeben
+Request submitted	Anfrage übermittelt
+Minimum quality	Mindestqualität
+Wanted quality	Gewünschte Qualität
+Complete	Vollständig
+Upcoming	Künftig
+Requested	Angefragt

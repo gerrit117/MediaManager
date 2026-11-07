@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { page } from '$app/state';
+    import EpisodeRequests from '$lib/components/requests/episode-requests.svelte';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
@@ -47,4 +48,5 @@
 		{mmT($mmLocale, "Season Requests" )}
 	</h1>
 	<RequestsTable {requests} isShow={true} />
+<EpisodeRequests/>
 </main>

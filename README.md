@@ -12,7 +12,7 @@ This is a community fork, not an official upstream release. The original project
 - Episode monitoring follows weekly releases within existing seasons, with persistent submission deduplication and targeted imports.
 - Shared language/resolution preferences and release exclusions apply to all indexer providers and manual/automatic downloads.
 - Exactly two roles: Admin and User. Administrators can set each user's monthly request quota and automatic approval.
-- Persistent quota accounting covers movies and seasons together and cannot be bypassed by deleting requests or making concurrent submissions.
+- Persistent quota accounting covers movies, seasons and individual episode requests together and cannot be bypassed by deleting requests or making concurrent submissions.
 - Direct Newznab connection and indexer-advertised category discovery, alongside Prowlarr and Jackett.
 - SABnzbd, qBittorrent and Transmission integration, with protocol-aware download labels and progress.
 - Quick release filters for resolution, video source, audio tags and download type.
@@ -33,11 +33,27 @@ For a new managed stack, use [the installation guide](docs/configuration/managed
 
 On Unraid, use UID 99/GID 100 with writable persistent mounts. Keep existing configuration and database backups before upgrading. New database migrations are included in the image; do not replace a populated PostgreSQL data directory to upgrade it.
 
+## TMDB API key
+
+Set `MEDIAMANAGER_METADATA__TMDB__API_KEY` to your own TMDB v3 API key for direct TMDB access, including full movie-collection membership and missing collection entries. Obtain a key in your [TMDB account settings](https://www.themoviedb.org/settings/api). Existing relay-based movie and series metadata, requests and downloads do not require a personal TMDB key.
+
+You can either supply the variable when creating the Docker container, or enter the key in the administrator web settings. An environment variable takes precedence and makes the corresponding web setting read-only; recreate the container after changing its environment. Keys entered through web settings are stored privately in the persistent configuration directory and are not returned to the browser. Keep keys out of committed Compose files and shared container diagnostics.
+
+```sh
+# Export the key in your shell or deployment secret environment first.
+docker run --env MEDIAMANAGER_METADATA__TMDB__API_KEY \
+  --volume /your/config:/app/config \
+  --publish 8095:8000 ghcr.io/gerrit117/mediamanager:latest
+```
+
+For the managed Compose stack, export the same variable before starting it. On Unraid, add a Variable with this exact key and enable masking, or use [the container template](ops/unraid-mediamanager.xml). Leaving the variable unset keeps the web settings option available.
+
 ## Documentation
 
 - [Requests, policies and language selection](docs/configuration/request-policies.md)
 - [Episode monitoring and release rules](docs/episode-monitoring.md)
 - [Existing libraries and series monitoring](docs/library-import.md)
+- [Series identities, episode actions and movie collections](docs/library-details.md)
 - [Setup and web settings](docs/configuration/web-settings.md)
 - [Managed stack](docs/configuration/managed-stack.md)
 - [Upstream review and backports](docs/upstream-tracking.md)

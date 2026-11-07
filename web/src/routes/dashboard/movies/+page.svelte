@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
+    import {base} from '$app/paths';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -52,7 +53,8 @@
 </header>
 <main class="flex w-full flex-1 flex-col gap-4 p-4 pt-0">
 	<h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">{mmT($mmLocale, "Movies" )}</h1>
-	<LibraryScan kind="movies" />
+	<a class="self-start rounded-lg border px-4 py-2" href={base+'/dashboard/movies/collections'}>{mmT($mmLocale,"Movie collections")}</a>
+    <LibraryScan kind="movies" />
 	{#await data.movies}
 		<LoadingBar />
 	{:then movies}

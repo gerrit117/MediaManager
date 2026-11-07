@@ -108,6 +108,13 @@ def edit_metadata(kind: Literal['tv', 'movies'], media_id: UUID, body: MetadataE
     duplicate = db.scalar(select(cls.id).where(cls.metadata_provider == body.provider, cls.external_id == body.external_id, cls.id != media_id))
     if duplicate:
         raise HTTPException(409, 'This provider ID already belongs to another title. No records were merged.')
+    if kind=='tv':
+        from media_manager.library_models import ShowExternalId
+        alias=db.get(ShowExternalId,(body.provider,str(body.external_id)))
+        if alias and alias.show_id!=media_id:raise HTTPException(409,'This provider ID already belongs to another title. No records were merged.')
+        if changed:
+            for alias in db.scalars(select(ShowExternalId).where(ShowExternalId.show_id==media_id)):db.delete(alias)
+            db.flush()
     row.metadata_provider = body.provider
     row.external_id = body.external_id
     row.name = body.name.strip()
@@ -120,6 +127,9 @@ def edit_metadata(kind: Literal['tv', 'movies'], media_id: UUID, body: MetadataE
         if kind == 'tv':
             row.ended = fresh.ended
             reconcile_seasons(row, fresh, changed)
+    if kind=='tv':
+        from media_manager.show_identity import register,identifiers
+        register(db,row.id,identifiers(body.provider,body.external_id,row.imdb_id))
     try:
         db.commit()
     except IntegrityError:

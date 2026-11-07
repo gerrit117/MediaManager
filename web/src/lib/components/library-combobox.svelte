@@ -1,124 +1,25 @@
 <script lang="ts">
-	import {locale as mmLocale,t as mmT} from '$lib/i18n';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import * as Command from '$lib/components/ui/command/index.js';
-	import * as Popover from '$lib/components/ui/popover/index.js';
-	import { cn } from '$lib/utils.js';
-	import { tick } from 'svelte';
-	import { CheckIcon, ChevronsUpDownIcon } from 'lucide-svelte';
-	import { onMount } from 'svelte';
-	import { toast } from 'svelte-sonner';
-	import client from '$lib/api';
-	import type { components } from '$lib/api/api';
-	import { invalidateAll } from '$app/navigation';
-
-	let {
-		media,
-		mediaType
-	}: {
-		media: components['schemas']['PublicShow'] | components['schemas']['PublicMovie'];
-		mediaType: 'tv' | 'movie';
-	} = $props();
-
-	let open = $state(false);
-	let value = $derived(media.library === '' ? 'Default' : media.library);
-	let libraries: components['schemas']['LibraryItem'][] = $state([]);
-	let triggerRef: HTMLButtonElement = $state(null!);
-	const selectedLabel: string = $derived(
-		libraries.find((item) => item.name === value)?.name ?? 'Default'
-	);
-	onMount(async () => {
-		const tvLibraries = await client.GET('/api/v1/tv/shows/libraries');
-		const movieLibraries = await client.GET('/api/v1/movies/libraries');
-
-		if (mediaType === 'tv') {
-			libraries = tvLibraries.data as components['schemas']['LibraryItem'][];
-		} else {
-			libraries = movieLibraries.data as components['schemas']['LibraryItem'][];
-		}
-
-		if (!value && libraries.length > 0) {
-			value = 'Default';
-		}
-		libraries.push({
-			name: 'Default',
-			path: 'Default'
-		} as components['schemas']['LibraryItem']);
-	});
-
-	async function handleSelect() {
-		open = false;
-		await tick();
-		triggerRef.focus();
-		let response;
-		if (mediaType === 'tv') {
-			response = await client.POST('/api/v1/tv/shows/{show_id}/library', {
-				params: {
-					path: { show_id: media.id! },
-					query: { library: selectedLabel }
-				}
-			});
-		} else {
-			response = await client.POST('/api/v1/movies/{movie_id}/library', {
-				params: {
-					path: { movie_id: media.id! },
-					query: { library: selectedLabel }
-				}
-			});
-		}
-		if (response.error) {
-			toast.error(mmT($mmLocale,'Failed to update library'));
-		} else {
-			toast.success(mmT($mmLocale,`Library updated to ${selectedLabel}`));
-			media.library = selectedLabel;
-		}
-		await invalidateAll();
-	}
-
-	function closeAndFocusTrigger() {
-		open = false;
-		tick().then(() => {
-			triggerRef.focus();
-		});
-	}
+ import {locale,t} from '$lib/i18n';
+ import {onMount} from 'svelte';
+ import {toast} from 'svelte-sonner';
+ import client from '$lib/api';
+ import type {components} from '$lib/api/api';
+ let {media,mediaType}:{media:components['schemas']['PublicShow']|components['schemas']['PublicMovie'];mediaType:'tv'|'movie'}=$props();
+ let libraries=$state<{name:string;path:string}[]>([]);let busy=$state(false);
+ let value=$derived(media.library||'Default');
+ onMount(async()=>{const r=await fetch(mediaType==='tv'?'/api/v1/tv/shows/libraries':'/api/v1/movies/libraries');if(r.ok)libraries=await r.json();});
+ async function select(event:Event){
+  const selected=(event.currentTarget as HTMLSelectElement).value;busy=true;
+  const endpoint=mediaType==='tv'?`/api/v1/tv/shows/${media.id}/library`:`/api/v1/movies/${media.id}/library`;
+  try{const r=await fetch(endpoint+'?'+new URLSearchParams({library:selected}),{method:'POST'});if(!r.ok)throw Error();media.library=selected;toast.success(t($locale,'Import destination updated'));}
+  catch{toast.error(t($locale,'Failed to update library'));(event.target as HTMLSelectElement).value=value;}finally{busy=false;}
+ }
 </script>
-
-<Popover.Root bind:open>
-	<Popover.Trigger bind:ref={triggerRef}>
-		{#snippet child({ props })}
-			<Button
-				{...props}
-				variant="outline"
-				class="w-[200px] justify-between"
-				role="combobox"
-				aria-expanded={open}
-			>
-				{mmT($mmLocale, "Select Library" )}
-				<ChevronsUpDownIcon class="opacity-50" />
-			</Button>
-		{/snippet}
-	</Popover.Trigger>
-	<Popover.Content class="w-[200px] p-0">
-		<Command.Root>
-			<Command.Input placeholder={mmT($mmLocale, "Search library...")} />
-			<Command.List>
-				<Command.Empty>{mmT($mmLocale, "No library found." )}</Command.Empty>
-				<Command.Group value="libraries">
-					{#each libraries as item (item.name)}
-						<Command.Item
-							value={item.name}
-							onSelect={() => {
-								value = item.name;
-								handleSelect();
-								closeAndFocusTrigger();
-							}}
-						>
-							<CheckIcon class={cn(value !== item.name && 'text-transparent')} />
-							{item.name}
-						</Command.Item>
-					{/each}
-				</Command.Group>
-			</Command.List>
-		</Command.Root>
-	</Popover.Content>
-</Popover.Root>
+<div class="w-full space-y-2 rounded-xl border p-3">
+ <label class="block text-sm font-semibold">{t($locale,'Import destination')}
+ <select class="mt-2 w-full rounded-lg border bg-background p-2" {value} onchange={select} disabled={busy}>
+ {#if !libraries.some(l=>l.name==='Default')}<option value="Default">{t($locale,'Default')}</option>{/if}
+ {#each libraries as library}<option value={library.name}>{library.name} — {library.path}</option>{/each}
+ </select></label>
+ <p class="text-xs text-muted-foreground">{t($locale,'Used for future imports. Existing files stay in place. To correct a title or provider ID, use metadata editing.')}</p>
+</div>

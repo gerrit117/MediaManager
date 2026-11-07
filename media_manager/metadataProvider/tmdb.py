@@ -242,6 +242,10 @@ class TmdbMetadataProvider(AbstractMetadataProvider):
             return False
         return True
 
+    def get_show_identifiers(self, show_id: int) -> dict[str,str]:
+        data=self.__get_show_external_ids(show_id)
+        return {key:str(value) for key,value in {'tmdb':show_id,'tvdb':data.get('tvdb_id'),'imdb':data.get('imdb_id')}.items() if value}
+
     @override
     def get_show_metadata(self, show_id: int, language: str | None = None) -> Show:
         """

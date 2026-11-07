@@ -141,6 +141,12 @@ class RichShowTorrent(BaseModel):
     torrents: list[RichSeasonTorrent]
 
 
+class PublicEpisode(Episode):
+    downloaded: bool = False
+    state: str = 'unknown'
+    requested: bool = False
+
+
 class PublicSeason(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -153,7 +159,13 @@ class PublicSeason(BaseModel):
 
     external_id: int
 
-    episodes: list[Episode]
+    episodes: list[PublicEpisode]
+    state: str = 'unknown'
+    available_count: int = 0
+    missing_count: int = 0
+    upcoming_count: int = 0
+    unknown_count: int = 0
+    total_count: int = 0
 
 
 class PublicShow(BaseModel):
@@ -173,3 +185,4 @@ class PublicShow(BaseModel):
     library: str
 
     seasons: list[PublicSeason]
+    external_ids: dict[str,str] = Field(default_factory=dict)

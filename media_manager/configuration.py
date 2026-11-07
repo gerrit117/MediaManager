@@ -65,6 +65,7 @@ FIELDS: list[tuple[str, str, str]] = [
  ('indexers.release_policy.excluded_tags','Excluded release tags','list'),
  ('indexers.release_policy.allow_unknown_language','Allow releases with unidentified language','bool'),
  ('misc.movie_directory','Filme','path'),('misc.tv_directory','Serien','path'),('misc.torrent_directory','Abgeschlossene Downloads (Containerpfad)','path'),('misc.image_directory','Vorschaubilder','path'),('misc.frontend_url','WebUI-Adresse','text'),
+ ('metadata.tmdb.api_key','TMDB API key (optional)','secret'),
  ('metadata.tmdb.default_language','Metadaten: Standardsprache','text'),('metadata.tmdb.primary_languages','Metadaten: bevorzugte Sprachen (z. B. de,en)','list'),
  ('database.host','Datenbank: Host','text'),('database.port','Datenbank: Port','number'),('database.dbname','Datenbank: Name','text'),('database.user','Datenbank: Benutzer','text'),('database.password','Datenbank: Passwort','secret'),
  ('torrents.sabnzbd.enabled','SABnzbd verwenden (NZB)','bool'),('torrents.sabnzbd.host','SABnzbd: Adresse mit http(s)://','text'),('torrents.sabnzbd.port','SABnzbd: Port','number'),('torrents.sabnzbd.api_key','SABnzbd: API-Key','secret'),('torrents.sabnzbd.base_path','SABnzbd: API-Pfad','text'),('torrents.sabnzbd.category','SABnzbd: Kategorie','text'),('torrents.sabnzbd.remote_download_directory','SABnzbd: fertiger Pfad im Downloadmanager','text'),
@@ -87,7 +88,7 @@ def fields_for_browser() -> list[dict]:
     return [dict(key=key, label=label, kind=kind,
                  value=None if kind == 'secret' else lookup(data, key),
                  configured=bool(lookup(data,key)) if kind == 'secret' else False,
-                 environment=bool(os.getenv('MEDIAMANAGER_'+key.upper().replace('.', '__')) is not None)) for key,label,kind in FIELDS]
+                 environment=bool(os.getenv('MEDIAMANAGER_'+key.upper().replace('.', '__')))) for key,label,kind in FIELDS]
 
 
 def stage_settings(values: dict, apply_live: bool = False) -> dict:
@@ -96,7 +97,7 @@ def stage_settings(values: dict, apply_live: bool = False) -> dict:
     cleaned = {}
     for key,value in values.items():
         if key not in kinds: raise ValueError('Unbekannte Einstellung')
-        if os.getenv('MEDIAMANAGER_'+key.upper().replace('.', '__')) is not None:
+        if os.getenv('MEDIAMANAGER_'+key.upper().replace('.', '__')):
             raise ValueError('Eine Umgebungsvariable überschreibt diese Einstellung')
         kind = kinds[key]
         if kind == 'secret' and value in ('',None): continue  # Keep existing credentials.

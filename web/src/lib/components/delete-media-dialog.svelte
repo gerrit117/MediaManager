@@ -61,7 +61,7 @@
 
 <AlertDialog.Root bind:open={deleteDialogOpen}>
 	<AlertDialog.Trigger class={buttonVariants({ variant: 'destructive' })}>
-		{mmT($mmLocale, "Delete" )} {isShow ? ' Show' : ' Movie'}
+		{mmT($mmLocale, isShow ? "Delete series" : "Delete movie")}
 	</AlertDialog.Trigger>
 	<AlertDialog.Content>
 		<AlertDialog.Header>

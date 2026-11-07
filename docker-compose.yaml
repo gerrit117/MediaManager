@@ -6,6 +6,8 @@ services:
       - "8000:8000"
     environment:
       - CONFIG_DIR=/app/config
+      # Optional; when unset, the key can be stored in web settings instead.
+      - MEDIAMANAGER_METADATA__TMDB__API_KEY
     volumes:
       # Mount your actual media directories here - these paths should match your config.toml
       - ./data/:/data/  # Example: change ./data/ to your actual media root

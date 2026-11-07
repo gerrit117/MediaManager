@@ -93,6 +93,9 @@ class TvRepository:
         :raises SQLAlchemyError: If a database error occurs.
         """
         try:
+            from media_manager.library_models import ShowExternalId
+            alias=self.db.get(ShowExternalId,(metadata_provider,str(external_id)))
+            if alias:return self.get_show_by_id(alias.show_id)
             stmt = (
                 select(Show)
                 .where(Show.external_id == external_id)

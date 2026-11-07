@@ -89,12 +89,24 @@ class TvService:
         :param metadata_provider: The name of the metadata provider.
         :param language: Optional language code (ISO 639-1) to fetch metadata in.
         """
-        show_with_metadata = metadata_provider.get_show_metadata(
-            show_id=external_id, language=language
-        )
-        saved_show = self.tv_repository.save_show(show=show_with_metadata)
-        metadata_provider.download_show_poster_image(show=saved_show)
-        return saved_show
+        from media_manager.show_identity import resolve,register,identifiers,identity_lock
+        db=self.tv_repository.db
+        basic=identifiers(metadata_provider.name,external_id)
+        existing=resolve(db,basic)
+        if existing:return self.tv_repository.get_show_by_id(existing.id)
+        fresh=metadata_provider.get_show_metadata(show_id=external_id,language=language)
+        ids=identifiers(metadata_provider.name,external_id,fresh.imdb_id)
+        try:ids.update(metadata_provider.get_show_identifiers(external_id))
+        except Exception:pass # Full metadata's IMDb identity still protects creation.
+        with identity_lock(db,ids):
+            existing=resolve(db,ids)
+            if existing:
+                register(db,existing.id,ids);db.commit()
+                return self.tv_repository.get_show_by_id(existing.id)
+            saved=self.tv_repository.save_show(show=fresh)
+            register(db,saved.id,ids);db.commit()
+        metadata_provider.download_show_poster_image(show=saved)
+        return saved
 
     def add_season_request(self, season_request: SeasonRequest) -> SeasonRequest:
         """
@@ -294,22 +306,23 @@ class TvService:
         :return: A list of metadata provider show search results.
         """
         results = metadata_provider.search_show(query)
+        from media_manager.show_identity import resolve,register
+        from media_manager.tv.models import Show as ShowModel
+        from sqlalchemy import select
+        db=self.tv_repository.db
+        years=set(db.scalars(select(ShowModel.year)).all())
         for result in results:
-            if self.check_if_show_exists(
-                external_id=result.external_id, metadata_provider=metadata_provider.name
-            ):
-                result.added = True
-
+            ids={metadata_provider.name:str(result.external_id)}
+            existing=resolve(db,ids)
+            if existing is None and result.year in years:
                 try:
-                    show = self.tv_repository.get_show_by_external_id(
-                        external_id=result.external_id,
-                        metadata_provider=metadata_provider.name,
-                    )
-                    result.id = show.id
-                except Exception:
-                    log.error(
-                        f"Unable to find internal show ID for {result.external_id} on {metadata_provider.name}"
-                    )
+                    ids.update(metadata_provider.get_show_identifiers(result.external_id))
+                    existing=resolve(db,ids)
+                except Exception:pass
+            if existing:
+                result.added=True;result.id=existing.id
+                register(db,existing.id,ids)
+        db.commit()
         return results
 
     def get_popular_shows(
@@ -338,12 +351,8 @@ class TvService:
         :param show: The show object.
         :return: A public show.
         """
-        seasons = [PublicSeason.model_validate(season) for season in show.seasons]
-        for season in seasons:
-            season.downloaded = self.is_season_downloaded(season_id=season.id)
-        public_show = PublicShow.model_validate(show)
-        public_show.seasons = seasons
-        return public_show
+        from media_manager.library_availability import public_show
+        return public_show(self,show)
 
     def get_show_by_id(self, show_id: ShowId) -> Show:
         """
@@ -361,17 +370,10 @@ class TvService:
         :param season_id: The ID of the season.
         :return: True if the season is downloaded, False otherwise.
         """
-        season_files = self.tv_repository.get_season_files_by_season_id(
-            season_id=season_id
-        )
-        present = set()
-        for season_file in season_files:
-            if season_file.episode_numbers:
-                present.update(episode_numbers([p for p in (season_file.source_files or []) if Path(p).is_file()], self.get_season(season_id).number))
-            elif self.season_file_exists_on_file(season_file=season_file):
-                return True
-        expected = {e.number for e in self.get_season(season_id).episodes}
-        return bool(expected) and expected.issubset(present)
+        from media_manager.library_availability import describe,season_presence
+        season=self.get_season(season_id)
+        show=self.tv_repository.get_show_by_season_id(season_id)
+        return describe(season,season_presence(self,show,season))['downloaded']
 
     def season_file_exists_on_file(self, season_file: SeasonFile) -> bool:
         """
@@ -610,7 +612,7 @@ class TvService:
             f"Show {show.name} without special characters: {remove_special_characters(show.name)}"
         )
 
-        if show.library != "Default":
+        if show.library not in ("", "Default"):
             for library in misc_config.tv_libraries:
                 if library.name == show.library:
                     log.debug(

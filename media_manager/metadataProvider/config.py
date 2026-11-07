@@ -1,7 +1,9 @@
 from pydantic_settings import BaseSettings
+from pydantic import Field
 
 
 class TmdbConfig(BaseSettings):
+    api_key: str = Field(default="", repr=False)
     tmdb_relay_url: str = "https://metadata-relay.dorninger.co/tmdb"
     primary_languages: list[str] = []  # ISO 639-1 language codes
     default_language: str = "en"  # ISO 639-1 language codes

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<Container version="2">
+ <Name>mediamanager</Name>
+ <Repository>ghcr.io/gerrit117/mediamanager:latest</Repository>
+ <Registry>https://github.com/gerrit117/MediaManager/pkgs/container/mediamanager</Registry>
+ <Network>bridge</Network><Privileged>false</Privileged>
+ <Support>https://github.com/gerrit117/MediaManager</Support>
+ <Overview>MediaManager with NZB and torrent support, requests and guided web configuration. Uses a separate PostgreSQL service. Optional TMDB key for complete movie collections.</Overview>
+ <WebUI>http://[IP]:[PORT:8000]/web/</WebUI>
+ <ExtraParams>--user=99:100</ExtraParams>
+ <Config Name="WebUI" Target="8000" Default="8095" Mode="tcp" Type="Port" Display="always" Required="true" Mask="false">8095</Config>
+ <Config Name="Configuration" Target="/app/config" Default="/mnt/user/appdata/mediamanager/config" Mode="rw" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/mediamanager/config</Config>
+ <Config Name="Posters" Target="/data/images" Default="/mnt/user/appdata/mediamanager/images" Mode="rw" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/mediamanager/images</Config>
+ <Config Name="Movies" Target="/data/movies" Default="/mnt/user/Media/Movies" Mode="rw" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/Media/Movies</Config>
+ <Config Name="Series" Target="/data/tv" Default="/mnt/user/Media/TV" Mode="rw" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/Media/TV</Config>
+ <Config Name="Downloads" Target="/downloads" Default="/mnt/user/Downloads/finished" Mode="rw" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/Downloads/finished</Config>
+ <Config Name="TMDB API key (optional)" Target="MEDIAMANAGER_METADATA__TMDB__API_KEY" Default="" Mode="" Description="TMDB v3 API key for direct movie-collection refresh and missing members. Empty: use private web settings instead. Environment values take precedence." Type="Variable" Display="always" Required="false" Mask="true"></Config>
+</Container>
