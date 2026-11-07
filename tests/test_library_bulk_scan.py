@@ -50,3 +50,28 @@ def test_source_urls_cannot_expose_keys_or_send_credentials_to_redirects():
 def test_source_validation_errors_hide_api_keys():
     with pytest.raises(ValueError) as error:LibraryScanConfig(sonarr_url='file:///invalid',sonarr_api_key='never-echo-this-fixture-key')
     assert 'never-echo-this-fixture-key' not in str(error.value)
+
+
+def test_status_reader_does_not_overwrite_a_worker_that_just_finished(tmp_path,monkeypatch):
+ import json
+ from media_manager.configuration import atomic_json
+ monkeypatch.setattr('media_manager.library_scan.config_file',lambda:tmp_path/'config.toml')
+ status=tmp_path/'library-scan-status.json';atomic_json(status,{'status':'running','processed':1})
+ def after_worker_finished():
+  atomic_json(status,{'status':'completed','processed':2})
+  return Mock()
+ monkeypatch.setattr('media_manager.library_scan.lock_scan',after_worker_finished)
+ assert read_status()['status']=='completed'
+ assert json.loads(status.read_text())['status']=='completed'
+
+
+def test_interruption_detection_cannot_overwrite_a_new_job(tmp_path,monkeypatch):
+ import json
+ from media_manager.configuration import atomic_json
+ monkeypatch.setattr('media_manager.library_scan.config_file',lambda:tmp_path/'config.toml')
+ status=tmp_path/'library-scan-status.json';atomic_json(status,{'status':'running','started_at':'old'})
+ probe=Mock()
+ probe.close.side_effect=lambda:atomic_json(status,{'status':'running','started_at':'new'})
+ monkeypatch.setattr('media_manager.library_scan.lock_scan',lambda:probe)
+ assert read_status()['status']=='interrupted'
+ assert json.loads(status.read_text())=={'status':'running','started_at':'new'}

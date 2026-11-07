@@ -15,44 +15,21 @@
 		isShow = true
 	}: { result: components['schemas']['MetaDataProviderSearchResult']; isShow: boolean } = $props();
 
-	async function addMedia() {
-		loading = true;
-		let data;
-		if (isShow) {
-			const response = await client.POST('/api/v1/tv/shows', {
-				params: {
-					query: {
-						show_id: result.external_id,
-						metadata_provider: result.metadata_provider as 'tmdb' | 'tvdb',
-						language: result.original_language ?? undefined
-					}
-				}
-			});
-			data = response.data;
-		} else {
-			const response = await client.POST('/api/v1/movies', {
-				params: {
-					query: {
-						movie_id: result.external_id,
-						metadata_provider: result.metadata_provider as 'tmdb' | 'tvdb',
-						language: result.original_language ?? undefined
-					}
-				}
-			});
-			data = response.data;
-		}
-
-		if (isShow) {
-			await goto(resolve('/dashboard/tv/[showId]', { showId: data?.id ?? '' }), {
-				invalidateAll: true
-			});
-		} else {
-			await goto(resolve('/dashboard/movies/[movieId]', { movieId: data?.id ?? '' }), {
-				invalidateAll: true
-			});
-		}
-		loading = false;
-	}
+    async function addMedia() {
+        loading=true;errorMessage=null;
+        try {
+            let response;
+            if(isShow){
+                response=await client.POST('/api/v1/tv/shows',{params:{query:{show_id:result.external_id,metadata_provider:result.metadata_provider as 'tmdb'|'tvdb',language:$mmLocale}}});
+            }else{
+                response=await client.POST('/api/v1/movies',{params:{query:{movie_id:result.external_id,metadata_provider:result.metadata_provider as 'tmdb'|'tvdb',language:$mmLocale}}});
+            }
+            if(!response.response.ok||!response.data?.id)throw Error(typeof (response.error as any)?.detail==='string'?(response.error as any).detail:'The title could not be added. Please try again.');
+            const id=response.data.id;
+            await goto(resolve(isShow?'/dashboard/tv/[showId]':'/dashboard/movies/[movieId]',isShow?{showId:id}:{movieId:id}),{invalidateAll:true});
+        }catch(error){errorMessage=(error as Error).message;}
+        finally{loading=false;}
+    }
 </script>
 
 <Card.Root class="col-span-full flex h-full flex-col overflow-x-hidden sm:col-span-1">
@@ -70,7 +47,8 @@
 	<Card.Content class="flex flex-1 items-center justify-center">
 		{#if result.poster_path != null}
 			<img
-				class="h-full w-full rounded-lg object-contain"
+				class="aspect-[2/3] h-full w-full rounded-lg object-cover"
+                loading="lazy" decoding="async"
 				src={result.poster_path}
 				alt="{result.name}'s Poster Image"
 			/>
@@ -83,7 +61,7 @@
 	<Card.Footer class="flex flex-col items-start gap-2 rounded-b-lg border-t bg-card p-4">
 		{#if result.added}
 			<Button
-				class="w-full font-semibold"
+				class="h-auto min-h-9 w-full whitespace-normal text-center text-xs font-semibold sm:text-sm"
 				variant="secondary"
 				href={resolve(
 					isShow ? '/dashboard/tv/[showId]' : '/dashboard/movies/[movieId]',
@@ -93,7 +71,7 @@
 				{mmT($mmLocale, isShow ? "Series already exists" : "Movie already exists")}
 			</Button>
 		{:else}
-			<Button class="w-full font-semibold" disabled={loading} onclick={() => addMedia()}>
+			<Button class="h-auto min-h-9 w-full whitespace-normal text-center text-xs font-semibold sm:text-sm" disabled={loading} onclick={() => addMedia()}>
 				{#if loading}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
 					<span class="animate-pulse">{mmT($mmLocale, "Loading..." )}</span>
@@ -115,7 +93,7 @@
 			{/if}
 		</div>
 		{#if errorMessage}
-			<p class="w-full rounded bg-red-50 px-2 py-1 text-xs text-red-500">{mmT($mmLocale, errorMessage)}</p>
+			<p role="alert" class="w-full rounded bg-red-50 px-2 py-1 text-xs text-red-500">{mmT($mmLocale, errorMessage)}</p>
 		{/if}
 	</Card.Footer>
 </Card.Root>

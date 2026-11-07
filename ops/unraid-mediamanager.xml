@@ -14,5 +14,5 @@
  <Config Name="Movies" Target="/data/movies" Default="/mnt/user/Media/Movies" Mode="rw" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/Media/Movies</Config>
  <Config Name="Series" Target="/data/tv" Default="/mnt/user/Media/TV" Mode="rw" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/Media/TV</Config>
  <Config Name="Downloads" Target="/downloads" Default="/mnt/user/Downloads/finished" Mode="rw" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/Downloads/finished</Config>
- <Config Name="TMDB API key (optional)" Target="MEDIAMANAGER_METADATA__TMDB__API_KEY" Default="" Mode="" Description="TMDB v3 API key for direct movie-collection refresh and missing members. Empty: use private web settings instead. Environment values take precedence." Type="Variable" Display="always" Required="false" Mask="true"></Config>
+ <Config Name="TMDB API key (optional)" Target="MEDIAMANAGER_METADATA__TMDB__API_KEY" Default="" Mode="" Description="TMDB v3 API key for discovery, provider/studio filters and full movie collections. Empty: use private web settings instead. Environment values take precedence." Type="Variable" Display="always" Required="false" Mask="true"></Config>
 </Container>

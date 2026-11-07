@@ -32,17 +32,17 @@
 		{/each}
 	{/if}
 	{#if isShow}
-		<Button class="md:col-start-2" variant="secondary" href={resolve('/dashboard/tv/add-show', {})}>
-			{mmT($mmLocale, "More recommendations" )}
+		<Button class="md:col-start-2" variant="secondary" href={resolve('/dashboard/tv/discover', {})}>
+			{mmT($mmLocale, "Discover more" )}
 			<ChevronRight />
 		</Button>
 	{:else}
 		<Button
 			class="md:col-start-2"
 			variant="secondary"
-			href={resolve('/dashboard/movies/add-movie', {})}
+			href={resolve('/dashboard/movies/discover', {})}
 		>
-			{mmT($mmLocale, "More recommendations" )}
+			{mmT($mmLocale, "Discover more" )}
 			<ChevronRight />
 		</Button>
 	{/if}

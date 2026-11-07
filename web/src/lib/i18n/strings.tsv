@@ -642,3 +642,61 @@ Wanted quality	Gewünschte Qualität
 Complete	Vollständig
 Upcoming	Künftig
 Requested	Angefragt
+Discover	Entdecken
+Discovery	Entdecken
+Discover series	Serien entdecken
+Discover movies	Filme entdecken
+Open library	Bibliothek öffnen
+Browse current trends or explore by streaming provider, studio and genre. Existing library titles stay visible.	Aktuelle Trends entdecken oder nach Streaminganbieter, Studio und Genre stöbern. Vorhandene Titel bleiben erkennbar.
+Discovery lists	Entdecken-Listen
+Trending	Im Trend
+Popular	Beliebt
+Top rated	Bestbewertet
+Recently released	Neu erschienen
+Discovery filters	Entdecken-Filter
+Streaming region	Streamingregion
+Streaming provider	Streaminganbieter
+All providers	Alle Anbieter
+Genre	Genre
+All genres	Alle Genres
+Trend period	Trendzeitraum
+Minimum votes	Mindestanzahl Bewertungen
+This week	Diese Woche
+Today	Heute
+Any number of votes	Beliebige Anzahl
+Popular providers	Beliebte Anbieter
+Studio / production company	Studio / Produktionsfirma
+e.g. Warner, A24, BBC…	z. B. Warner, A24, BBC …
+Search studio	Studio suchen
+Selected studio	Gewähltes Studio
+All studios	Alle Studios
+Hide titles already in library	Vorhandene Titel ausblenden
+Apply filters	Filter anwenden
+Loading…	Wird geladen …
+Trends are worldwide. Choosing provider, studio or genre switches to the filtered Popular catalogue.	Trends gelten weltweit. Die Auswahl von Anbieter, Studio oder Genre wechselt zum gefilterten Katalog „Beliebt“.
+Provider results use subscription availability in the selected region. Recently released covers the past year; minimum votes reduce obscure one-vote results.	Anbieterfilter berücksichtigen die Abo-Verfügbarkeit in der gewählten Region. Neuerscheinungen umfassen das letzte Jahr; die Mindestanzahl an Bewertungen reduziert kaum bewertete Titel.
+TMDB trends this week	TMDB-Trends dieser Woche
+TMDB trends today	TMDB-Trends heute
+results on TMDB	Treffer bei TMDB
+titles on this page	Titel auf dieser Seite
+Discovery results	Entdecken-Ergebnisse
+No titles match this selection. Try fewer filters or show existing titles.	Keine passenden Titel. Wähle weniger Filter oder blende vorhandene Titel ein.
+Metadata:	Metadaten:
+Streaming availability:	Streamingverfügbarkeit:
+This product uses the TMDB API but is not endorsed or certified by TMDB.	Dieses Produkt verwendet die TMDB-API, wird aber nicht von TMDB unterstützt oder zertifiziert.
+No studios found.	Keine Studios gefunden.
+Discovery could not be loaded.	Entdecken konnte nicht geladen werden.
+A TMDB API key is required for discovery. An administrator can configure it in Settings or the Docker environment.	Für Entdecken ist ein TMDB-API-Key erforderlich. Ein Administrator kann ihn in den Einstellungen oder als Docker-Variable hinterlegen.
+TMDB request limit reached. Please try again later.	Das TMDB-Anfragelimit ist erreicht. Bitte versuche es später erneut.
+TMDB rejected the API key. An administrator should check the configured key.	TMDB hat den API-Key abgelehnt. Ein Administrator sollte den hinterlegten Schlüssel prüfen.
+TMDB could not load this selection. Please try again later.	TMDB konnte diese Auswahl nicht laden. Bitte versuche es später erneut.
+TMDB returned an invalid response.	TMDB hat eine ungültige Antwort geliefert.
+TMDB could not be reached. Please try again later.	TMDB ist momentan nicht erreichbar. Bitte versuche es später erneut.
+Choose Popular, Top rated or Recently released to use catalogue filters.	Wähle Beliebt, Bestbewertet oder Neu erschienen, um Katalogfilter zu verwenden.
+Trending shows one current list. Choose a catalogue list to browse more pages.	Trends zeigen eine aktuelle Liste. Wähle eine Katalogliste für weitere Seiten.
+This week: series	Diese Woche: Serien
+This week: movies	Diese Woche: Filme
+Discover more	Mehr entdecken
+The title could not be added. Please try again.	Der Titel konnte nicht hinzugefügt werden. Bitte versuche es erneut.
+Movie already exists	Film bereits vorhanden
+Series	Serien
