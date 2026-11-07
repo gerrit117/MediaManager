@@ -19,17 +19,20 @@
 	let recommendedMovies: components['schemas']['MetaDataProviderSearchResult'][] = $state([]);
 	let moviesLoading = $state(true);
 
-	onMount(() => {
-		client.GET('/api/v1/tv/recommended').then((res) => {
-			recommendedShows = res.data as components['schemas']['MetaDataProviderSearchResult'][];
-			showsLoading = false;
-		});
-		client.GET('/api/v1/movies/recommended').then((res) => {
-			recommendedMovies = res.data as components['schemas']['MetaDataProviderSearchResult'][];
-			moviesLoading = false;
-		});
+    let discoveryError=$state('');
+    async function trending(kind:'tv'|'movie') {
+        try {
+            const response=await fetch('/api/v1/discover/'+kind+'?mode=trending&window=week&language='+$mmLocale);
+            const payload=await response.json();
+            if(!response.ok)throw Error(typeof payload.detail==='string'?payload.detail:'Discovery could not be loaded.');
+            if(kind==='tv')recommendedShows=payload.results;else recommendedMovies=payload.results;
+        }catch(error){discoveryError=(error as Error).message;}
+        finally{if(kind==='tv')showsLoading=false;else moviesLoading=false;}
+    }
+    onMount(() => {
+        void trending('tv');void trending('movie');
         void refreshCounts();const timer=setInterval(refreshCounts,10000);return()=>clearInterval(timer);
-	});
+    });
 </script>
 
 <svelte:head>
@@ -67,11 +70,12 @@
 			<StatCard showCount={libraryCounts?.shows ?? data.tvShows?.length ?? 0} moviesCount={libraryCounts?.movies ?? data.movies?.length ?? 0}
 			></StatCard>
 		</div>
-		<div class="mx-auto">
-			<h3 class="my-4 text-center text-2xl font-semibold">{mmT($mmLocale, "Trending Shows" )}</h3>
+		{#if discoveryError}<p role="alert" class="my-4 rounded-xl border border-destructive p-3 text-sm text-destructive">{mmT($mmLocale,discoveryError)}</p>{/if}
+        <div class="mx-auto">
+			<h3 class="my-4 text-center text-2xl font-semibold">{mmT($mmLocale, "This week: series" )}</h3>
 			<RecommendedMediaCarousel isLoading={showsLoading} isShow={true} media={recommendedShows} />
 
-			<h3 class="my-4 text-center text-2xl font-semibold">{mmT($mmLocale, "Trending Movies" )}</h3>
+			<h3 class="my-4 text-center text-2xl font-semibold">{mmT($mmLocale, "This week: movies" )}</h3>
 			<RecommendedMediaCarousel
 				isLoading={moviesLoading}
 				isShow={false}

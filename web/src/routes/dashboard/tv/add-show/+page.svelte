@@ -13,6 +13,7 @@
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
 	import client from '$lib/api';
+    import {toast} from 'svelte-sonner';
 	import type { components } from '$lib/api/api';
 	import { handleQueryNotificationToast } from '$lib/utils.ts';
 
@@ -21,6 +22,12 @@
 	let data: components['schemas']['MetaDataProviderSearchResult'][] | null = $state(null);
 	let isSearching: boolean = $state(false);
 
+    async function suggestions() {
+        const response=await fetch('/api/v1/discover/tv?mode=trending&window=week&language='+$mmLocale);
+        const payload=await response.json();
+        if(!response.ok){toast.error(mmT($mmLocale,typeof payload.detail==='string'?payload.detail:'Discovery could not be loaded.'));return {data:[]};}
+        return {data:payload.results};
+    }
 	onMount(() => {
 		search('');
 	});
@@ -38,7 +45,7 @@
 								}
 							}
 						})
-					: await client.GET('/api/v1/tv/recommended');
+					: await suggestions();
 			if (results.data && results.data.length > 0) {
 				handleQueryNotificationToast(results.data.length, query);
 				data = results.data as components['schemas']['MetaDataProviderSearchResult'][];

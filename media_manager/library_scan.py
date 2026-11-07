@@ -33,7 +33,14 @@ def read_status():
         try:probe=lock_scan()
         except HTTPException:return data
         else:
-            probe.close();data['status']='interrupted';atomic_json(state_path(),data)
+            try:
+                # The worker can finish between the initial read and acquiring this lease.
+                # Re-read while holding it; never overwrite a completed scan or a newer job.
+                try:data=json.loads(state_path().read_text())
+                except (FileNotFoundError,ValueError):return {'status':'idle','processed':0,'total':0,'imported':0,'skipped':0,'review':[],'errors':[]}
+                if data.get('status')=='running':
+                    data['status']='interrupted';atomic_json(state_path(),data)
+            finally:probe.close()
     return data
 
 def source_json(cfg,source,endpoint,params=None):

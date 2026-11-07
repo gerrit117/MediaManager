@@ -155,6 +155,10 @@ with Session(engine) as db:
  assert 'manual review passed' in exec_python(library_checks)
  actions_checks=(repo/'tests/integration/library_actions_checks.py').read_text()
  assert 'collection checks passed' in exec_python(actions_checks)
+ assert request(client(),'/api/v1/discover/movie')[0]==401
+ discovery_status,discovery_error=request(user,'/api/v1/discover/movie')
+ assert discovery_status==503 and 'TMDB API key' in discovery_error['detail']
+ assert request(user,'/api/v1/discover/tv?region=invalid')[0]==422
  secrets_before=[(root/'state/secrets'/n).read_bytes() for n in ['app_db_password','db_admin_password']]
  stack('down');subprocess.run(command,env=env,stdout=subprocess.DEVNULL,check=True)
  for _ in range(90):

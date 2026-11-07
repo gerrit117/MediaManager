@@ -27,6 +27,7 @@
 				icon: TvIcon,
 				isActive: true,
 				items: [
+                    {title: 'Discover', url: resolve('/dashboard/tv/discover', {})},
 					{
 						title: 'Add a show',
 						url: resolve('/dashboard/tv/add-show', {})
@@ -47,6 +48,7 @@
 				icon: Clapperboard,
 				isActive: true,
 				items: [
+                    {title: 'Discover', url: resolve('/dashboard/movies/discover', {})},
 					{
 						title: 'Add a movie',
 						url: resolve('/dashboard/movies/add-movie', {})

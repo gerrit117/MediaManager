@@ -147,6 +147,9 @@ app.mount(
 from media_manager.movie_collections import router as movie_collections_router
 api_app.include_router(movie_collections_router, prefix='/library/collections', tags=['library'])
 
+from media_manager.discovery import router as discovery_router
+api_app.include_router(discovery_router, prefix='/discover', tags=['discovery'])
+
 app.include_router(api_app)
 
 # handle static frontend files
