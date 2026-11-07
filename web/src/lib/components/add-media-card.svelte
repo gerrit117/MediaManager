@@ -90,7 +90,7 @@
 					isShow ? { showId: result.id ?? '' } : { movieId: result.id ?? '' }
 				)}
 			>
-				{isShow ? 'Show already exists' : 'Movie already exists'}
+				{mmT($mmLocale, isShow ? "Series already exists" : "Movie already exists")}
 			</Button>
 		{:else}
 			<Button class="w-full font-semibold" disabled={loading} onclick={() => addMedia()}>
@@ -98,7 +98,7 @@
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
 					<span class="animate-pulse">{mmT($mmLocale, "Loading..." )}</span>
 				{:else}
-					{`Add ${isShow ? 'Show' : 'Movie'}`}
+					{mmT($mmLocale, isShow ? "Add series" : "Add movie")}
 				{/if}
 			</Button>
 		{/if}

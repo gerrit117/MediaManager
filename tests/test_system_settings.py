@@ -77,3 +77,27 @@ def test_hot_settings_apply_without_restart_and_cold_stays_pending(settings):
  assert not MediaManagerConfig().indexers.prowlarr.enabled
  assert result['restart_required']
  cfg.activate_settings();assert MediaManagerConfig().database.host=='pending-db'
+
+
+def test_tmdb_key_is_private_persistent_and_environment_overridable(settings,monkeypatch):
+ cfg.stage_settings({'metadata.tmdb.api_key':'private-tmdb-fixture'},apply_live=True)
+ assert MediaManagerConfig().metadata.tmdb.api_key=='private-tmdb-fixture'
+ assert 'private-tmdb-fixture' not in repr(MediaManagerConfig().metadata.tmdb)
+ fields=cfg.fields_for_browser()
+ field=next(f for f in fields if f['key']=='metadata.tmdb.api_key')
+ assert field['configured'] and field['value'] is None
+ assert 'private-tmdb-fixture' not in json.dumps(fields)
+ assert cfg.settings_file().stat().st_mode&0o777==0o600
+ monkeypatch.setenv('MEDIAMANAGER_METADATA__TMDB__API_KEY','environment-fixture')
+ assert MediaManagerConfig().metadata.tmdb.api_key=='environment-fixture'
+ with pytest.raises(ValueError):cfg.stage_settings({'metadata.tmdb.api_key':'replacement'})
+ assert next(f for f in cfg.fields_for_browser() if f['key']=='metadata.tmdb.api_key')['environment']
+ monkeypatch.delenv('MEDIAMANAGER_METADATA__TMDB__API_KEY')
+ assert MediaManagerConfig().metadata.tmdb.api_key=='private-tmdb-fixture'
+
+
+def test_empty_tmdb_environment_does_not_shadow_private_settings(settings,monkeypatch):
+ monkeypatch.setenv('MEDIAMANAGER_METADATA__TMDB__API_KEY','')
+ cfg.stage_settings({'metadata.tmdb.api_key':'private-fixture'},apply_live=True)
+ assert MediaManagerConfig().metadata.tmdb.api_key=='private-fixture'
+ assert not next(f for f in cfg.fields_for_browser() if f['key']=='metadata.tmdb.api_key')['environment']

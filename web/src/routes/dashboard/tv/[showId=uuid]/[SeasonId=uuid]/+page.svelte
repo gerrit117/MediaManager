@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { page } from '$app/state';
+    import SeriesSeasons from '$lib/components/series-seasons.svelte';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
@@ -14,7 +15,7 @@
 
 	let seasonFiles: components['schemas']['PublicSeasonFile'][] = $derived(page.data.files);
 	let season: components['schemas']['Season'] = $derived(page.data.season);
-	let show: components['schemas']['Show'] = $derived(page.data.showData);
+	let show: components['schemas']['PublicShow'] = $derived(page.data.showData);
 </script>
 
 <svelte:head>
@@ -133,23 +134,7 @@
 				</Card.Description>
 			</Card.Header>
 			<Card.Content class="w-full overflow-x-auto">
-				<Table.Root>
-					<Table.Caption>{mmT($mmLocale, "A list of all episodes." )}</Table.Caption>
-					<Table.Header>
-						<Table.Row>
-							<Table.Head class="w-[100px]">{mmT($mmLocale, "Number" )}</Table.Head>
-							<Table.Head class="min-w-[50px]">{mmT($mmLocale, "Title" )}</Table.Head>
-						</Table.Row>
-					</Table.Header>
-					<Table.Body>
-						{#each season.episodes as episode (episode.id)}
-							<Table.Row>
-								<Table.Cell class="w-[100px] font-medium">{episode.number}</Table.Cell>
-								<Table.Cell class="min-w-[50px]">{episode.title}</Table.Cell>
-							</Table.Row>
-						{/each}
-					</Table.Body>
-				</Table.Root>
+				<SeriesSeasons {show} onlySeason={season.id}/>
 			</Card.Content>
 		</Card.Root>
 	</div>

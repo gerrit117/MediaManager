@@ -135,12 +135,18 @@ api_app.include_router(
 from media_manager.library_metadata import router as library_metadata_router
 api_app.include_router(library_metadata_router, prefix="/library/metadata", tags=["library"])
 
+from media_manager.episode_requests import router as episode_requests_router
+api_app.include_router(episode_requests_router, prefix="/tv", tags=["tv"])
+
 # serve static image files
 app.mount(
     "/api/v1/static/image",
     StaticFiles(directory=config.misc.image_directory),
     name="static-images",
 )
+from media_manager.movie_collections import router as movie_collections_router
+api_app.include_router(movie_collections_router, prefix='/library/collections', tags=['library'])
+
 app.include_router(api_app)
 
 # handle static frontend files

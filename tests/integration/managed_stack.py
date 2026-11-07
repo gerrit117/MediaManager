@@ -153,6 +153,8 @@ with Session(engine) as db:
  assert 'no backfill passed' in exec_python(episode_checks)
  library_checks=(repo/'tests/integration/library_scan_checks.py').read_text().replace('ADMIN_PASSWORD',repr(password))
  assert 'manual review passed' in exec_python(library_checks)
+ actions_checks=(repo/'tests/integration/library_actions_checks.py').read_text()
+ assert 'collection checks passed' in exec_python(actions_checks)
  secrets_before=[(root/'state/secrets'/n).read_bytes() for n in ['app_db_password','db_admin_password']]
  stack('down');subprocess.run(command,env=env,stdout=subprocess.DEVNULL,check=True)
  for _ in range(90):

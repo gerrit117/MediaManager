@@ -18,9 +18,9 @@
 	import SearchTabs from '$lib/components/download-dialogs/search-tabs.svelte';
 	import DownloadDialogWrapper from '$lib/components/download-dialogs/download-dialog-wrapper.svelte';
 
-	let { show }: { show: components['schemas']['Show'] } = $props();
+	let { show, seasonNumber=1, triggerText='Download Season' }: { show: components['schemas']['Show']; seasonNumber?:number; triggerText?:string } = $props();
 	let dialogueState = $state(false);
-	let selectedSeasonNumber: number = $state(1);
+	let selectedSeasonNumber: number = $state(seasonNumber);
 	let torrentsError: string | null = $state(null);
 	let queryOverride: string = $state('');
 	let filePathSuffix: string = $state('');
@@ -45,7 +45,7 @@
 
 	async function downloadTorrent(result_id: string) {
 		torrentsError = null;
-		const { response } = await client.POST('/api/v1/tv/torrents', {
+		const { response, error } = await client.POST('/api/v1/tv/torrents', {
 			params: {
 				query: {
 					show_id: show.id!,
@@ -96,7 +96,7 @@
 
 <DownloadDialogWrapper
 	bind:open={dialogueState}
-	triggerText={mmT($mmLocale, "Download Seasons")}
+	triggerText={mmT($mmLocale, triggerText)}
 	title={mmT($mmLocale, "Download a Season")}
 	description={mmT($mmLocale, "Search indexers and send releases to your download manager for a specific season or season packs.")}
 >

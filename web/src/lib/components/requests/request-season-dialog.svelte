@@ -11,7 +11,7 @@
 	import client from '$lib/api';
 	import type { components } from '$lib/api/api';
 
-	let { show }: { show: components['schemas']['PublicShow'] } = $props();
+	let { show, seasonId, triggerText='Request Season' }: { show: components['schemas']['PublicShow']; seasonId?:string; triggerText?:string } = $props();
 
 	let dialogOpen = $state(false);
 	let selectedSeasonsIds = $state<string[]>([]);
@@ -72,10 +72,11 @@
 	<Dialog.Trigger
 		class={buttonVariants({ variant: 'default' })}
 		onclick={() => {
-			dialogOpen = true;
+			selectedSeasonsIds = seasonId ? [seasonId] : [];
+            dialogOpen = true;
 		}}
 	>
-		{mmT($mmLocale, "Request Season" )}
+		{mmT($mmLocale, triggerText)}
 	</Dialog.Trigger>
 	<Dialog.Content class="max-h-[90vh] w-fit min-w-[clamp(300px,50vw,600px)] overflow-y-auto">
 		<Dialog.Header>
@@ -99,7 +100,7 @@
 						{/each}
 					</Select.Trigger>
 					<Select.Content>
-						{#each show.seasons as season (season.id)}
+						{#each show.seasons.filter(s=>s.episodes.length>0 && (!seasonId || s.id===seasonId)) as season (season.id)}
 							<Select.Item value={season.id || ''}>
 								{mmT($mmLocale, "Season" )} {season.number}{season.name ? `: ${season.name}` : ''}
 							</Select.Item>

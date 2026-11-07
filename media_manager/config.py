@@ -57,6 +57,7 @@ class MediaManagerConfig(BaseSettings):
         hide_input_in_errors=True,
         case_sensitive=False,
         env_nested_delimiter="__",
+        env_ignore_empty=True,
         env_prefix="MEDIAMANAGER_",
     )
     """

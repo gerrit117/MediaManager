@@ -27,6 +27,8 @@ services:
     ports: ["${MM_PORT:-8095}:8000"]
     environment:
       CONFIG_DIR: /app/config
+      # Optional: export this variable before starting Compose. When unset, use web settings.
+      MEDIAMANAGER_METADATA__TMDB__API_KEY:
       MEDIAMANAGER_MANAGED_DATABASE: "true"
       MEDIAMANAGER_DB_HOST: database
       MEDIAMANAGER_DB_PASSWORD_FILE: /run/secrets/app_db_password

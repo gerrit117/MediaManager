@@ -1,5 +1,6 @@
 <script lang="ts">
     import {onMount} from 'svelte';
+    import SeriesSeasons from '$lib/components/series-seasons.svelte';
     let monitorStatus = $state<any>(null);
     onMount(async()=>{try{const r=await fetch('/api/v1/tv/shows/'+show.id+'/monitor');if(r.ok)monitorStatus=await r.json();}catch{}});
 
@@ -171,43 +172,7 @@
 				</Card.Description>
 			</Card.Header>
 			<Card.Content class="w-full overflow-x-auto">
-				<Table.Root>
-					<Table.Caption>{mmT($mmLocale, "A list of all seasons." )}</Table.Caption>
-					<Table.Header>
-						<Table.Row>
-							<Table.Head>{mmT($mmLocale, "Number" )}</Table.Head>
-							<Table.Head>{mmT($mmLocale, "Exists on file" )}</Table.Head>
-							<Table.Head>{mmT($mmLocale, "Title" )}</Table.Head>
-							<Table.Head>{mmT($mmLocale, "Overview" )}</Table.Head>
-						</Table.Row>
-					</Table.Header>
-					<Table.Body>
-						{#if show.seasons.length > 0}
-							{#each show.seasons as season (season.id)}
-								<Table.Row
-									onclick={() =>
-										goto(
-											resolve('/dashboard/tv/[showId]/[seasonId]', {
-												showId: show.id,
-												seasonId: season.id
-											})
-										)}
-								>
-									<Table.Cell class="min-w-[10px] font-medium">{season.number}</Table.Cell>
-									<Table.Cell class="min-w-[10px] font-medium">
-										<CheckmarkX state={season.downloaded} />
-									</Table.Cell>
-									<Table.Cell class="min-w-[50px]">{season.name}</Table.Cell>
-									<Table.Cell class="max-w-[300px] truncate">{season.overview}</Table.Cell>
-								</Table.Row>
-							{/each}
-						{:else}
-							<Table.Row>
-								<Table.Cell colspan={3} class="text-center">{mmT($mmLocale, "No season data available." )}</Table.Cell>
-							</Table.Row>
-						{/if}
-					</Table.Body>
-				</Table.Root>
+				<SeriesSeasons {show}/>
 			</Card.Content>
 		</Card.Root>
 	</div>

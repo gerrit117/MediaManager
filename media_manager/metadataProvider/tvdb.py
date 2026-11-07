@@ -62,6 +62,14 @@ class TvdbMetadataProvider(AbstractMetadataProvider):
         log.warning(f"image for show {show.name} could not be downloaded")
         return False
 
+    def get_show_identifiers(self, show_id: int) -> dict[str,str]:
+        data=self.__get_show(show_id);ids={'tvdb':str(show_id)}
+        for item in data.get('remoteIds') or []:
+            source=(item.get('sourceName') or '').lower()
+            if item.get('type')==2 or 'imdb' in source:ids['imdb']=str(item.get('id',''))
+            if 'themoviedb' in source or 'the movie database' in source:ids['tmdb']=str(item.get('id',''))
+        return ids
+
     @override
     def get_show_metadata(self, show_id: int, language: str | None = None) -> Show:
         """
