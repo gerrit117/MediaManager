@@ -1,14 +1,15 @@
 <script lang="ts">
+ import {cn} from '$lib/utils';
  import * as Dialog from '$lib/components/ui/dialog';
  import {locale,t} from '$lib/i18n';
- let {result,isShow}:{result:any;isShow:boolean}=$props();
+ let {result,isShow,triggerClass=''}:{result:any;isShow:boolean;triggerClass?:string}=$props();
  let open=$state(false),busy=$state(false),error=$state(''),message=$state(''),metadata=$state<any>(null),seasons=$state<number[]>([]),specific=$state<Record<number,boolean>>({}),episodes=$state<Record<number,number[]>>({});
  let wanted=$state('1'),minimum=$state('3');
  async function read(r:Response){const data=await r.json();if(!r.ok)throw Error(typeof data.detail==='string'?data.detail:'Request could not be submitted.');return data;}
  async function show(){open=true;busy=true;error='';message='';seasons=[];specific={};episodes={};metadata=null;try{metadata=await read(await fetch(`/api/v1/requests/preview/${isShow?'tv':'movie'}/${result.metadata_provider}/${result.external_id}?language=${$locale}`));episodes=Object.fromEntries((metadata.seasons??[]).map((s:any)=>[s.number,[]]));}catch(e){error=(e as Error).message;}finally{busy=false;}}
  async function submit(e:SubmitEvent){e.preventDefault();busy=true;error='';try{const selected=Object.fromEntries(seasons.filter(n=>specific[n]).map(n=>[n,episodes[n]??[]]));await read(await fetch('/api/v1/requests/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:isShow?'tv':'movie',provider:result.metadata_provider,external_id:result.external_id,language:$locale,seasons:seasons.filter(n=>!specific[n]),episodes:selected,wanted_quality:Number(wanted),min_quality:Number(minimum)})}));message='Request submitted. You can follow its progress under Requests.';metadata=null;}catch(e){error=(e as Error).message;}finally{busy=false;}}
 </script>
-<Dialog.Root bind:open><Dialog.Trigger class="min-h-9 w-full rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground sm:text-sm" onclick={show}>{t($locale,isShow?'Request series':'Request movie')}</Dialog.Trigger>
+<Dialog.Root bind:open><Dialog.Trigger class={cn("min-h-11 w-full rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground sm:text-sm",triggerClass)} onclick={show}>{t($locale,isShow?'Request series':'Request movie')}</Dialog.Trigger>
 <Dialog.Content class="max-h-[90vh] w-full max-w-2xl overflow-y-auto"><form onsubmit={submit} class="space-y-4 text-left">
   <div class="flex items-start justify-between gap-3"><Dialog.Title class="text-xl font-bold">{metadata?.name??result.name}</Dialog.Title><button type="button" class="rounded-lg border px-3 py-2" onclick={()=>open=false}>{t($locale,'Close')}</button></div>
   {#if busy}<p role="status">{t($locale,'Loading…')}</p>{/if}
