@@ -137,7 +137,7 @@ def stage_settings(values: dict, apply_live: bool = False) -> dict:
                 os.chmod(settings_file().with_suffix('.json.bak'),0o600)
             atomic_json(settings_file(),active)
         live=MediaManagerConfig().model_dump(mode='json')
-        desired=merge(live,proposed)
+        desired=MediaManagerConfig(**merge(live,proposed)).model_dump(mode='json')
         restart_required=any(lookup(live,key)!=lookup(desired,key) for key,_,_ in FIELDS)
         if not apply_live or restart_required:atomic_json(settings_file(True),proposed)
         else:settings_file(True).unlink(missing_ok=True)

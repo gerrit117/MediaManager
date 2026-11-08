@@ -101,3 +101,10 @@ def test_empty_tmdb_environment_does_not_shadow_private_settings(settings,monkey
  cfg.stage_settings({'metadata.tmdb.api_key':'private-fixture'},apply_live=True)
  assert MediaManagerConfig().metadata.tmdb.api_key=='private-fixture'
  assert not next(f for f in cfg.fields_for_browser() if f['key']=='metadata.tmdb.api_key')['environment']
+
+
+def test_email_link_url_applies_without_false_restart_for_normalized_slash(settings):
+ from media_manager.configuration import stage_settings,fields_for_browser
+ result=stage_settings({'misc.frontend_url':'https://media.example.com'},apply_live=True)
+ assert result['applied_live'] and not result['restart_required']
+ assert next(f['value'] for f in fields_for_browser() if f['key']=='misc.frontend_url')=='https://media.example.com/'
