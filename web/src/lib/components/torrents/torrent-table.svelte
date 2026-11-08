@@ -2,11 +2,11 @@
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import {
 		convertTorrentSeasonRangeToIntegerRange,
-		getTorrentQualityString,
-		getTorrentStatusString
+		getTorrentQualityString
 	} from '$lib/utils.js';
 	import type { components } from '$lib/api/api';
 	import { getContext, onMount } from 'svelte';
+	import { statusLabel, importLabel } from '$lib/download-status';
 	import { loadDownloadProgress, type DownloadProgress } from '$lib/download-progress';
 	import { Button } from '$lib/components/ui/button';
 	import client from '$lib/api';
@@ -39,12 +39,10 @@
 		};
 		void refresh();
 		const interval = setInterval(refresh, 5000);
-		return () => { active = false; clearInterval(interval); };
+		document.addEventListener('visibilitychange', refresh);
+		window.addEventListener('focus', refresh);
+		return () => { active = false; clearInterval(interval); document.removeEventListener('visibilitychange', refresh); window.removeEventListener('focus', refresh); };
 	});
-	function statusLabel(state: string | undefined, fallback: components['schemas']['TorrentStatus']) {
-		const names: Record<string, string> = { Downloading: 'Lädt herunter', Queued: 'Warteschlange', Paused: 'Pausiert', QueuePaused: 'Warteschlange pausiert', Completed: 'Abgeschlossen', Failed: 'Fehlgeschlagen', Extracting: 'Entpackt', Moving: 'Verschiebt', Running: 'Nachbearbeitung', Repairing: 'Repariert', Verifying: 'Prüft', QuickCheck: 'Prüft', Fetching: 'Lädt Reparaturdaten', Propagating: 'Wartet auf Verfügbarkeit', Unknown: 'Status unbekannt' };
-		return state ? (names[state] ?? state) : getTorrentStatusString(fallback);
-	}
 	let user: () => components['schemas']['UserRead'] = getContext('user');
 
 	async function retryTorrentDownload(
@@ -71,7 +69,8 @@
 <div class="grid min-w-0 gap-4" aria-label={mmT($mmLocale, "Downloads")}>
 	{#each torrents as torrent (torrent.torrent_id)}
 		{@const live = progress[torrent.torrent_id]}
-		{@const percent = live?.percent ?? (torrent.imported ? 100 : null)}
+		{@const imported = live?.imported ?? torrent.imported}
+		{@const percent = live?.percent ?? (imported ? 100 : null)}
 		{@const quality = getTorrentQualityString(torrent.quality)}
 		<article class="min-w-0 overflow-hidden rounded-xl border bg-card" data-download-card>
 			<div class="min-w-0 space-y-4 p-4 sm:p-5">
@@ -91,12 +90,12 @@
 					<span class="rounded-md border px-2 py-1">{torrent.usenet ? 'Usenet / NZB' : 'Torrent'}</span>
 					{#if quality !== 'unknown'}<span class="rounded-md border px-2 py-1">{quality}</span>{/if}
 					{#if isShow}<span class="rounded-md border px-2 py-1">{mmT($mmLocale, "Staffel" )} {convertTorrentSeasonRangeToIntegerRange((torrent as components['schemas']['RichSeasonTorrent']).seasons!)}</span>{/if}
-					<span class={torrent.imported ? 'text-emerald-500' : 'text-muted-foreground'}>{torrent.imported ? 'In der Bibliothek' : 'Import steht aus'}</span>
+					<span class={imported ? 'text-emerald-500' : 'text-muted-foreground'}>{mmT($mmLocale,importLabel(live, imported))}</span>
 				</div>
 				<div class="space-y-2">
 					<div class="flex items-center justify-between gap-3 text-sm">
-						<span class="text-muted-foreground">{mmT($mmLocale, "Fortschritt" )}</span>
-						<span class="font-medium tabular-nums">{percent !== null && Number.isFinite(percent) ? percent.toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' %' : mmT($mmLocale, "Nicht verfügbar")}</span>
+						<span class="text-muted-foreground">{mmT($mmLocale, "Download progress" )}</span>
+						<span class="font-medium tabular-nums">{percent !== null && Number.isFinite(percent) ? percent.toLocaleString($mmLocale, { maximumFractionDigits: 1 }) + ' %' : mmT($mmLocale, "Nicht verfügbar")}</span>
 					</div>
 					{#if percent !== null && Number.isFinite(percent)}
 						<div class="h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label={mmT($mmLocale, "Downloadfortschritt")} aria-valuemin="0" aria-valuemax="100" aria-valuenow={percent}>
@@ -104,6 +103,12 @@
 						</div>
 					{/if}
 				</div>
+				{#if live?.phase === 'postprocessing'}
+                    <div role="status" class="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm">
+                        <span class="inline-block h-3 w-3 rounded-full border-2 border-primary border-t-transparent motion-safe:animate-spin" aria-hidden="true"></span>
+                        {mmT($mmLocale,'Download complete. Post-processing is still running; import follows afterwards.')}
+                    </div>
+                {/if}
 				{#if torrent.file_path_suffix}<p class="break-words text-xs text-muted-foreground">{mmT($mmLocale, "Dateizusatz:" )} {torrent.file_path_suffix}</p>{/if}
 			</div>
 			{#if user().is_superuser}

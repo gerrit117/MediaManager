@@ -145,17 +145,25 @@ class SabnzbdDownloadClient(AbstractDownloadClient):
         if not torrents:
             return {}
         ids = [torrent.hash for torrent in torrents]
-        queue = self.client.get_downloads(nzo_ids=ids).get("queue", {})
+        queue = self.client.get_downloads(nzo_ids=ids, limit=len(ids)).get("queue", {})
         slots = {slot["nzo_id"]: slot for slot in queue.get("slots", [])}
+        history_ids = set()
         missing = [identifier for identifier in ids if identifier not in slots]
         if missing:
             history = self.client.get_history(nzo_ids=missing, limit=len(missing))
-            slots.update({slot["nzo_id"]: slot for slot in history.get("history", {}).get("slots", [])})
+            history_slots = {slot["nzo_id"]: slot for slot in history.get("history", {}).get("slots", [])}
+            history_ids.update(history_slots)
+            slots.update(history_slots)
         result = {}
         for torrent in torrents:
             slot = slots.get(torrent.hash, {})
             status = slot.get("status", "Unknown")
-            if queue.get("paused") and status in {"Downloading", "Queued"}:
+            in_history = torrent.hash in history_ids
+            if in_history and status == "Queued":
+                status = "PostProcessQueued"
+            elif in_history and slot.get("loaded") is True and status in {"Unknown", "Downloading"}:
+                status = "PostProcessing"
+            if not in_history and queue.get("paused") and status in {"Downloading", "Queued"}:
                 status = "QueuePaused"
             percent = None
             try:
@@ -163,9 +171,12 @@ class SabnzbdDownloadClient(AbstractDownloadClient):
                     percent = min(100.0, max(0.0, float(slot["percentage"])))
             except (TypeError, ValueError):
                 pass
-            if status == "Completed" or torrent.imported:
+            if (in_history and status != "Failed") or status == "Completed" or torrent.imported:
+                # History contains downloaded jobs waiting for/in post-processing.
+                # This is download completion, not a fabricated processing percentage.
                 percent = 100.0
-            result[str(torrent.id)] = {"percent": percent, "state": status, "client": "SABnzbd", "usenet": True}
+            phase = "postprocessing" if in_history and status not in {"Completed", "Failed", "Unknown"} else "complete" if status == "Completed" else "download"
+            result[str(torrent.id)] = {"percent": percent, "state": status, "phase": phase, "client": "SABnzbd", "usenet": True}
         return result
 
     def retry_download(self, torrent: Torrent) -> None:
