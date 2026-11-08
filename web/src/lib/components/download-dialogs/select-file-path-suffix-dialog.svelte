@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import FilePathSuffixSelector from '$lib/components/download-dialogs/file-path-suffix-selector.svelte';
 	import type { components } from '$lib/api/api';
@@ -23,10 +23,8 @@
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
-	<Dialog.Trigger>
-		<Button class="w-full" onclick={() => (dialogOpen = true)}>{mmT($mmLocale, "Download" )}</Button>
-	</Dialog.Trigger>
-	<Dialog.Content class="w-full max-w-[600px] rounded-lg p-6 shadow-lg">
+	<Dialog.Trigger class={buttonVariants({class:"min-h-11 w-full"})}>{mmT($mmLocale, "Download" )}</Dialog.Trigger>
+	<Dialog.Content class="w-[calc(100vw-2rem)] max-w-[600px] rounded-lg p-6 shadow-lg">
 		<Dialog.Header>
 			<Dialog.Title class="mb-1 text-xl font-semibold">{mmT($mmLocale, "Set File Path Suffix" )}</Dialog.Title>
 			<Dialog.Description class="mb-4 text-sm">

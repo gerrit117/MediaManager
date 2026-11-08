@@ -35,19 +35,19 @@
     }
 </script>
 
-<Card.Root class="col-span-full flex h-full flex-col overflow-x-hidden sm:col-span-1">
-	<Card.Header>
-		<Card.Title class="flex h-12 items-center leading-tight">
+<Card.Root class="min-w-0 flex h-full flex-col overflow-hidden">
+	<Card.Header class="p-3 sm:p-5">
+		<Card.Title class="line-clamp-2 min-h-10 text-sm leading-snug sm:text-base">
 			{result.name}
 			{#if result.year != null}
 				({result.year})
 			{/if}
 		</Card.Title>
-		<Card.Description class="truncate"
+		<Card.Description class="hidden truncate sm:block"
 			>{result.overview !== '' ? result.overview : mmT($mmLocale, "No overview available")}</Card.Description
 		>
 	</Card.Header>
-	<Card.Content class="flex flex-1 items-center justify-center">
+	<Card.Content class="flex flex-1 items-center justify-center px-3 pb-3 sm:px-5 sm:pb-5">
 		{#if result.poster_path != null}
 			<img
 				class="aspect-[2/3] h-full w-full rounded-lg object-cover"
