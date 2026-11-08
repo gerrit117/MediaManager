@@ -1,4 +1,5 @@
 <script lang="ts">
+ import ReleaseProtection from '$lib/components/release-protection.svelte';
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { page } from '$app/state';
     import SeriesSeasons from '$lib/components/series-seasons.svelte';
@@ -64,6 +65,8 @@
 	{getFullyQualifiedMediaName(show)} {mmT($mmLocale, "Season" )} {season.number}
 </h1>
 <main class="mx-auto flex w-full flex-1 flex-col gap-4 p-4 md:max-w-[80em]">
+ <ReleaseProtection kind="season" mediaId={season.id!}/>
+
 	<div class="flex flex-col gap-4 md:flex-row md:items-stretch">
 		<div class="w-full overflow-hidden rounded-xl bg-muted/50 md:w-1/3 md:max-w-sm">
 			<MediaPicture media={show} />

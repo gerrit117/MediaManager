@@ -64,6 +64,8 @@ def run_show(service, show):
         present=present_episodes(service,show,season)
         claimed=claimed_episodes(service,season)
         for episode in season.episodes:
+            from media_manager.release_control import locked
+            if episode.number in present and locked(db,'episode',episode.id):continue
             previous=db.get(EpisodeDownload,episode.id)
             if not should_search(episode,since,current.date(),present,claimed,previous):continue
             if previous is not None and previous.checked_at is not None and current-previous.checked_at < timedelta(hours=6):continue
@@ -87,12 +89,15 @@ def run_show(service, show):
                 if added is None:continue
             job=db.get(EpisodeDownload,episode.id)
             try:
+                from media_manager.release_control import automatic_manifest,attach
+                manifest=automatic_manifest(service,'show',show,season,episode)
                 torrent=service.torrent_service.download(best)
                 job.torrent_id=torrent.id
                 suffix=f'AUTO-S{season.number:02d}E{episode.number:02d}-'+hashlib.sha256(best.title.encode()).hexdigest()[:12]
                 record=SeasonFile(season_id=season.id,torrent_id=torrent.id,quality=best.quality,
                     file_path_suffix=suffix,episode_numbers=[episode.number])
                 service.tv_repository.add_season_file(record)
+                attach(db,torrent.id,'show',show.id,manifest)
                 job.status='submitted';db.commit();claimed.add(episode.number)
             except Exception as error:
                 db.rollback();job=db.get(EpisodeDownload,episode.id)

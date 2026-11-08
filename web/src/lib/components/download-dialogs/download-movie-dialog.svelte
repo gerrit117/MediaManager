@@ -18,6 +18,7 @@
 	let torrentsError: string | null = $state(null);
 	let queryOverride: string = $state('');
 	let filePathSuffix: string = $state('');
+ let replaceExisting=$state(true),overrideLock=$state(false);
 
 	let torrentsPromise: any = $state(null);
 	let torrentsData: any[] | null = $state(null);
@@ -37,23 +38,11 @@
 
 	async function downloadTorrent(result_id: string) {
 		torrentsError = null;
-		const { data, response, error } = await client.POST(`/api/v1/movies/{movie_id}/torrents`, {
-			params: {
-				path: {
-					movie_id: movie.id!
-				},
-				query: {
-					public_indexer_result_id: result_id,
-					override_file_path_suffix: filePathSuffix === '' ? undefined : filePathSuffix
-				}
-			}
-		});
-		if (response.status === 409) {
-			const errorMessage = `There already is a Movie File using the Filepath Suffix '${filePathSuffix}'. Try again with a different Filepath Suffix.`;
-			console.warn(errorMessage);
-			torrentsError = errorMessage;
-			if (dialogueState) toast.info(mmT($mmLocale,errorMessage));
-		} else if (!response.ok) {
+        if(replaceExisting&&!confirm(mmT($mmLocale,'Replace the selected existing files after successful import? Originals will be archived.')))return;
+        const query=new URLSearchParams({public_indexer_result_id:result_id,replace_existing:String(replaceExisting),override_lock:String(overrideLock)});
+        const response=await fetch('/api/v1/movies/'+movie.id+'/torrents'+'?'+query,{method:'POST'});
+        const data=await response.json();const error=response.ok?undefined:data;
+		if (!response.ok) {
 			const errorMessage = (error as { detail?: string } | undefined)?.detail ?? `Downloadmanager-Anfrage fehlgeschlagen: ${response.statusText}`;
 			console.error(errorMessage);
 			torrentsError = errorMessage;
@@ -95,6 +84,7 @@
 	title={mmT($mmLocale, "Download a Movie")}
 	description={mmT($mmLocale, "Search indexers and send releases to your download manager for this movie.")}
 >
+    <div class="space-y-2 rounded-xl border p-3 text-sm"><label class="flex min-h-11 items-center gap-3"><input type="checkbox" bind:checked={replaceExisting}/>{mmT($mmLocale,'Replace existing version after successful import')}</label><label class="flex min-h-11 items-center gap-3"><input type="checkbox" bind:checked={overrideLock}/>{mmT($mmLocale,'Explicitly override release protection for this manual download')}</label><p class="text-xs text-muted-foreground">{mmT($mmLocale,'Original files are retained in a recovery archive. Release rules still apply.')}</p></div>
 	<SearchTabs
 		bind:tabState
 		{isLoading}

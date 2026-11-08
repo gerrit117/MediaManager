@@ -40,10 +40,12 @@ def search_episode(service,show,season,episode):
     return [r for r in results if r.season==[season.number] and episode_numbers([r.title],season.number)=={episode.number}]
 
 
-def submit_episode(service,show,season,episode,result_id):
+def submit_episode(service,show,season,episode,result_id,replace_existing=False,override_lock=False):
     db=service.tv_repository.db
-    if episode.number in season_presence(service,show,season):raise HTTPException(409,'This episode already exists in the library.')
+    if not replace_existing and episode.number in season_presence(service,show,season):raise HTTPException(409,'This episode already exists in the library.')
     if episode.number in claimed_episodes(service,season):raise HTTPException(409,'An existing download already covers this episode. Check Downloads before retrying.')
+    from media_manager.release_control import locked
+    if episode.number in season_presence(service,show,season) and locked(db,'episode',episode.id) and not override_lock:raise HTTPException(409,'This release is protected. Confirm the manual override to continue.')
     from media_manager.library import episode_numbers
     result=service.indexer_service.get_result(result_id)
     if result.season!=[season.number] or episode_numbers([result.title],season.number)!={episode.number}:raise HTTPException(409,'The release does not match this episode.')
@@ -56,7 +58,7 @@ def submit_episode(service,show,season,episode,result_id):
         job.status='submitting';job.release_title=result.title;job.error=None
     db.commit()
     try:
-        torrent=service.download_torrent(result_id,show.id)
+        torrent=service.download_torrent(result_id,show.id,replace_existing=replace_existing,override_lock=override_lock)
         job=db.get(EpisodeDownload,episode.id);job.torrent_id=torrent.id;job.status='submitted';db.commit();return torrent
     except HTTPException:
         db.rollback();job=db.get(EpisodeDownload,episode.id)
@@ -87,7 +89,7 @@ def request_episode(body:EpisodeRequestCreate,service:tv_service_dep,user:Annota
     try:apply_request_policy(db,row,'episodes');db.add(row);db.commit()
     except IntegrityError:db.rollback();raise HTTPException(409,'This episode has already been requested at this quality.') from None
     from media_manager.auth.mail import notify_admins
-    tasks.add_task(notify_admins,'New episode request',str(user.email)+': '+show.name+' S'+str(season.number)+'E'+str(episode.number))
+    # Durable lifecycle observer handles all request notifications.
     return {'id':str(row.id),'authorized':row.authorized}
 
 
@@ -112,8 +114,8 @@ def releases(episode_id:UUID,service:tv_service_dep):
 
 
 @router.post('/episodes/{episode_id}/download',dependencies=[Depends(current_superuser)])
-def download(episode_id:UUID,result_id:UUID,service:tv_service_dep):
-    show,season,episode=context(service,episode_id);return submit_episode(service,show,season,episode,result_id)
+def download(episode_id:UUID,result_id:UUID,service:tv_service_dep,replace_existing:bool=True,override_lock:bool=False):
+    show,season,episode=context(service,episode_id);return submit_episode(service,show,season,episode,result_id,replace_existing,override_lock)
 
 
 def process_approved(service):

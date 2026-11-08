@@ -1,4 +1,5 @@
 <script lang="ts">
+ import ReleaseProtection from '$lib/components/release-protection.svelte';
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -64,6 +65,8 @@
 	{getFullyQualifiedMediaName(movie)}
 </h1>
 <main class="mx-auto flex w-full flex-1 flex-col gap-4 p-4 md:max-w-[80em]">
+ <ReleaseProtection kind="movie" mediaId={movie.id!}/>
+
 	<MetadataEditor media={movie} isTv={false}/>
 	<div class="flex flex-col gap-4 md:flex-row md:items-stretch">
 		<div class="mx-auto w-40 shrink-0 overflow-hidden rounded-xl bg-muted/50 sm:w-52 md:mx-0 md:w-1/3 md:max-w-sm">

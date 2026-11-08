@@ -1,4 +1,5 @@
 <script lang="ts">
+ import ReleaseProtection from '$lib/components/release-protection.svelte';
     import {onMount} from 'svelte';
     import SeriesSeasons from '$lib/components/series-seasons.svelte';
     let monitorStatus = $state<any>(null);
@@ -94,6 +95,8 @@
 	{getFullyQualifiedMediaName(show)}
 </h1>
 <main class="mx-auto flex w-full flex-1 flex-col gap-4 p-4 md:max-w-[80em]">
+ <ReleaseProtection kind="show" mediaId={show.id!}/>
+
 	<MetadataEditor media={show} isTv={true}/>
 	<div class="flex flex-col gap-4 md:flex-row md:items-stretch">
 		<div class="mx-auto w-40 shrink-0 overflow-hidden rounded-xl bg-muted/50 sm:w-52 md:mx-0 md:w-1/3 md:max-w-sm">

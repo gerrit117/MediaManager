@@ -52,6 +52,9 @@ export function convertTorrentSeasonRangeToIntegerRange(seasons: number[]): stri
 }
 
 export async function handleLogout() {
+    if(typeof navigator!=='undefined'&&'serviceWorker' in navigator){
+        try{const reg=await navigator.serviceWorker.getRegistration('/web/');const sub=await reg?.pushManager.getSubscription();if(sub){await fetch('/api/v1/account-notifications/push',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})});await sub.unsubscribe();}}catch{/* Logout remains possible if the browser push service is unreachable. */}
+    }
 	await client.POST('/api/v1/auth/cookie/logout');
 	await goto(resolve('/login', {}));
 }

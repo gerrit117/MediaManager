@@ -81,18 +81,13 @@ def get_torrent_filepath(torrent: Torrent) -> Path:
 
 
 def import_file(target_file: Path, source_file: Path) -> None:
-    if target_file.exists():
-        target_file.unlink()
-
+    import os,uuid
+    temporary=target_file.with_name('.mm-import-'+uuid.uuid4().hex+target_file.suffix)
     try:
-        target_file.hardlink_to(source_file)
-    except FileExistsError:
-        log.exception(f"File already exists at {target_file}.")
-    except (OSError, UnsupportedOperation, NotImplementedError):
-        log.exception(
-            f"Failed to create hardlink from {source_file} to {target_file}. Falling back to copying the file."
-        )
-        shutil.copy(src=source_file, dst=target_file)
+        try:temporary.hardlink_to(source_file)
+        except (OSError,UnsupportedOperation,NotImplementedError):shutil.copy2(source_file,temporary)
+        os.replace(temporary,target_file)
+    finally:temporary.unlink(missing_ok=True)
 
 
 def get_files_for_import(

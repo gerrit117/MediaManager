@@ -46,7 +46,7 @@
 			toast.success(mmT($mmLocale,'Movie request submitted successfully!'));
 		} else {
 			submitRequestError = (error as any)?.detail ?? 'Anfrage fehlgeschlagen';
-			toast.error(mmT($mmLocale,submitRequestError));
+			toast.error(mmT($mmLocale,submitRequestError??'Request failed'));
 		}
 		await invalidateAll();
 	}

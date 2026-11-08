@@ -320,7 +320,7 @@ def request_a_season(
         request.authorized_by = UserRead.model_validate(user)
     tv_service.add_season_request(request)
     from media_manager.auth.mail import notify_admins
-    tasks.add_task(notify_admins,'New season request',str(user.email)+': '+str(request.season_id))
+    # Durable request observer handles per-account notifications.
     return
 
 
@@ -460,6 +460,8 @@ def download_a_torrent(
     public_indexer_result_id: IndexerQueryResultId,
     show_id: ShowId,
     override_file_path_suffix: str = "",
+    replace_existing: bool = True,
+    override_lock: bool = False,
 ) -> Torrent:
     """
     Trigger a download for a specific torrent.
@@ -468,6 +470,7 @@ def download_a_torrent(
         public_indexer_result_id=public_indexer_result_id,
         show_id=show_id,
         override_show_file_path_suffix=override_file_path_suffix,
+        replace_existing=replace_existing,override_lock=override_lock,
     )
 
 

@@ -3,17 +3,21 @@ WORKDIR /frontend
 COPY web/package*.json ./
 RUN npm ci
 COPY web/ ./
-ARG VERSION=1.12.3-fork.15
+ARG VERSION=1.12.3-fork.16
 RUN node --experimental-strip-types --test tests/*.test.mjs
 RUN BASE_PATH=/web PUBLIC_API_URL= PUBLIC_VERSION=${VERSION} npm run build
 
 # Preserve the tested release runtime and its dependency lock; no master migration.
 FROM quay.io/maxdorninger/mediamanager@sha256:83b80dce26f8cdbbf8afec06784a85e7eedcba05ad4be57d2f70b006304d7a8c AS runtime
-ARG VERSION=1.12.3-fork.15
+ARG VERSION=1.12.3-fork.16
 ENV PUBLIC_VERSION=${VERSION} UV_NO_SYNC=1 UV_CACHE_DIR=/tmp/uv-cache
 LABEL org.opencontainers.image.source="https://github.com/gerrit117/MediaManager" \
-      org.opencontainers.image.version="1.12.3-fork.15" \
+      org.opencontainers.image.version="1.12.3-fork.16" \
       org.opencontainers.image.description="MediaManager fork; NZB and torrents, requests, guided setup"
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
+COPY pyproject.toml uv.lock /app/
+RUN UV_NO_SYNC=0 UV_CACHE_DIR=/tmp/mm-build-deps UV_LINK_MODE=copy uv sync --frozen --no-dev --no-install-project && rm -rf /tmp/mm-build-deps /tmp/uv-cache
 COPY --chmod=755 edition-startup.sh /app/edition-startup.sh
 CMD ["/app/edition-startup.sh"]
 COPY --chown=1000:1000 alembic/ /app/alembic/

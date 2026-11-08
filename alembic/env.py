@@ -45,6 +45,8 @@ from media_manager.tv.models import (  # noqa: E402
 
 from media_manager.library_models import ShowExternalId, EpisodeRequest, MovieCollection
 
+import media_manager.media_features_models
+
 target_metadata = Base.metadata
 
 # this is to keep pycharm from complaining about/optimizing unused imports
