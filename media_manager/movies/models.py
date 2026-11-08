@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import JSON, ForeignKey, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy import Boolean, JSON, ForeignKey, PrimaryKeyConstraint, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from media_manager.auth.db import User
@@ -13,6 +13,7 @@ class Movie(Base):
     __table_args__ = (UniqueConstraint("external_id", "metadata_provider"),)
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
+    request_only: Mapped[bool] = mapped_column(Boolean,default=False,server_default='false')
     external_id: Mapped[int]
     metadata_provider: Mapped[str]
     name: Mapped[str]
@@ -47,7 +48,7 @@ class MovieFile(Base):
 
 class MovieRequest(Base):
     __tablename__ = "movie_request"
-    __table_args__ = (UniqueConstraint("movie_id", "wanted_quality"),)
+    __table_args__ = (UniqueConstraint("movie_id", "wanted_quality", "requested_by_id",name="uq_movie_request_user_quality"),)
     id: Mapped[UUID] = mapped_column(primary_key=True)
     movie_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="movie.id", ondelete="CASCADE"),

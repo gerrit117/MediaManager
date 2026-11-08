@@ -21,15 +21,15 @@ class SetupInput(BaseModel):
     tv_directory: str = '/data/tv'
     download_directory: str = '/downloads'
     admin_email: str
-    admin_password: str = Field(min_length=12)
+    admin_password: str = Field(min_length=8)
 
 
 def render_html(language='de') -> str:
-    fields = [('code','Einrichtungscode (aus setup-code)','password'),('database_host','PostgreSQL-Host','text'),('database_port','PostgreSQL-Port','number'),('database_name','Datenbankname','text'),('database_user','Datenbankbenutzer','text'),('database_password','Datenbankpasswort','password'),('movie_directory','Filmpfad im Container','text'),('tv_directory','Serienpfad im Container','text'),('download_directory','Downloadpfad im Container','text'),('admin_email','Admin-E-Mail','email'),('admin_password','Admin-Passwort (mindestens 12 Zeichen)','password')]
+    fields = [('code','Einrichtungscode (aus setup-code)','password'),('database_host','PostgreSQL-Host','text'),('database_port','PostgreSQL-Port','number'),('database_name','Datenbankname','text'),('database_user','Datenbankbenutzer','text'),('database_password','Datenbankpasswort','password'),('movie_directory','Filmpfad im Container','text'),('tv_directory','Serienpfad im Container','text'),('download_directory','Downloadpfad im Container','text'),('admin_email','Admin-E-Mail','email'),('admin_password','Admin-Passwort (mindestens 8 Zeichen, Groß/Klein, Zahl, Sonderzeichen)','password')]
     defaults={'database_port':'5432','movie_directory':'/data/movies','tv_directory':'/data/tv','download_directory':'/downloads'}
     if os.getenv('MEDIAMANAGER_MANAGED_DATABASE') == 'true':
         fields=[f for f in fields if not f[0].startswith('database_')]
-    inputs=''.join(f'<label>{label}<input required name="{key}" type="{kind}" value="{defaults.get(key, "")}" {"minlength=12" if key=="admin_password" else ""}></label>' for key,label,kind in fields)
+    inputs=''.join(f'<label>{label}<input required name="{key}" type="{kind}" value="{defaults.get(key, "")}" {"minlength=8" if key=="admin_password" else ""}></label>' for key,label,kind in fields)
     html = '''<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MediaManager einrichten</title><style>body{font:16px system-ui;background:#101416;color:#edf4f3;margin:0;padding:24px}main{max-width:720px;margin:auto}form{display:grid;gap:18px}label{display:grid;gap:8px}input,button{font:inherit;padding:12px;border-radius:10px;background:#202a2c;color:inherit;border:1px solid #465453;min-width:0}button{background:#247c6b}p{line-height:1.5}#message{white-space:pre-wrap}</style><main><h1>Willkommen bei MediaManager</h1><p>PostgreSQL und die Bibliothek verbinden, danach mit deinem neuen Administratorkonto anmelden. Indexer und Downloadmanager richtest du anschließend unter Einstellungen ein.</p><p>Der private Einrichtungscode liegt im Konfigurationsordner in <code>setup-code</code>. Es werden keine vorhandenen Konfigurationen überschrieben. Der verwaltete Stack richtet PostgreSQL automatisch ein. Bei einer externen Datenbank benötigst du deren Zugangsdaten.</p><form id="form">'''+inputs+'''<button>Prüfen & Einrichtung abschließen</button></form><p role="status" id="message"></p><script>const form=document.querySelector('form'),message=document.querySelector('#message');form.onsubmit=async e=>{e.preventDefault();const button=form.querySelector('button');button.disabled=true;const data=Object.fromEntries(new FormData(form));data.database_port=Number(data.database_port);try{const response=await fetch('/setup/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!response.ok)throw Error((await response.json()).detail||'Einrichtung fehlgeschlagen');message.textContent='Einrichtung gespeichert. MediaManager startet jetzt. Gleich kannst du dich anmelden.';form.remove();setInterval(async()=>{try{const health=await fetch('/api/v1/health');if(health.ok&&health.headers.get('content-type')?.includes('application/json'))location.href='/web/login/?next=/web/dashboard/settings/';}catch{}},3000);}catch(error){message.textContent=error.message;button.disabled=false;}};</script></main></html>'''
 
     chooser = f"""<label>Language / Sprache<select onchange="location.search='?lang='+this.value"><option value="de" {'selected' if language=='de' else ''}>Deutsch</option><option value="en" {'selected' if language=='en' else ''}>English</option></select></label>"""
@@ -43,7 +43,7 @@ def render_html(language='de') -> str:
           'PostgreSQL-Host':'PostgreSQL host','PostgreSQL-Port':'PostgreSQL port',
           'Datenbankname':'Database name','Datenbankbenutzer':'Database username','Datenbankpasswort':'Database password',
           'Filmpfad im Container':'Movie directory inside container','Serienpfad im Container':'TV directory inside container','Downloadpfad im Container':'Download directory inside container',
-          'Admin-E-Mail':'Administrator email','Admin-Passwort (mindestens 12 Zeichen)':'Administrator password (at least 12 characters)',
+          'Admin-E-Mail':'Administrator email','Admin-Passwort (mindestens 8 Zeichen, Groß/Klein, Zahl, Sonderzeichen)':'Administrator password (at least 8 characters, uppercase/lowercase, number, symbol)',
           'PostgreSQL und die Bibliothek verbinden, danach mit deinem neuen Administratorkonto anmelden. Indexer und Downloadmanager richtest du anschließend unter Einstellungen ein.':'Connect PostgreSQL and your library, then sign in with your new administrator account. Configure indexers and download managers in Settings afterwards.',
           'Der private Einrichtungscode liegt im Konfigurationsordner in':'The private setup code is in the configuration directory in',
           'Es werden keine vorhandenen Konfigurationen überschrieben.':'Existing configurations are never overwritten.',
@@ -86,7 +86,10 @@ def create_setup_app(stop=lambda:None) -> FastAPI:
             except (OSError,KeyError):raise HTTPException(503,'Automatisch erzeugte Datenbankzugangsdaten fehlen') from None
         if not all([body.database_host,body.database_name,body.database_user,body.database_password]):raise HTTPException(400,'Datenbankverbindung ist unvollständig')
         from media_manager.auth.schemas import UserCreate
-        try: UserCreate(email=body.admin_email,password=body.admin_password)
+        from media_manager.auth.password_policy import validate_password
+        try:
+            UserCreate(email=body.admin_email,password=body.admin_password)
+            validate_password(body.admin_password)
         except Exception: raise HTTPException(400,'Admin-E-Mail oder Passwort ungültig') from None
         for folder in (body.movie_directory,body.tv_directory,body.download_directory):
             p=Path(folder)

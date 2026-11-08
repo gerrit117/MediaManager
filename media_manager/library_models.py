@@ -14,7 +14,7 @@ class ShowExternalId(Base):
 
 class EpisodeRequest(Base):
     __tablename__='episode_request'
-    __table_args__=(UniqueConstraint('episode_id','wanted_quality'),)
+    __table_args__=(UniqueConstraint('episode_id','wanted_quality','requested_by_id',name='uq_episode_request_user_quality'),)
     id: Mapped[UUID]=mapped_column(primary_key=True,default=uuid4)
     episode_id: Mapped[UUID]=mapped_column(ForeignKey('episode.id',ondelete='CASCADE'),index=True)
     requested_by_id: Mapped[UUID|None]=mapped_column(ForeignKey('user.id',ondelete='SET NULL'))

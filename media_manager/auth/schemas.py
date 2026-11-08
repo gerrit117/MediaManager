@@ -19,3 +19,5 @@ class UserUpdate(schemas.BaseUserUpdate):
 
 class AuthMetadata(BaseModel):
     oauth_providers: list[str]
+    email_available: bool = False
+    invitation_required: bool = True

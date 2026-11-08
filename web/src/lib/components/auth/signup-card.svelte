@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
+	import {passwordHint,validPassword} from '$lib/password-policy';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
@@ -14,6 +15,7 @@
 	import { resolve } from '$app/paths';
 
 	let email = $state('');
+    let invitationCode=$state('');
 	let password = $state('');
 	let errorMessage = $state('');
 	let successMessage = $state('');
@@ -31,22 +33,15 @@
 		isLoading = true;
 		errorMessage = '';
 		successMessage = '';
-		const { response } = await client.POST('/api/v1/auth/register', {
-			body: {
-				email: email,
-				password: password,
-				is_active: null,
-				is_superuser: null,
-				is_verified: null
-			}
-		});
+        if(password!==confirmPassword||!validPassword(password)){errorMessage=password!==confirmPassword?'Passwords do not match.':passwordHint;isLoading=false;return;}
+        let response;try{response=await fetch('/api/v1/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,invitation_code:invitationCode.toUpperCase()})});}catch{errorMessage='Registration failed';isLoading=false;return;}
 		isLoading = false;
 
 		if (response.ok) {
-			successMessage = 'Registration successful! Please login.';
+			successMessage = 'Account created. Please confirm your email address before signing in.';
 			toast.success(mmT($mmLocale,successMessage));
 		} else {
-			toast.error(mmT($mmLocale,'Registration failed'));
+			const data=await response.json();errorMessage=typeof data.detail==='string'?data.detail:'Registration failed';toast.error(mmT($mmLocale,errorMessage));
 		}
 	}
 </script>
@@ -58,6 +53,8 @@
 	</Card.Header>
 	<Card.Content>
 		<form class="grid gap-4" onsubmit={handleSignup}>
+            <label class="grid gap-2 text-sm">{mmT($mmLocale,'Invitation code')}<input required minlength="5" maxlength="5" pattern="[A-Za-z0-9]{5}" autocomplete="off" bind:value={invitationCode} class="rounded-md border bg-background p-2 uppercase"/></label>
+            <p class="text-xs text-muted-foreground">{mmT($mmLocale,passwordHint)}</p>
 			<div class="grid gap-2">
 				<Label for="email">{mmT($mmLocale, "Email" )}</Label>
 				<Input
@@ -75,6 +72,7 @@
 					autocomplete="new-password"
 					bind:value={password}
 					id="password"
+                    minlength={8}
 					required
 					type="password"
 				/>

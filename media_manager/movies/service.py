@@ -73,6 +73,7 @@ class MovieService:
         external_id: int,
         metadata_provider: AbstractMetadataProvider,
         language: str | None = None,
+        request_only: bool = False,
     ) -> Movie:
         """
         Add a new movie to the database.
@@ -81,12 +82,21 @@ class MovieService:
         :param metadata_provider: The name of the metadata provider.
         :param language: Optional language code (ISO 639-1) to fetch metadata in.
         """
+        try:
+            existing=self.movie_repository.get_movie_by_external_id(external_id,metadata_provider.name)
+            if not request_only:
+                from media_manager.movies.models import Movie as StoredMovie
+                self.movie_repository.db.get(StoredMovie,existing.id).request_only=False
+                self.movie_repository.db.commit()
+            return existing
+        except NotFoundError:pass
         movie_with_metadata = metadata_provider.get_movie_metadata(
             movie_id=external_id, language=language
         )
         if not movie_with_metadata:
             raise NotFoundError
 
+        movie_with_metadata.request_only=request_only
         saved_movie = self.movie_repository.save_movie(movie=movie_with_metadata)
         metadata_provider.download_movie_poster_image(movie=saved_movie)
         return saved_movie
@@ -234,21 +244,21 @@ class MovieService:
 
         if not (external_id is None or metadata_provider is None):
             try:
-                self.movie_repository.get_movie_by_external_id(
+                found=self.movie_repository.get_movie_by_external_id(
                     external_id=external_id, metadata_provider=metadata_provider
                 )
             except NotFoundError:
                 return False
         elif movie_id is not None:
             try:
-                self.movie_repository.get_movie_by_id(movie_id=movie_id)
+                found=self.movie_repository.get_movie_by_id(movie_id=movie_id)
             except NotFoundError:
                 return False
         else:
             msg = "Use one of the provided overloads for this function!"
             raise ValueError(msg)
 
-        return True
+        return not found.request_only
 
     def get_all_available_torrents_for_movie(
         self, movie: Movie, search_query_override: str | None = None
@@ -309,24 +319,6 @@ class MovieService:
                     )
         return results
 
-    def get_popular_movies(
-        self, metadata_provider: AbstractMetadataProvider
-    ) -> list[MetaDataProviderSearchResult]:
-        """
-        Get popular movies from a given metadata provider.
-
-        :param metadata_provider: The metadata provider to use.
-        :return: A list of metadata provider movie search results.
-        """
-        results = metadata_provider.search_movie()
-
-        return [
-            result
-            for result in results
-            if not self.check_if_movie_exists(
-                external_id=result.external_id, metadata_provider=metadata_provider.name
-            )
-        ]
 
     def get_public_movie_by_id(self, movie: Movie) -> PublicMovie:
         """
@@ -503,6 +495,13 @@ class MovieService:
 
         log.info(f"Downloading approved movie request {movie_request.id}")
 
+        from media_manager.movies.models import MovieFile as StoredFile
+        from media_manager.torrent.models import Torrent as StoredJob
+        from sqlalchemy import select
+        db=self.movie_repository.db
+        records=list(db.scalars(select(StoredFile).where(StoredFile.movie_id==movie.id)))
+        previous_jobs=[db.get(StoredJob,r.torrent_id) for r in records if r.torrent_id]
+        if any(j and not j.imported for j in previous_jobs):return False
         torrents = self.get_all_available_torrents_for_movie(movie=movie)
         available_torrents: list[IndexerQueryResult] = []
 
@@ -529,6 +528,13 @@ class MovieService:
 
         from media_manager.release_policy import allowed_results
         available_torrents = allowed_results(available_torrents,available_only=True)
+        if not available_torrents:return False
+        from media_manager.release_policy import rank
+        candidate=available_torrents[0]
+        for previous in previous_jobs:
+            if previous and previous.imported:
+                old=IndexerQueryResult(title=previous.title,download_url='',seeders=3,flags=[],size=0,usenet=previous.usenet,age=0,indexer=None)
+                if rank(candidate)[:2]<=rank(old)[:2]:return False
 
         torrent = self.torrent_service.download(indexer_result=available_torrents[0])
         movie_file = MovieFile(
@@ -654,7 +660,9 @@ class MovieService:
             for movie_file in movie_files
         ]
 
-        if all(success):
+        if success and all(success):
+            from media_manager.movies.models import Movie as LibraryModel
+            self.movie_repository.db.get(LibraryModel,movie.id).request_only=False
             torrent.imported = True
             self.torrent_service.torrent_repository.save_torrent(torrent=torrent)
 

@@ -3,11 +3,10 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import RequestCenter from '$lib/components/requests/request-center.svelte';
 	import StatCard from '$lib/components/stats/stat-cards.svelte';
 	import RecommendedMediaCarousel from '$lib/components/recommended-media-carousel.svelte';
 	import { resolve } from '$app/paths';
-    let libraryCounts=$state<{movies:number;shows:number}|null>(null);
-    async function refreshCounts(){try{const r=await fetch('/api/v1/library/summary');if(r.ok)libraryCounts=await r.json();}catch{}}
 	import { onMount } from 'svelte';
 	import client from '$lib/api';
 	import type { components } from '$lib/api/api.d.ts';
@@ -31,7 +30,7 @@
     }
     onMount(() => {
         void trending('tv');void trending('movie');
-        void refreshCounts();const timer=setInterval(refreshCounts,10000);return()=>clearInterval(timer);
+
     });
 </script>
 
@@ -62,14 +61,10 @@
 </header>
 <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
 	<h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
-		{mmT($mmLocale, "Dashboard" )}
+		{mmT($mmLocale, "Overview" )}
 	</h1>
 	<main class="min-h-screen flex-1 items-center justify-center rounded-xl p-4 md:min-h-min">
-		<div class="mx-auto">
-			<div class="my-8 block text-2xl">{mmT($mmLocale, "Welcome to MediaManager!" )}</div>
-			<StatCard showCount={libraryCounts?.shows ?? data.tvShows?.length ?? 0} moviesCount={libraryCounts?.movies ?? data.movies?.length ?? 0}
-			></StatCard>
-		</div>
+        <RequestCenter overview={true}/>
 		{#if discoveryError}<p role="alert" class="my-4 rounded-xl border border-destructive p-3 text-sm text-destructive">{mmT($mmLocale,discoveryError)}</p>{/if}
         <div class="mx-auto">
 			<h3 class="my-4 text-center text-2xl font-semibold">{mmT($mmLocale, "This week: series" )}</h3>

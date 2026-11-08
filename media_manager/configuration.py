@@ -64,7 +64,7 @@ FIELDS: list[tuple[str, str, str]] = [
  ('indexers.release_policy.resolutions','Resolution priority (2160p, 1080p, 720p, 480p)','list'),
  ('indexers.release_policy.excluded_tags','Excluded release tags','list'),
  ('indexers.release_policy.allow_unknown_language','Allow releases with unidentified language','bool'),
- ('misc.movie_directory','Filme','path'),('misc.tv_directory','Serien','path'),('misc.torrent_directory','Abgeschlossene Downloads (Containerpfad)','path'),('misc.image_directory','Vorschaubilder','path'),('misc.frontend_url','WebUI-Adresse','text'),
+ ('misc.movie_directory','Filme','path'),('misc.tv_directory','Serien','path'),('misc.torrent_directory','Abgeschlossene Downloads (Containerpfad)','path'),('misc.image_directory','Vorschaubilder','path'),('misc.frontend_url','Public WebUI URL (email links)','text'),
  ('metadata.tmdb.api_key','TMDB API key (optional)','secret'),
  ('metadata.tmdb.default_language','Metadaten: Standardsprache','text'),('metadata.tmdb.primary_languages','Metadaten: bevorzugte Sprachen (z. B. de,en)','list'),
  ('database.host','Datenbank: Host','text'),('database.port','Datenbank: Port','number'),('database.dbname','Datenbank: Name','text'),('database.user','Datenbank: Benutzer','text'),('database.password','Datenbank: Passwort','secret'),
@@ -72,6 +72,16 @@ FIELDS: list[tuple[str, str, str]] = [
  ('torrents.qbittorrent.enabled','qBittorrent verwenden (Torrent)','bool'),('torrents.qbittorrent.host','qBittorrent: Adresse','text'),('torrents.qbittorrent.port','qBittorrent: Port','number'),('torrents.qbittorrent.username','qBittorrent: Benutzer','text'),('torrents.qbittorrent.password','qBittorrent: Passwort','secret'),('torrents.qbittorrent.category_name','qBittorrent: Kategorie','text'),('torrents.qbittorrent.category_save_path','qBittorrent: Kategoriepfad','text'),
  ('torrents.transmission.enabled','Transmission verwenden (Torrent)','bool'),('torrents.transmission.host','Transmission: Host','text'),('torrents.transmission.port','Transmission: Port','number'),('torrents.transmission.username','Transmission: Benutzer','text'),('torrents.transmission.password','Transmission: Passwort','secret'),('torrents.transmission.https_enabled','Transmission: HTTPS','bool'),('torrents.transmission.path','Transmission: RPC-Pfad','text'),
  ('indexers.prowlarr.enabled','Prowlarr verwenden (NZB/Torrent)','bool'),('indexers.prowlarr.url','Prowlarr: Adresse','text'),('indexers.prowlarr.api_key','Prowlarr: API-Key','secret'),('indexers.jackett.enabled','Jackett verwenden (Torrent)','bool'),('indexers.jackett.url','Jackett: Adresse','text'),('indexers.jackett.api_key','Jackett: API-Key','secret'),('indexers.jackett.indexers','Jackett: Indexer (kommagetrennt)','list'),
+ ('notifications.smtp_config.smtp_host', 'SMTP server', 'text'),
+ ('notifications.smtp_config.smtp_port', 'SMTP port', 'number'),
+ ('notifications.smtp_config.smtp_user', 'SMTP username', 'text'),
+ ('notifications.smtp_config.smtp_password', 'SMTP password', 'secret'),
+ ('notifications.smtp_config.from_email', 'Sender email', 'text'),
+ ('notifications.smtp_config.use_tls', 'SMTP STARTTLS', 'bool'),
+ ('notifications.smtp_config.use_ssl', 'SMTP implicit TLS (SSL)', 'bool'),
+ ('auth.email_password_resets', 'Send password recovery emails', 'bool'),
+ ('auth.admin_emails', 'Administrator email recipients', 'list'),
+ ('auth.administrator_mail_enabled', 'Administrator email notifications', 'bool'),
  ('auth.session_lifetime','Anmeldedauer (Sekunden)','number'),('auth.openid_connect.enabled','OIDC verwenden','bool'),('auth.openid_connect.name','OIDC: Anzeigename','text'),('auth.openid_connect.configuration_endpoint','OIDC: Discovery-Adresse','text'),('auth.openid_connect.client_id','OIDC: Client-ID','text'),('auth.openid_connect.client_secret','OIDC: Client-Secret','secret'),
 ]
 
@@ -119,7 +129,7 @@ def stage_settings(values: dict, apply_live: bool = False) -> dict:
         current = json.loads(settings_file().read_text()) if settings_file().exists() else {}
         pending = json.loads(settings_file(True).read_text()) if settings_file(True).exists() else {}
         proposed=merge(merge(current,pending),nested(cleaned))
-        hot={key:value for key,value in cleaned.items() if key.startswith(('indexers.','torrents.','metadata.','misc.library_scan.'))} if apply_live else {}
+        hot={key:value for key,value in cleaned.items() if key.startswith(('indexers.','torrents.','metadata.','misc.library_scan.','notifications.','auth.email_password_resets','auth.admin_emails','auth.administrator_mail_enabled','misc.frontend_url'))} if apply_live else {}
         if hot:
             active=merge(current,nested(hot))
             if settings_file().exists():

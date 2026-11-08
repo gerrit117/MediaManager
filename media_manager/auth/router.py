@@ -76,8 +76,8 @@ def get_all_users(db: DbSessionDependency) -> list[UserRead]:
 @auth_metadata_router.get("/auth/metadata", status_code=status.HTTP_200_OK)
 def get_auth_metadata() -> AuthMetadata:
     if openid_config.enabled:
-        return AuthMetadata(oauth_providers=[openid_config.name])
-    return AuthMetadata(oauth_providers=[])
+        return AuthMetadata(oauth_providers=[openid_config.name],email_available=__import__('media_manager.auth.mail',fromlist=['mail_ready']).mail_ready())
+    return AuthMetadata(oauth_providers=[],email_available=__import__('media_manager.auth.mail',fromlist=['mail_ready']).mail_ready())
 
 # Server-managed fields stay out of UserUpdate: users cannot raise their own quota.
 from pydantic import BaseModel, Field
@@ -118,7 +118,7 @@ import logging
 
 class AdminUserCreate(BaseModel):
     email: EmailStr
-    password: str = Field(min_length=12, repr=False)
+    password: str = Field(min_length=8,max_length=1024, repr=False)
     is_active: bool = True
     is_verified: bool = True
     is_superuser: bool = False
@@ -128,12 +128,17 @@ class AdminUserCreate(BaseModel):
 @users_router.post('/users/admin-create', status_code=201, response_model=UserRead)
 def create_user_as_admin(body: AdminUserCreate, db: DbSessionDependency,
                          actor: Annotated[User, Depends(current_superuser)]) -> UserRead:
+    from media_manager.auth.mail import mail_ready,send_verification
+    from media_manager.auth.password_policy import validate_password
+    if not mail_ready():raise HTTPException(503,'Configure SMTP before creating an account that requires email confirmation.')
+    try:validate_password(body.password)
+    except ValueError as e:raise HTTPException(400,str(e)) from None
     email = str(body.email).lower()
     if db.scalar(select(User.id).where(func.lower(User.email) == email)) is not None:
         raise HTTPException(409, 'Email address is already registered.')
     user = User(id=uuid4(), email=email,
                 hashed_password=PasswordHelper().hash(body.password),
-                is_active=body.is_active, is_verified=body.is_verified,
+                is_active=body.is_active, is_verified=False,
                 is_superuser=body.is_superuser,
                 monthly_request_limit=None if body.is_superuser else body.monthly_request_limit,
                 auto_approve_requests=body.auto_approve_requests)
@@ -144,5 +149,6 @@ def create_user_as_admin(body: AdminUserCreate, db: DbSessionDependency,
         db.rollback()
         raise HTTPException(409, 'Email address is already registered.') from None
     db.refresh(user)
+    send_verification(user)
     logging.getLogger(__name__).info('Administrator %s created account %s', actor.id, user.id)
     return UserRead.model_validate(user)

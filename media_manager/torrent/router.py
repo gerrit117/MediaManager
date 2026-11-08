@@ -13,7 +13,7 @@ from media_manager.torrent.schemas import Torrent, TorrentStatus
 router = APIRouter()
 
 
-@router.get("/progress", dependencies=[Depends(current_active_user)])
+@router.get("/progress", dependencies=[Depends(current_superuser)])
 def get_download_progress(service: torrent_service_dep) -> dict:
     torrents = service.torrent_repository.get_all_torrents()
     return service.download_manager.get_progress(torrents)
@@ -22,13 +22,13 @@ def get_download_progress(service: torrent_service_dep) -> dict:
 @router.get(
     "",
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(current_active_user)],
+    dependencies=[Depends(current_superuser)],
 )
 def get_all_torrents(service: torrent_service_dep) -> list[Torrent]:
     return service.get_all_torrents()
 
 
-@router.get("/{torrent_id}", status_code=status.HTTP_200_OK)
+@router.get("/{torrent_id}", status_code=status.HTTP_200_OK,dependencies=[Depends(current_superuser)])
 def get_torrent(service: torrent_service_dep, torrent: torrent_dep) -> Torrent:
     return service.get_torrent_by_id(torrent_id=torrent.id)
 

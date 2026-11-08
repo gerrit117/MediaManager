@@ -1,49 +1,8 @@
 <script lang="ts">
-	import {locale as mmLocale,t as mmT} from '$lib/i18n';
-	import { page } from '$app/state';
-	import { Separator } from '$lib/components/ui/separator/index.js';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import RequestsTable from '$lib/components/requests/requests-table.svelte';
-	import { resolve } from '$app/paths';
-
-	let requests = $derived(page.data.requestsData);
+import {locale,t} from '$lib/i18n';
+import * as Sidebar from '$lib/components/ui/sidebar';
+import RequestCenter from '$lib/components/requests/request-center.svelte';
 </script>
-
-<svelte:head>
-	<title>{mmT($mmLocale, "Movie Requests - MediaManager" )}</title>
-	<meta content="View and manage movie download requests in MediaManager" name="description" />
-</svelte:head>
-
-<header class="flex h-16 shrink-0 items-center gap-2">
-	<div class="flex items-center gap-2 px-4">
-		<Sidebar.Trigger class="-ml-1" />
-		<Separator class="mr-2 h-4" orientation="vertical" />
-		<Breadcrumb.Root>
-			<Breadcrumb.List>
-				<Breadcrumb.Item class="hidden md:block">
-					<Breadcrumb.Link href={resolve('/dashboard', {})}>MediaManager</Breadcrumb.Link>
-				</Breadcrumb.Item>
-				<Breadcrumb.Separator class="hidden md:block" />
-				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard', {})}>{mmT($mmLocale, "Home" )}</Breadcrumb.Link>
-				</Breadcrumb.Item>
-				<Breadcrumb.Separator class="hidden md:block" />
-				<Breadcrumb.Item>
-					<Breadcrumb.Link href={resolve('/dashboard/movies', {})}>{mmT($mmLocale, "Movies" )}</Breadcrumb.Link>
-				</Breadcrumb.Item>
-				<Breadcrumb.Separator class="hidden md:block" />
-				<Breadcrumb.Item>
-					<Breadcrumb.Page>{mmT($mmLocale, "Movie Requests" )}</Breadcrumb.Page>
-				</Breadcrumb.Item>
-			</Breadcrumb.List>
-		</Breadcrumb.Root>
-	</div>
-</header>
-
-<main class="mx-auto flex w-full flex-1 flex-col gap-4 p-4 md:max-w-[80em]">
-	<h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
-		{mmT($mmLocale, "Movie Requests" )}
-	</h1>
-	<RequestsTable {requests} isShow={false} />
-</main>
+<svelte:head><title>{t($locale,'Requests')} – MediaManager</title></svelte:head>
+<header class="flex h-16 items-center gap-3 px-4"><Sidebar.Trigger/><span class="text-sm text-muted-foreground">MediaManager / {t($locale,'Requests')}</span></header>
+<main class="mx-auto w-full min-w-0 max-w-[90rem] space-y-5 p-4"><h1 class="text-3xl font-bold">{t($locale,'Requests')}</h1><RequestCenter kind="movie"/></main>

@@ -274,7 +274,7 @@ def summary():
     from media_manager.movies.models import Movie
     from media_manager.tv.models import Show
     with Session(init_engine(MediaManagerConfig().database)) as db:
-        return {'movies':db.scalar(select(func.count(Movie.id))),'shows':db.scalar(select(func.count(Show.id))),
+        return {'movies':db.scalar(select(func.count(Movie.id)).where(Movie.request_only==False)),'shows':db.scalar(select(func.count(Show.id)).where(Show.request_only==False)),
                 'paths':{'movies':str(MediaManagerConfig().misc.movie_directory),'tv':str(MediaManagerConfig().misc.tv_directory)}}
 
 @router.get('/scan',dependencies=[Depends(current_superuser)])

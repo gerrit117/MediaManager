@@ -7,7 +7,8 @@ class EmailConfig(BaseSettings):
     smtp_user: str = ""
     smtp_password: str = ""
     from_email: str = ""
-    use_tls: bool = False
+    use_tls: bool = True
+    use_ssl: bool = False
 
 
 class EmailNotificationsConfig(BaseSettings):

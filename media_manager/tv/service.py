@@ -81,6 +81,7 @@ class TvService:
         external_id: int,
         metadata_provider: AbstractMetadataProvider,
         language: str | None = None,
+        request_only: bool = False,
     ) -> Show:
         """
         Add a new show to the database.
@@ -93,7 +94,9 @@ class TvService:
         db=self.tv_repository.db
         basic=identifiers(metadata_provider.name,external_id)
         existing=resolve(db,basic)
-        if existing:return self.tv_repository.get_show_by_id(existing.id)
+        if existing:
+            if not request_only:existing.request_only=False;db.commit()
+            return self.tv_repository.get_show_by_id(existing.id)
         fresh=metadata_provider.get_show_metadata(show_id=external_id,language=language)
         ids=identifiers(metadata_provider.name,external_id,fresh.imdb_id)
         try:ids.update(metadata_provider.get_show_identifiers(external_id))
@@ -101,8 +104,10 @@ class TvService:
         with identity_lock(db,ids):
             existing=resolve(db,ids)
             if existing:
+                if not request_only:existing.request_only=False
                 register(db,existing.id,ids);db.commit()
                 return self.tv_repository.get_show_by_id(existing.id)
+            fresh.request_only=request_only
             saved=self.tv_repository.save_show(show=fresh)
             register(db,saved.id,ids);db.commit()
         metadata_provider.download_show_poster_image(show=saved)
@@ -239,21 +244,21 @@ class TvService:
     ) -> bool:
         if not (external_id is None or metadata_provider is None):
             try:
-                self.tv_repository.get_show_by_external_id(
+                found=self.tv_repository.get_show_by_external_id(
                     external_id=external_id, metadata_provider=metadata_provider
                 )
             except NotFoundError:
                 return False
         elif show_id is not None:
             try:
-                self.tv_repository.get_show_by_id(show_id=show_id)
+                found=self.tv_repository.get_show_by_id(show_id=show_id)
             except NotFoundError:
                 return False
         else:
             msg = "Use one of the provided overloads for this function!"
             raise ValueError(msg)
 
-        return True
+        return not found.request_only
 
     def get_all_available_torrents_for_a_season(
         self,
@@ -325,24 +330,6 @@ class TvService:
         db.commit()
         return results
 
-    def get_popular_shows(
-        self, metadata_provider: AbstractMetadataProvider
-    ) -> list[MetaDataProviderSearchResult]:
-        """
-        Get popular shows from a given metadata provider.
-
-        :param metadata_provider: The metadata provider to use.
-        :return: A list of metadata provider show search results.
-        """
-        results = metadata_provider.search_show()
-
-        return [
-            result
-            for result in results
-            if not self.check_if_show_exists(
-                external_id=result.external_id, metadata_provider=metadata_provider.name
-            )
-        ]
 
     def get_public_show_by_id(self, show: Show) -> PublicShow:
         """
@@ -556,6 +543,13 @@ class TvService:
         log.info(f"Downloading approved season request {season_request.id}")
 
         season = self.get_season(season_id=season_request.season_id)
+        from media_manager.tv.models import SeasonFile as StoredFile
+        from media_manager.torrent.models import Torrent as StoredJob
+        from sqlalchemy import select
+        db=self.tv_repository.db
+        records=list(db.scalars(select(StoredFile).where(StoredFile.season_id==season_request.season_id)))
+        previous_jobs=[db.get(StoredJob,r.torrent_id) for r in records if r.torrent_id]
+        if any(j and not j.imported for j in previous_jobs):return False
         torrents = self.get_all_available_torrents_for_a_season(
             season_number=season.number, show_id=show.id
         )
@@ -588,6 +582,13 @@ class TvService:
 
         from media_manager.release_policy import allowed_results
         available_torrents = allowed_results(available_torrents,available_only=True)
+        if not available_torrents:return False
+        from media_manager.release_policy import rank
+        candidate=available_torrents[0]
+        for previous in previous_jobs:
+            if previous and previous.imported:
+                old=IndexerQueryResult(title=previous.title,download_url='',seeders=3,flags=[],size=0,usenet=previous.usenet,age=0,indexer=None)
+                if rank(candidate)[:2]<=rank(old)[:2]:return False
 
         torrent = self.torrent_service.download(indexer_result=available_torrents[0])
         season_file = SeasonFile(
@@ -779,7 +780,9 @@ class TvService:
             f"Finished importing files for torrent {torrent.title} {'without' if all(success) else 'with'} errors"
         )
 
-        if all(success):
+        if success and all(success):
+            from media_manager.tv.models import Show as LibraryModel
+            self.tv_repository.db.get(LibraryModel,show.id).request_only=False
             torrent.imported = True
             self.torrent_service.torrent_repository.save_torrent(torrent=torrent)
 

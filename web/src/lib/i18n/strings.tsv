@@ -710,3 +710,89 @@ In library	In der Bibliothek
 Import pending	Import steht aus
 Download complete. Post-processing is still running; import follows afterwards.	Download abgeschlossen. Die Nachbearbeitung läuft noch; anschließend folgt der Import.
 Status unknown	Status unbekannt
+Request series	Serie anfragen
+Request movie	Film anfragen
+Request title	Titel anfragen
+Submit request	Anfrage absenden
+Select individual episodes	Einzelne Folgen auswählen
+One movie or season counts as one request. Further episodes from a previously requested season do not consume another quota unit.	Ein Film oder eine Staffel zählt als eine Anfrage. Weitere Folgen einer bereits angefragten Staffel verbrauchen kein zusätzliches Kontingent.
+Preferred quality	Bevorzugte Qualität
+Configured release rules apply to all downloads.	Für alle Downloads gelten die eingestellten Release-Regeln.
+Request submitted. You can follow its progress under Requests.	Anfrage abgesendet. Den Fortschritt findest du unter Anfragen.
+Request could not be submitted.	Anfrage konnte nicht abgesendet werden.
+Could not load title metadata. Please try again.	Metadaten konnten nicht geladen werden. Bitte erneut versuchen.
+Request center	Anfrageübersicht
+Your request quota	Dein Anfragekontingent
+Your requests	Deine Anfragen
+Resets on	Wird zurückgesetzt am
+requests remaining	Anfragen übrig
+used	verbraucht
+All requests	Alle Anfragen
+Pending	Ausstehend
+In progress	Laufend
+Finished	Fertig
+Filter requests	Anfragen filtern
+Request status	Anfragestatus
+Approve request	Anfrage genehmigen
+No requests match this selection.	Keine Anfragen für diese Auswahl vorhanden.
+Open Requests in the sidebar to see all requests.	Alle Anfragen findest du über Anfragen in der Seitenleiste.
+Active downloads	Aktive Downloads
+No active downloads.	Keine aktiven Downloads.
+Request could not be approved.	Anfrage konnte nicht genehmigt werden.
+Use at least 8 characters, including an uppercase letter, lowercase letter, number and special character.	Mindestens 8 Zeichen mit Groß- und Kleinbuchstaben, einer Zahl und einem Sonderzeichen verwenden.
+Passwords do not match.	Die Passwörter stimmen nicht überein.
+Account created. Please confirm your email address before signing in.	Konto erstellt. Bitte bestätige deine E-Mail-Adresse vor der Anmeldung.
+Invitation code	Einladungscode
+Confirm email	E-Mail bestätigen
+Check your inbox and follow the confirmation link.	Prüfe dein Postfach und öffne den Bestätigungslink.
+Resend confirmation	Bestätigung erneut senden
+If this account can be verified, a confirmation email has been sent.	Falls dieses Konto bestätigt werden kann, wurde eine Bestätigungsmail versendet.
+The confirmation link is invalid, expired or already used.	Der Bestätigungslink ist ungültig, abgelaufen oder bereits verwendet.
+Email confirmed. You can now sign in.	E-Mail bestätigt. Du kannst dich jetzt anmelden.
+Verification email could not be requested.	Bestätigungsmail konnte nicht angefordert werden.
+Invitations	Einladungen
+Registration requires a single-use invitation code and email confirmation. Codes are displayed once.	Die Registrierung benötigt einen einmaligen Einladungscode und eine E-Mail-Bestätigung. Codes werden nur einmal angezeigt.
+Bind to email (optional)	Auf E-Mail-Adresse beschränken (optional)
+Valid for days	Gültig für Tage
+Create invitation	Einladung erstellen
+Any email	Beliebige E-Mail-Adresse
+Used	Verwendet
+Revoked	Widerrufen
+Expired	Abgelaufen
+Revoke	Widerrufen
+Email & accounts	E-Mail und Konten
+Configure outgoing SMTP for email confirmation, password recovery and administrator notifications. IMAP is not required. Save before testing. Existing accounts are preserved.	Ausgehenden SMTP-Versand für E-Mail-Bestätigung, Passwort-Wiederherstellung und Admin-Mails einrichten. IMAP wird nicht benötigt. Vor dem Test speichern. Bestehende Konten bleiben erhalten.
+Save email settings	E-Mail-Einstellungen speichern
+Test recipient	Testempfänger
+Send test email	Testmail senden
+Email settings saved and applied.	E-Mail-Einstellungen gespeichert und übernommen.
+Test email sent. Check the recipient inbox.	Testmail versendet. Bitte das Empfängerpostfach prüfen.
+SMTP connection successful.	SMTP-Verbindung erfolgreich.
+SMTP server	SMTP-Server
+SMTP port	SMTP-Port
+SMTP username	SMTP-Benutzername
+SMTP password	SMTP-Passwort
+Sender email	Absenderadresse
+SMTP STARTTLS	SMTP STARTTLS
+SMTP implicit TLS (SSL)	SMTP implizites TLS (SSL)
+Send password recovery emails	Passwort-Wiederherstellung per E-Mail
+Administrator email recipients	Empfänger für Administrator-Mails
+Administrator email notifications	Administrator-Benachrichtigungen per E-Mail
+Saved — leave empty to keep	Hinterlegt – leer lassen zum Behalten
+Configure SMTP before inviting users.	Vor dem Einladen von Nutzern SMTP einrichten.
+Configure SMTP before creating an account that requires email confirmation.	Vor dem Erstellen eines Kontos mit E-Mail-Bestätigung SMTP einrichten.
+Registration requires configured SMTP email delivery.	Die Registrierung benötigt einen eingerichteten SMTP-Mailversand.
+Invitation code is invalid, expired or already used.	Einladungscode ist ungültig, abgelaufen oder bereits verwendet.
+Registration could not be completed. Try signing in or contact the administrator.	Registrierung konnte nicht abgeschlossen werden. Bitte anmelden oder den Administrator kontaktieren.
+Account email delivery is not configured. Contact the administrator.	Der Mailversand für Konten ist nicht eingerichtet. Bitte den Administrator kontaktieren.
+Configure the SMTP server and sender email first.	Zuerst SMTP-Server und Absenderadresse einrichten.
+SMTP connection or delivery failed. Check server, port, TLS and credentials.	SMTP-Verbindung oder Versand fehlgeschlagen. Server, Port, TLS und Zugangsdaten prüfen.
+Too many attempts. Please try again later.	Zu viele Versuche. Bitte später erneut versuchen.
+Select at least one season or episode.	Mindestens eine Staffel oder Folge auswählen.
+Select at least one episode.	Mindestens eine Folge auswählen.
+Search series	Serien suchen
+Search movies	Filme suchen
+Search for a series.	Nach einer Serie suchen.
+Search for a movie.	Nach einem Film suchen.
+Please confirm your email address before signing in.	Bitte bestätige deine E-Mail-Adresse vor der Anmeldung.
+Public WebUI URL (email links)	Öffentliche WebUI-Adresse (E-Mail-Links)

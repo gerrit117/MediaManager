@@ -1,4 +1,5 @@
 <script lang="ts">
+ import RequestMediaDialog from '$lib/components/requests/request-media-dialog.svelte';
  import {onMount,getContext} from 'svelte';
  import {locale,t} from '$lib/i18n';
  import {goto} from '$app/navigation';
@@ -23,7 +24,7 @@
  {#if selected!==null}
   {@const collection=collections.find(c=>c.id===selected)}
   {#if collection}<section class="space-y-4 rounded-xl border p-4"><div class="flex justify-between gap-3"><h2 class="text-2xl font-semibold">{collection.name}</h2><button class="rounded-lg border px-3" onclick={()=>selected=null}>{t($locale,'Close')}</button></div><p class="text-sm text-muted-foreground">{collection.overview}</p><div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-   {#each collection.parts as part}<article class="flex min-w-0 flex-col overflow-hidden rounded-xl border"><div class="aspect-[2/3] bg-muted">{#if part.poster_url}<img src={part.poster_url} alt={part.name} class="h-full w-full object-cover" loading="lazy"/>{/if}</div><div class="flex flex-1 flex-col gap-2 p-3"><h3 class="text-sm font-semibold">{part.name}</h3><p class="text-xs text-muted-foreground">{part.year??'—'} · {t($locale,part.state==='available'?'Available':part.state==='upcoming'?'Upcoming':'Missing')}</p><button class="mt-auto rounded-lg border px-2 py-2 text-sm disabled:opacity-50" disabled={busy} onclick={()=>openMovie(part)}>{t($locale,part.available?'Open':user().is_superuser?'Search':'Request')}</button></div></article>{/each}
+   {#each collection.parts as part}<article class="flex min-w-0 flex-col overflow-hidden rounded-xl border"><div class="aspect-[2/3] bg-muted">{#if part.poster_url}<img src={part.poster_url} alt={part.name} class="h-full w-full object-cover" loading="lazy"/>{/if}</div><div class="flex flex-1 flex-col gap-2 p-3"><h3 class="text-sm font-semibold">{part.name}</h3><p class="text-xs text-muted-foreground">{part.year??'—'} · {t($locale,part.state==='available'?'Available':part.state==='upcoming'?'Upcoming':'Missing')}</p>{#if !part.available&&!user().is_superuser}<RequestMediaDialog result={{name:part.name,external_id:part.tmdb_id,metadata_provider:'tmdb'}} isShow={false}/>{:else}<button class="mt-auto rounded-lg border px-2 py-2 text-sm disabled:opacity-50" disabled={busy} onclick={()=>openMovie(part)}>{t($locale,part.available?'Open':user().is_superuser?'Search':'Request')}</button>{/if}</div></article>{/each}
   </div></section>{/if}
  {/if}
  <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">

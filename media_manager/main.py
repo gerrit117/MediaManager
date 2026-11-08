@@ -1,3 +1,4 @@
+from fastapi import Depends
 import logging
 import os
 
@@ -88,29 +89,22 @@ async def hello_world() -> dict:
 
 
 api_app.include_router(
-    fastapi_users.get_auth_router(bearer_auth_backend),
+    fastapi_users.get_auth_router(bearer_auth_backend,requires_verification=True),
     prefix="/auth/jwt",
     tags=["auth"],
 )
 api_app.include_router(
-    fastapi_users.get_auth_router(cookie_auth_backend),
+    fastapi_users.get_auth_router(cookie_auth_backend,requires_verification=True),
     prefix="/auth/cookie",
     tags=["auth"],
 )
-api_app.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
-    prefix="/auth",
-    tags=["auth"],
-)
-api_app.include_router(
-    fastapi_users.get_reset_password_router(), prefix="/auth", tags=["auth"]
-)
-api_app.include_router(
-    fastapi_users.get_verify_router(UserRead), prefix="/auth", tags=["auth"]
-)
+from media_manager.auth.invitations import router as invitations_router,public_mail_rate
+api_app.include_router(invitations_router)
+api_app.include_router(fastapi_users.get_reset_password_router(),prefix='/auth',tags=['auth'],dependencies=[Depends(public_mail_rate)])
+api_app.include_router(fastapi_users.get_verify_router(UserRead),prefix='/auth',tags=['auth'],dependencies=[Depends(public_mail_rate)])
 api_app.include_router(custom_users_router, tags=["users"])
 api_app.include_router(
-    fastapi_users.get_users_router(UserRead, UserUpdate),
+    fastapi_users.get_users_router(UserRead, UserUpdate,requires_verification=True),
     prefix="/users",
     tags=["users"],
 )
@@ -123,6 +117,9 @@ from media_manager.settings_router import router as settings_router
 api_app.include_router(settings_router, prefix="/settings", tags=["settings"])
 from media_manager.library_scan import router as library_router
 api_app.include_router(library_router,prefix="/library",tags=["library"])
+
+from media_manager.request_center import router as request_center_router
+api_app.include_router(request_center_router,prefix='/requests',tags=['requests'])
 
 api_app.include_router(indexer_router, prefix="/indexers", tags=["indexers"])
 api_app.include_router(tv_router.router, prefix="/tv", tags=["tv"])

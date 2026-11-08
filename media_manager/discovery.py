@@ -67,8 +67,8 @@ def list_query(kind,mode,window,page,region,provider_id,company_id,genre_id,min_
 
 def library_ids(db,kind):
     model=Show if kind=='tv' else Movie
-    owned={int(external):str(internal) for internal,external in db.execute(select(model.id,model.external_id).where(model.metadata_provider=='tmdb'))}
-    if kind=='tv':owned.update({int(external):str(internal) for external,internal in db.execute(select(ShowExternalId.external_id,ShowExternalId.show_id).where(ShowExternalId.provider=='tmdb')) if str(external).isdigit()})
+    owned={int(external):str(internal) for internal,external in db.execute(select(model.id,model.external_id).where(model.metadata_provider=='tmdb',model.request_only==False))}
+    if kind=='tv':owned.update({int(external):str(internal) for external,internal in db.execute(select(ShowExternalId.external_id,ShowExternalId.show_id).join(Show,Show.id==ShowExternalId.show_id).where(ShowExternalId.provider=='tmdb',Show.request_only==False)) if str(external).isdigit()})
     return owned
 
 

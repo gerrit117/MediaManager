@@ -1,5 +1,8 @@
 <script lang="ts">
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
+	import {getContext} from 'svelte';
+    import RequestMediaDialog from '$lib/components/requests/request-media-dialog.svelte';
+    const currentUser=getContext<()=>any>('user');
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { ImageOff, LoaderCircle } from 'lucide-svelte';
@@ -70,6 +73,8 @@
 			>
 				{mmT($mmLocale, isShow ? "Series already exists" : "Movie already exists")}
 			</Button>
+		{:else if !currentUser?.()?.is_superuser}
+            <RequestMediaDialog {result} {isShow}/>
 		{:else}
 			<Button class="h-auto min-h-9 w-full whitespace-normal text-center text-xs font-semibold sm:text-sm" disabled={loading} onclick={() => addMedia()}>
 				{#if loading}

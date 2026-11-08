@@ -3,7 +3,7 @@ from uuid import UUID,uuid4
 from typing import Annotated
 from datetime import datetime,timezone
 import logging
-from fastapi import APIRouter,Depends,HTTPException
+from fastapi import APIRouter,Depends,HTTPException,BackgroundTasks
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -79,13 +79,15 @@ def list_requests(db:DbSessionDependency,user:Annotated[User,Depends(current_act
 
 
 @router.post('/episodes/requests',status_code=201)
-def request_episode(body:EpisodeRequestCreate,service:tv_service_dep,user:Annotated[User,Depends(current_active_user)]):
+def request_episode(body:EpisodeRequestCreate,service:tv_service_dep,user:Annotated[User,Depends(current_active_user)],tasks:BackgroundTasks):
     show,season,episode=context(service,body.episode_id);db=service.tv_repository.db
     if episode.number in season_presence(service,show,season):raise HTTPException(409,'This episode already exists in the library.')
     if episode.number in claimed_episodes(service,season):raise HTTPException(409,'An existing download already covers this episode. Check Downloads before retrying.')
     row=EpisodeRequest(id=uuid4(),episode_id=episode.id,requested_by_id=user.id,min_quality=body.min_quality,wanted_quality=body.wanted_quality)
     try:apply_request_policy(db,row,'episodes');db.add(row);db.commit()
     except IntegrityError:db.rollback();raise HTTPException(409,'This episode has already been requested at this quality.') from None
+    from media_manager.auth.mail import notify_admins
+    tasks.add_task(notify_admins,'New episode request',str(user.email)+': '+show.name+' S'+str(season.number)+'E'+str(episode.number))
     return {'id':str(row.id),'authorized':row.authorized}
 
 

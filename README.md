@@ -4,6 +4,8 @@ An independent fork of [MediaManager by Maximilian Dorninger and contributors](h
 
 This is a community fork, not an official upstream release. The original project's attribution, license and Git history are retained.
 
+Account setup and the request-first workflow are documented in [Accounts and requests](docs/accounts-and-requests.md): single-use invitations, email confirmation/recovery through SMTP, shared movie/season quotas and per-user progress.
+
 ## What differs here
 
 - Separate movie/series discovery with TMDB trends, popular/top-rated/recent lists, and country-specific streaming provider, studio and genre filters.
