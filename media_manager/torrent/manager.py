@@ -111,6 +111,9 @@ class DownloadManager:
                 result.update(client.get_progress([t for t in torrents if t.usenet == is_usenet]))
             except Exception as error:
                 log.warning("Download progress unavailable (%s)", type(error).__name__)
+        for torrent in torrents:
+            if str(torrent.id) in result:
+                result[str(torrent.id)]["imported"] = torrent.imported
         return result
 
     def retry_download(self, torrent: Torrent) -> None:

@@ -700,3 +700,13 @@ Discover more	Mehr entdecken
 The title could not be added. Please try again.	Der Titel konnte nicht hinzugefügt werden. Bitte versuche es erneut.
 Movie already exists	Film bereits vorhanden
 Series	Serien
+Waiting for post-processing	Wartet auf Nachbearbeitung
+Running post-processing script	Nachbearbeitungsskript läuft
+Moving files	Verschiebt Dateien
+Downloading repair data	Lädt Reparaturdaten
+Import follows post-processing	Import folgt nach der Nachbearbeitung
+Waiting for library import	Wartet auf Bibliotheksimport
+In library	In der Bibliothek
+Import pending	Import steht aus
+Download complete. Post-processing is still running; import follows afterwards.	Download abgeschlossen. Die Nachbearbeitung läuft noch; anschließend folgt der Import.
+Status unknown	Status unbekannt

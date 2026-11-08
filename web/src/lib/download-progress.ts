@@ -1,6 +1,6 @@
 import { env } from '$env/dynamic/public';
 
-export type DownloadProgress = { percent: number | null; state: string; client: string; usenet: boolean };
+export type DownloadProgress = { percent: number | null; state: string; client: string; usenet: boolean; phase?: string; imported?: boolean };
 let cached: Record<string, DownloadProgress> = {};
 let expires = 0;
 let pending: Promise<Record<string, DownloadProgress>> | null = null;

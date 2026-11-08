@@ -74,7 +74,7 @@ class ProgressTests(unittest.TestCase):
     def test_progress_is_for_our_job_only(self):
         self.client.client.get_downloads.return_value={'queue':{'slots':[{'nzo_id':'job-hash','status':'Downloading','percentage':'42.6'},{'nzo_id':'foreign','status':'Completed','percentage':'100'}]}}
         result=self.client.get_progress([self.job])
-        self.assertEqual(result,{'job-id':{'percent':42.6,'state':'Downloading','client':'SABnzbd','usenet':True}})
+        self.assertEqual(result,{'job-id':{'percent':42.6,'state':'Downloading','client':'SABnzbd','usenet':True,'phase':'download'}})
         self.client.client.get_history.assert_not_called()
 
     def test_completed_history_progress(self):
@@ -89,6 +89,40 @@ class ProgressTests(unittest.TestCase):
     def test_global_pause_not_presented_as_per_job_resume(self):
         self.client.client.get_downloads.return_value={'queue':{'paused':True,'slots':[{'nzo_id':'job-hash','status':'Downloading','percentage':'9'}]}}
         self.assertEqual(self.client.get_progress([self.job])['job-id']['state'],'QueuePaused')
+
+    def test_history_queued_is_postprocessing_and_not_global_pause(self):
+        self.client.client.get_downloads.return_value={'queue':{'paused':True,'slots':[]}}
+        self.client.client.get_history.return_value={'history':{'slots':[{'nzo_id':'job-hash','status':'Queued','loaded':True,'action_line':'private details','url':'private key'}]}}
+        result=self.client.get_progress([self.job])['job-id']
+        self.assertEqual(result['state'],'PostProcessQueued')
+        self.assertEqual(result['phase'],'postprocessing')
+        self.assertEqual(result['percent'],100)
+        self.assertEqual(set(result),{'percent','state','phase','client','usenet'})
+
+    def test_each_processing_stage_keeps_its_state_and_download_completion(self):
+        for status in ['QuickCheck','Verifying','Repairing','Fetching','Extracting','Moving','Running']:
+            with self.subTest(status=status):
+                self.client.client.get_downloads.return_value={'queue':{'slots':[]}}
+                self.client.client.get_history.return_value={'history':{'slots':[{'nzo_id':'job-hash','status':status}]}}
+                result=self.client.get_progress([self.job])['job-id']
+                self.assertEqual(result['state'],status)
+                self.assertEqual(result['phase'],'postprocessing')
+                self.assertEqual(result['percent'],100)
+
+    def test_all_requested_queue_jobs_fit_the_page(self):
+        jobs=[SimpleNamespace(id=str(i),hash='hash-'+str(i),imported=False) for i in range(15)]
+        self.client.client.get_downloads.return_value={'queue':{'slots':[{'nzo_id':j.hash,'status':'Downloading','percentage':'2'} for j in jobs]}}
+        result=self.client.get_progress(jobs)
+        self.assertEqual(len(result),15)
+        self.client.client.get_downloads.assert_called_once_with(nzo_ids=[j.hash for j in jobs],limit=15)
+
+    def test_manager_returns_current_import_state(self):
+        manager=object.__new__(DownloadManager);manager._usenet_client=Mock();manager._torrent_client=None
+        self.job.usenet=True
+        manager._usenet_client.get_progress.return_value={'job-id':{'state':'Completed','percent':100}}
+        self.assertFalse(manager.get_progress([self.job])['job-id']['imported'])
+        self.job.imported=True
+        self.assertTrue(manager.get_progress([self.job])['job-id']['imported'])
 
     def test_running_job_cannot_be_retried(self):
         from media_manager.exceptions import BadRequestError
