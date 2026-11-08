@@ -50,7 +50,7 @@ def test_bootstrap_requires_code_and_never_overwrites(settings,monkeypatch):
  from media_manager.onboarding import create_setup_app
  (settings/'config.toml').unlink()
  c=TestClient(create_setup_app())
- body=dict(code='wrong',database_host='db',database_name='db',database_user='user',database_password='private',admin_email='owner@example.com',admin_password='a sufficiently long password',movie_directory=str(settings/'movies'),tv_directory=str(settings/'tv'),download_directory=str(settings/'downloads'))
+ body=dict(code='wrong',database_host='db',database_name='db',database_user='user',database_password='private',admin_email='owner@example.com',admin_password='A sufficiently long password!1',movie_directory=str(settings/'movies'),tv_directory=str(settings/'tv'),download_directory=str(settings/'downloads'))
  assert c.post('/setup/complete',json=body).status_code==403
  body['code']=(settings/'setup-code').read_text()
  db=Mock();db.execute.return_value.fetchone.return_value=(None,)
@@ -61,7 +61,7 @@ def test_bootstrap_requires_code_and_never_overwrites(settings,monkeypatch):
  assert len(saved['auth']['token_secret'])==64
  assert saved['metadata']['tmdb']['default_language']=='de'
  assert (settings/'config.toml').stat().st_mode&0o777==0o600
- assert 'a sufficiently long password' not in (settings/'config.toml').read_text()
+ assert 'A sufficiently long password!1' not in (settings/'config.toml').read_text()
  assert c.post('/setup/complete',json=body).status_code==409
 
 def test_hot_settings_apply_without_restart_and_cold_stays_pending(settings):

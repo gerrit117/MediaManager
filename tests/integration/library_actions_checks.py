@@ -5,7 +5,7 @@ from types import SimpleNamespace as NS
 from unittest.mock import Mock,patch
 from sqlalchemy import select,text
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
+from fastapi import HTTPException,BackgroundTasks
 from media_manager.database import init_engine
 from media_manager.config import MediaManagerConfig
 from media_manager.tv.models import Show,Season,Episode,SeasonFile
@@ -23,7 +23,7 @@ from media_manager.torrent.schemas import Quality
 from pathlib import Path
 engine=init_engine(MediaManagerConfig().database)
 with Session(engine) as db:
- assert db.scalar(text('select version_num from alembic_version'))=='b6c432fd734d'
+ assert db.scalar(text('select version_num from alembic_version'))=='c7d543ae845e'
  keep=Show(id=uuid4(),name='Identity fixture',external_id=111112,metadata_provider='tvdb',imdb_id='tt99901112',overview='',year=2025)
  duplicate=Show(id=uuid4(),name='Same fixture',external_id=222223,metadata_provider='tmdb',imdb_id=keep.imdb_id,overview='',year=2025)
  db.add_all([keep,duplicate]);db.commit()
@@ -55,11 +55,16 @@ with Session(engine) as db:
  user=User(id=uuid4(),email='episode-fixture@example.com',hashed_password='unused',is_active=True,is_superuser=False,is_verified=True,monthly_request_limit=1,auto_approve_requests=False)
  db.add(user);db.commit()
  body=EpisodeRequestCreate(episode_id=episodes[1].id,min_quality=Quality.hd,wanted_quality=Quality.fullhd)
- r=request_episode(body,service,user);assert not r['authorized'] and usage_count(db,user.id)==1
+ r=request_episode(body,service,user,BackgroundTasks());assert not r['authorized'] and usage_count(db,user.id)==1
  assert db.get(EpisodeRequest,__import__('uuid').UUID(r['id'])).episode_id==episodes[1].id
- try:request_episode(EpisodeRequestCreate(episode_id=episodes[2].id,min_quality=Quality.hd,wanted_quality=Quality.fullhd),service,user)
+ # More episodes of this season are free, even when the monthly limit is reached.
+ additional=request_episode(EpisodeRequestCreate(episode_id=episodes[2].id,min_quality=Quality.hd,wanted_quality=Quality.fullhd),service,user,BackgroundTasks())
+ assert additional['id'] and usage_count(db,user.id)==1
+ other_season=Season(id=uuid4(),show_id=keep.id,number=2,external_id=500,name='Next season',overview='');db.add(other_season);db.flush()
+ other_episode=Episode(id=uuid4(),season_id=other_season.id,number=1,external_id=501,title='Next season episode');db.add(other_episode);db.commit()
+ try:request_episode(EpisodeRequestCreate(episode_id=other_episode.id,min_quality=Quality.hd,wanted_quality=Quality.fullhd),service,user,BackgroundTasks())
  except HTTPException as error:assert error.status_code==429;db.rollback()
- else:raise AssertionError('Episode quota bypass')
+ else:raise AssertionError('Different season quota bypass')
  delete_request(__import__('uuid').UUID(r['id']),db,user)
  assert usage_count(db,user.id)==1
  # Exact-ID collection matching, physical-file presence and future members.

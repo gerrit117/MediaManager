@@ -83,7 +83,7 @@
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
 				<Breadcrumb.Item>
-					<Breadcrumb.Page>{mmT($mmLocale, "Add a Show" )}</Breadcrumb.Page>
+					<Breadcrumb.Page>{mmT($mmLocale, "Search series" )}</Breadcrumb.Page>
 				</Breadcrumb.Item>
 			</Breadcrumb.List>
 		</Breadcrumb.Root>
@@ -93,7 +93,7 @@
 <main class="flex w-full max-w-[90vw] flex-1 flex-col items-center gap-4 p-4 pt-0">
 	<div class="grid w-full max-w-sm items-center gap-12">
 		<h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
-			{mmT($mmLocale, "Add a Show" )}
+			{mmT($mmLocale, "Search series" )}
 		</h1>
 		<section>
 			<Label for="search-box">{mmT($mmLocale, "Show Name" )}</Label>
@@ -108,7 +108,7 @@
 					}
 				}}
 			/>
-			<p class="text-sm text-muted-foreground">{mmT($mmLocale, "Search for a Show to add." )}</p>
+			<p class="text-sm text-muted-foreground">{mmT($mmLocale, "Search for a series." )}</p>
 		</section>
 		<section>
 			<Collapsible.Root class="w-full space-y-1">

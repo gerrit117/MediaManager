@@ -1,3 +1,4 @@
+from fastapi import BackgroundTasks
 from pathlib import Path
 from typing import Literal
 from typing import Annotated
@@ -69,7 +70,8 @@ def get_popular_movies(
     """
     Get a list of recommended/popular movies from the metadata provider.
     """
-    return movie_service.get_popular_movies(metadata_provider=metadata_provider)
+    from media_manager.discovery import discover
+    return discover('movie',movie_service.movie_repository.db,mode='trending',window='week',page=1,region='DE',language='de',provider_id=None,company_id=None,genre_id=None,min_votes=100)['results']
 
 
 # -----------------------------------------------------------------------------
@@ -137,7 +139,7 @@ def get_all_movies(movie_service: movie_service_dep) -> list[Movie]:
 @router.post(
     "",
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(current_active_user)],
+    dependencies=[Depends(current_superuser)],
     responses={
         status.HTTP_201_CREATED: {
             "model": Movie,
@@ -171,7 +173,7 @@ def add_a_movie(
 
 @router.get(
     "/torrents",
-    dependencies=[Depends(current_active_user)],
+    dependencies=[Depends(current_superuser)],
 )
 def get_all_movies_with_torrents(
     movie_service: movie_service_dep,
@@ -202,11 +204,11 @@ def get_available_libraries() -> list[LibraryItem]:
     "/requests",
     dependencies=[Depends(current_active_user)],
 )
-def get_all_movie_requests(movie_service: movie_service_dep) -> list[RichMovieRequest]:
+def get_all_movie_requests(movie_service: movie_service_dep,user:Annotated[UserRead,Depends(current_active_user)]) -> list[RichMovieRequest]:
     """
     Get all movie requests.
     """
-    return movie_service.get_all_movie_requests()
+    return [r for r in movie_service.get_all_movie_requests() if user.is_superuser or (r.requested_by and r.requested_by.id==user.id)]
 
 
 @router.post(
@@ -215,6 +217,7 @@ def get_all_movie_requests(movie_service: movie_service_dep) -> list[RichMovieRe
 )
 def create_movie_request(
     movie_service: movie_service_dep,
+    tasks: BackgroundTasks,
     movie_request: CreateMovieRequest,
     user: Annotated[UserRead, Depends(current_active_user)],
 ) -> MovieRequest:
@@ -230,7 +233,10 @@ def create_movie_request(
         movie_request.authorized = True
         movie_request.authorized_by = user
 
-    return movie_service.add_movie_request(movie_request=movie_request)
+    created=movie_service.add_movie_request(movie_request=movie_request)
+    from media_manager.auth.mail import notify_admins
+    tasks.add_task(notify_admins,'New movie request',str(user.email)+': '+str(movie_request.movie_id))
+    return created
 
 
 @router.put(

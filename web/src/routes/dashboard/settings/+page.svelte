@@ -1,4 +1,5 @@
 <script lang="ts">
+ import MailSettings from '$lib/components/mail-settings.svelte';
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import LanguageSelect from '$lib/components/language-select.svelte';
 	import ConnectionSetup from '$lib/components/connection-setup.svelte';
@@ -22,7 +23,7 @@
 
 	let currentUser: () => components['schemas']['UserRead'] = getContext('user');
 	let activeTab=$state('account');
-	const tabs=[{id:'account',name:'Konto'},{id:'system',name:'System & Downloads'},{id:'indexers',name:'Indexer-Dienste'},{id:'library',name:'Library'},{id:'releases',name:'Release rules'},{id:'users',name:'Benutzerverwaltung'}];
+	const tabs=[{id:'account',name:'Konto'},{id:'system',name:'System & Downloads'},{id:'indexers',name:'Indexer-Dienste'},{id:'library',name:'Library'},{id:'releases',name:'Release rules'},{id:'users',name:'Benutzerverwaltung'},{id:'mail',name:'Email & accounts'}];
 	onMount(()=>{const section=new URLSearchParams(location.search).get('section');if(tabs.some(t=>t.id===section))activeTab=section!;const handler=(e:Event)=>{const target=(e as CustomEvent).detail;if(tabs.some(t=>t.id===target))activeTab=target;};window.addEventListener('mm-settings-tab',handler);return()=>window.removeEventListener('mm-settings-tab',handler);});
 	let users: components['schemas']['UserRead'][] = $derived(
 		(page.data.users ?? []).filter(
@@ -69,6 +70,7 @@
   <section role="tabpanel" id="panel-indexers" aria-labelledby="tab-indexers" hidden={activeTab!=='indexers'}><IndexerServices/></section>
   <section role="tabpanel" id="panel-library" aria-labelledby="tab-library" hidden={activeTab!=='library'}><LibraryManagement active={activeTab==='library'}/></section>
   <section role="tabpanel" id="panel-releases" aria-labelledby="tab-releases" hidden={activeTab!=='releases'}><ReleaseRules/></section>
+  <section role="tabpanel" id="panel-mail" aria-labelledby="tab-mail" hidden={activeTab!=='mail'}><MailSettings/></section>
   <section role="tabpanel" id="panel-users" aria-labelledby="tab-users" hidden={activeTab!=='users'}><Card.Root><Card.Header><Card.Title>{mmT($mmLocale, "Benutzerverwaltung" )}</Card.Title><Card.Description>{mmT($mmLocale, "Konten, Monatskontingente und automatische Genehmigung verwalten" )}</Card.Description></Card.Header><Card.Content><UserTable {users}/></Card.Content></Card.Root></section>
  {/if}
 </main>

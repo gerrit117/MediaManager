@@ -106,7 +106,7 @@ class MovieRepository:
         :raises SQLAlchemyError: If a database error occurs.
         """
         try:
-            stmt = select(Movie)
+            stmt = select(Movie).where(Movie.request_only==False)
             results = self.db.execute(stmt).scalars().unique().all()
             return [MovieSchema.model_validate(movie) for movie in results]
         except SQLAlchemyError:
@@ -294,6 +294,9 @@ class MovieRepository:
         :raises SQLAlchemyError: If a database error occurs.
         """
         db_model = MovieFile(**movie_file.model_dump())
+        if movie_file.torrent_id is None:
+            parent=self.db.get(Movie,movie_file.movie_id)
+            if parent:parent.request_only=False
         if movie_file.source_files is not None:
             existing = self.db.get(MovieFile, (movie_file.movie_id, movie_file.file_path_suffix))
             if existing is not None:

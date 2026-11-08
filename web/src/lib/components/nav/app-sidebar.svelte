@@ -99,6 +99,9 @@
 	import NavSecondary from '$lib/components/nav/nav-secondary.svelte';
 	import NavUser from '$lib/components/nav/nav-user.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar';
+	import {getContext} from 'svelte';
+    const currentUser=getContext<()=>any>('user');
+    let mainItems=$derived(data.navMain.map(item=>({...item,title:item.title==='Dashboard'?'Overview':item.title,items:item.items?.filter(sub=>currentUser?.()?.is_superuser||sub.title!=='Downloads').map(sub=>({...sub,title:!currentUser?.()?.is_superuser&&sub.title==='Add a show'?'Request series':!currentUser?.()?.is_superuser&&sub.title==='Add a movie'?'Request movie':sub.title}))})));
 	import type { ComponentProps } from 'svelte';
 	import logo from '$lib/images/logo.svg';
 
@@ -124,7 +127,7 @@
 		</Sidebar.Menu>
 	</Sidebar.Header>
 	<Sidebar.Content>
-		<NavMain items={data.navMain} />
+		<NavMain items={mainItems} />
 		<!--  <NavProjects projects={data.projects}/> -->
 		<NavSecondary class="mt-auto" items={data.navSecondary} />
 	</Sidebar.Content>

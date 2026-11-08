@@ -1,4 +1,5 @@
 <script lang="ts">
+ import {passwordHint,validPassword} from '$lib/password-policy';
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
@@ -20,9 +21,11 @@
 	let newPassword = $state('');
 	let confirmPassword = $state('');
 	let isLoading = $state(false);
-	let resetToken = $derived(page.data.token);
+	let resetToken = $state('');
 
 	onMount(() => {
+        resetToken=new URLSearchParams(location.hash.slice(1)).get('token')||page.data.token||'';
+        history.replaceState({},'',location.pathname);
 		if (!resetToken) {
 			toast.error('Invalid or missing reset token.');
 			goto(resolve('/login', {}));
@@ -30,6 +33,7 @@
 	});
 
 	async function resetPassword() {
+        if(!validPassword(newPassword)){toast.error(mmT($mmLocale,passwordHint));return;}
 		if (newPassword !== confirmPassword) {
 			toast.error('Passwords do not match.');
 			return;
@@ -63,8 +67,10 @@
 		resetPassword();
 	};
 </script>
+<p class="my-2 text-xs text-muted-foreground">{mmT($mmLocale,passwordHint)}</p>
 
 <svelte:head>
+<meta name="referrer" content="no-referrer"/>
 	<title>{mmT($mmLocale, "Reset Password - MediaManager" )}</title>
 	<meta content="Reset your MediaManager password with a secure token" name="description" />
 </svelte:head>
@@ -82,7 +88,7 @@
 					bind:value={newPassword}
 					disabled={isLoading}
 					id="new-password"
-					minlength={1}
+					minlength={8}
 					placeholder={mmT($mmLocale, "Enter your new password")}
 					required
 					type="password"
@@ -94,7 +100,7 @@
 					bind:value={confirmPassword}
 					disabled={isLoading}
 					id="confirm-password"
-					minlength={1}
+					minlength={8}
 					placeholder={mmT($mmLocale, "Confirm your new password")}
 					required
 					type="password"

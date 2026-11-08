@@ -16,9 +16,5 @@ export const load: LayoutLoad = async ({ fetch }) => {
 			throw redirect(303, resolve('/login', {}));
 		}
 	}
-	return {
-		user: data,
-		tvShows: await client.GET('/api/v1/tv/shows', { fetch: fetch }).then((res) => res.data),
-		movies: await client.GET('/api/v1/movies', { fetch: fetch }).then((res) => res.data)
-	};
+	return {user:data};
 };

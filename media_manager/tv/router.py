@@ -1,3 +1,4 @@
+from fastapi import BackgroundTasks
 from pathlib import Path
 from typing import Literal
 from typing import Annotated
@@ -68,7 +69,8 @@ def get_recommended_shows(
     """
     Get a list of recommended/popular shows from the metadata provider.
     """
-    return tv_service.get_popular_shows(metadata_provider=metadata_provider)
+    from media_manager.discovery import discover
+    return discover('tv',tv_service.tv_repository.db,mode='trending',window='week',page=1,region='DE',language='de',provider_id=None,company_id=None,genre_id=None,min_votes=100)['results']
 
 
 # -----------------------------------------------------------------------------
@@ -135,7 +137,7 @@ def get_all_shows(tv_service: tv_service_dep) -> list[Show]:
 @router.post(
     "/shows",
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(current_active_user)],
+    dependencies=[Depends(current_superuser)],
     responses={
         status.HTTP_201_CREATED: {
             "model": Show,
@@ -294,11 +296,11 @@ def get_a_shows_torrents(show: show_dep, tv_service: tv_service_dep) -> RichShow
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(current_active_user)],
 )
-def get_season_requests(tv_service: tv_service_dep) -> list[RichSeasonRequest]:
+def get_season_requests(tv_service: tv_service_dep,user:Annotated[User,Depends(current_active_user)]) -> list[RichSeasonRequest]:
     """
     Get all season requests.
     """
-    return tv_service.get_all_season_requests()
+    return [r for r in tv_service.get_all_season_requests() if user.is_superuser or (r.requested_by and r.requested_by.id==user.id)]
 
 
 @router.post("/seasons/requests", status_code=status.HTTP_204_NO_CONTENT)
@@ -306,6 +308,7 @@ def request_a_season(
     user: Annotated[User, Depends(current_active_user)],
     season_request: CreateSeasonRequest,
     tv_service: tv_service_dep,
+    tasks: BackgroundTasks,
 ) -> None:
     """
     Create a new season request.
@@ -316,6 +319,8 @@ def request_a_season(
         request.authorized = True
         request.authorized_by = UserRead.model_validate(user)
     tv_service.add_season_request(request)
+    from media_manager.auth.mail import notify_admins
+    tasks.add_task(notify_admins,'New season request',str(user.email)+': '+str(request.season_id))
     return
 
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+ import {passwordHint,validPassword} from '$lib/password-policy';
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { toast } from 'svelte-sonner';
@@ -13,6 +14,7 @@
 	let dialogOpen = $state(false);
 
 	async function saveUser() {
+        if(newPassword&&!validPassword(newPassword)){toast.error(mmT($mmLocale,passwordHint));return;}
 		const { error } = await client.PATCH('/api/v1/users/me', {
 			body: {
 				...(newPassword !== '' && { password: newPassword }),
@@ -30,6 +32,7 @@
 		await invalidateAll();
 	}
 </script>
+<p class="my-2 text-xs text-muted-foreground">{mmT($mmLocale,passwordHint)}</p>
 
 <Dialog.Root bind:open={dialogOpen}>
 	<Dialog.Trigger>
@@ -64,7 +67,7 @@
 					class="w-full"
 					id="password"
 					placeholder={mmT($mmLocale, "Keep empty to not change the password")}
-					type="password"
+					type="password" minlength={8}
 				/>
 			</div>
 		</div>

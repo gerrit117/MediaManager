@@ -1,5 +1,7 @@
 <script lang="ts">
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
+ import {passwordHint,validPassword} from '$lib/password-policy';
+ import Invitations from '$lib/components/invitations.svelte';
  import { onMount } from 'svelte';
  import { invalidateAll } from '$app/navigation';
  type Account={id:string;email:string;is_active:boolean;is_verified:boolean;is_superuser:boolean};
@@ -13,6 +15,7 @@
  function edit(user:Account){creating=false;selected={...user};const p=policies[user.id];unlimited=p?.monthly_request_limit==null;limit=p?.monthly_request_limit??10;automatic=p?.auto_approve_requests??false;password='';message='';}
  async function save(e:SubmitEvent){e.preventDefault();if(!selected)return;busy=true;failed=false;message='';
   try{
+   if((creating||password)&&!validPassword(password))throw Error(passwordHint);
    if(creating){
     const response=await fetch('/api/v1/users/admin-create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...selected,password,monthly_request_limit:unlimited?null:limit,auto_approve_requests:automatic})});
     const result=await response.json();if(!response.ok)throw Error(typeof result.detail==='string'?result.detail:'Could not create user.');
@@ -51,17 +54,20 @@
    <h3 class="text-xl font-semibold">{mmT($mmLocale,creating?"Add user":"Account profile")}</h3>
    <label class="block text-sm">{mmT($mmLocale, "E-Mail" )}<input type="email" required bind:value={selected.email} class="mt-1 w-full rounded-md border bg-background p-2"/></label>
    <label class="block text-sm">{mmT($mmLocale, "Rolle" )}<select bind:value={selected.is_superuser} class="mt-1 w-full rounded-md border bg-background p-2"><option value={false}>{mmT($mmLocale, "User" )}</option><option value={true}>{mmT($mmLocale, "Admin" )}</option></select></label>
-   <div class="flex flex-wrap gap-4"><label><input type="checkbox" bind:checked={selected.is_active}/> {mmT($mmLocale, "Konto aktiv" )}</label><label><input type="checkbox" bind:checked={selected.is_verified}/> {mmT($mmLocale, "Konto bestätigt" )}</label></div>
+   <div class="flex flex-wrap gap-4"><label><input type="checkbox" bind:checked={selected.is_active}/> {mmT($mmLocale, "Konto aktiv" )}</label>{#if !creating}<label><input type="checkbox" bind:checked={selected.is_verified}/> {mmT($mmLocale, "Konto bestätigt" )}</label>{/if}</div>
    <fieldset disabled={selected.is_superuser} class="space-y-3 rounded-lg border p-3 disabled:opacity-50"><legend class="px-2 font-semibold">{mmT($mmLocale, "Anfragen" )}</legend>
     <label class="block"><input type="checkbox" bind:checked={unlimited}/> {mmT($mmLocale, "Unbegrenzte Anfragen" )}</label>
     {#if !unlimited}<label class="block text-sm">{mmT($mmLocale, "Anfragen pro Kalendermonat" )}<input aria-label={mmT($mmLocale, "Anfragen pro Kalendermonat")} type="number" min="0" max="100000" required bind:value={limit} class="mt-1 w-full rounded-md border bg-background p-2"/></label>{/if}
     <label class="block"><input type="checkbox" bind:checked={automatic}/> {mmT($mmLocale, "Automatische Genehmigung" )}</label>
    </fieldset>
    {#if selected.is_superuser}<p class="text-sm text-muted-foreground">{mmT($mmLocale, "Administratoren haben unbegrenzte, automatisch genehmigte Anfragen." )}</p>{/if}
-   <label class="block text-sm">{mmT($mmLocale,creating?"Password (at least 12 characters)":"New password (leave empty to keep)")}<input required={creating} minlength={creating?12:undefined} type="password" autocomplete="new-password" bind:value={password} class="mt-1 w-full rounded-md border bg-background p-2"/></label>
+   <p class="text-xs text-muted-foreground">{mmT($mmLocale,passwordHint)}</p>
+   <label class="block text-sm">{mmT($mmLocale,creating?"Password":"New password (leave empty to keep)")}<input required={creating} minlength={8} type="password" autocomplete="new-password" bind:value={password} class="mt-1 w-full rounded-md border bg-background p-2"/></label>
    {#if message}<p role="alert">{mmT($mmLocale, message)}</p>{/if}
    <div class="flex flex-wrap justify-end gap-2"><button type="button" class="rounded-md border px-4 py-2" onclick={()=>{selected=null;password='';}} disabled={busy}>{mmT($mmLocale, "Abbrechen" )}</button><button type="submit" class="rounded-md bg-primary px-4 py-2 text-primary-foreground" disabled={busy}>{busy?mmT($mmLocale, "Speichert …"):mmT($mmLocale, "Speichern")}</button></div>
   </form>
  </div>
  {/if}
 </div>
+
+<Invitations/>

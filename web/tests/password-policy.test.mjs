@@ -1,0 +1,2 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {validPassword} from '../src/lib/password-policy.ts';
+test('passwords require length, both cases, a number and a symbol',()=>{for(const text of ['Abcdef1!','Abcdef1_','Äbcdef1!'])assert.ok(validPassword(text));for(const text of ['Abcde1!','abcdef1!','ABCDEF1!','Abcdefg!','Abcdefg1','Abcdef1 '])assert.ok(!validPassword(text));});

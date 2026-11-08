@@ -1,5 +1,6 @@
 import logging
 import smtplib
+import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -16,10 +17,14 @@ def send_email(subject: str, html: str, addressee: str) -> None:
     message["Subject"] = str(subject)
     message.attach(MIMEText(html, "html"))
 
-    with smtplib.SMTP(email_conf.smtp_host, email_conf.smtp_port) as server:
-        if email_conf.use_tls:
-            server.starttls()
-        server.login(email_conf.smtp_user, email_conf.smtp_password)
+    transport=smtplib.SMTP_SSL if email_conf.use_ssl else smtplib.SMTP
+    options={'timeout':15}
+    if email_conf.use_ssl:options['context']=ssl.create_default_context()
+    with transport(email_conf.smtp_host, email_conf.smtp_port, **options) as server:
+        if email_conf.use_tls and not email_conf.use_ssl:
+            server.starttls(context=ssl.create_default_context())
+        if email_conf.smtp_user:
+            server.login(email_conf.smtp_user, email_conf.smtp_password)
         server.sendmail(email_conf.from_email, addressee, message.as_string())
 
     log.info(f"Successfully sent email to {addressee} with subject: {subject}")

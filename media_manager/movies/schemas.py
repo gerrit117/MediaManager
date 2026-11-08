@@ -13,6 +13,7 @@ MovieRequestId = typing.NewType("MovieRequestId", UUID)
 
 
 class Movie(BaseModel):
+    request_only: bool = False
     model_config = ConfigDict(from_attributes=True)
 
     id: MovieId = Field(default_factory=lambda: MovieId(uuid.uuid4()))

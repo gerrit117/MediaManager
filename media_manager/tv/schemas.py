@@ -43,6 +43,7 @@ class Season(BaseModel):
 
 
 class Show(BaseModel):
+    request_only: bool = False
     model_config = ConfigDict(from_attributes=True)
 
     id: ShowId = Field(default_factory=lambda: ShowId(uuid.uuid4()))

@@ -18,5 +18,6 @@ class AuthConfig(BaseSettings):
     token_secret: str = Field(default_factory=secrets.token_hex)
     session_lifetime: int = 60 * 60 * 24
     admin_emails: list[str] = []
-    email_password_resets: bool = False
+    email_password_resets: bool = True
+    administrator_mail_enabled: bool = True
     openid_connect: OpenIdConfig = OpenIdConfig()

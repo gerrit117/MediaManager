@@ -1,32 +1,10 @@
 <script lang="ts">
-	import {locale as mmLocale,t as mmT} from '$lib/i18n';
-	import { UserCheck } from 'lucide-svelte';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { handleLogout } from '$lib/utils.ts';
+ import {onMount} from 'svelte';
+ import {locale,t} from '$lib/i18n';
+ import {base} from '$app/paths';
+ let email=$state(''),message=$state(''),error=$state(''),busy=$state(false);
+ async function send(){busy=true;error='';try{const r=await fetch('/api/v1/auth/request-verify-token',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});if(!r.ok)throw Error('Verification email could not be requested.');message='If this account can be verified, a confirmation email has been sent.';}catch(e){error=(e as Error).message;}finally{busy=false;}}
+ onMount(async()=>{const token=new URLSearchParams(location.hash.slice(1)).get('token')||new URLSearchParams(location.search).get('token');if(!token)return;history.replaceState({},'',location.pathname);busy=true;try{const r=await fetch('/api/v1/auth/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});if(!r.ok)throw Error('The confirmation link is invalid, expired or already used.');message='Email confirmed. You can now sign in.';}catch(e){error=(e as Error).message;}finally{busy=false;}});
 </script>
-
-<svelte:head>
-	<title>{mmT($mmLocale, "Verify Account - MediaManager" )}</title>
-	<meta content="Verify your MediaManager account to complete registration" name="description" />
-</svelte:head>
-
-<div class="absolute top-4 right-4">
-	<Button onclick={() => handleLogout()} variant="outline">{mmT($mmLocale, "Logout" )}</Button>
-</div>
-<div class="mx-auto w-full max-w-md text-center">
-	<div class="mb-6">
-		<UserCheck class="mx-auto h-16 w-16 text-primary" />
-	</div>
-	<h1 class="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-		{mmT($mmLocale, "Account Pending Activation" )}
-	</h1>
-	<p class="mt-4 text-lg text-muted-foreground">
-		{mmT($mmLocale, "Your account has been successfully created, but activation by an administrator is required." )}
-	</p>
-	<div class="mt-8">
-		<Button onclick={() => handleLogout()}>{mmT($mmLocale, "Logout" )}</Button>
-	</div>
-	<p class="end mt-10 text-sm text-muted-foreground">
-		{mmT($mmLocale, "If you have any questions, please contact an administrator." )}
-	</p>
-</div>
+<svelte:head><title>{t($locale,'Confirm email')} – MediaManager</title><meta name="referrer" content="no-referrer"/></svelte:head>
+<main class="mx-auto w-full max-w-md space-y-4 rounded-2xl border bg-card p-6"><h1 class="text-2xl font-bold">{t($locale,'Confirm email')}</h1><p class="text-sm text-muted-foreground">{t($locale,'Check your inbox and follow the confirmation link.')}</p>{#if message}<p role="status">{t($locale,message)}</p>{/if}{#if error}<p role="alert" class="text-destructive">{t($locale,error)}</p>{/if}<label class="block text-sm">{t($locale,'Email')}<input type="email" bind:value={email} class="mt-1 w-full rounded-lg border bg-background p-2"/></label><button disabled={busy||!email} onclick={send} class="w-full rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-40">{t($locale,'Resend confirmation')}</button><a class="block text-center text-sm underline" href={base+'/login/'}>{t($locale,'Sign in')}</a></main>

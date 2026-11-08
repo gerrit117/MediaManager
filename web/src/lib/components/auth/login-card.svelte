@@ -53,7 +53,7 @@
 			await goto(target === '/web/dashboard/settings/' ? resolve('/dashboard/settings', {}) : resolve('/dashboard', {}));
 		} else {
 			toast.error(mmT($mmLocale,'Login failed!'));
-			errorMessage = `Login failed! Please check your credentials and try again.`;
+			errorMessage = (error as any)?.detail==='LOGIN_USER_NOT_VERIFIED'?'Please confirm your email address before signing in.':'Login failed! Please check your credentials and try again.';
 		}
 	}
 </script>

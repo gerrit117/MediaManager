@@ -121,7 +121,7 @@ class TvRepository:
         :raises SQLAlchemyError: If a database error occurs.
         """
         try:
-            stmt = select(Show).options(
+            stmt = select(Show).where(Show.request_only==False).options(
                 joinedload(Show.seasons).joinedload(Season.episodes)
             )
             results = self.db.execute(stmt).scalars().unique().all()
@@ -170,6 +170,7 @@ class TvRepository:
             db_show.imdb_id = show.imdb_id
         else:  # Insert new show
             db_show = Show(
+                request_only=show.request_only,
                 id=show.id,
                 external_id=show.external_id,
                 metadata_provider=show.metadata_provider,
@@ -390,6 +391,10 @@ class TvRepository:
         :raises SQLAlchemyError: If a database error occurs.
         """
         db_model = SeasonFile(**season_file.model_dump())
+        if season_file.torrent_id is None:
+            season_parent=self.db.get(Season,season_file.season_id)
+            parent=self.db.get(Show,season_parent.show_id) if season_parent else None
+            if parent:parent.request_only=False
         if season_file.source_files is not None:
             existing = self.db.get(SeasonFile, (season_file.season_id, season_file.file_path_suffix))
             if existing is not None:

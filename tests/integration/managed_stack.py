@@ -1,13 +1,15 @@
 """Isolated end-to-end stack + quota test. Uses only synthetic users/media."""
 import concurrent.futures,http.cookiejar,json,os,secrets,shutil,socket,subprocess,sys,tempfile,time,urllib.error,urllib.parse,urllib.request,uuid
 from pathlib import Path
+from mail_sink import MailSink
+mail_sink=MailSink()
 repo=Path(__file__).resolve().parents[2]
 root=Path(tempfile.mkdtemp(prefix='mm-managed-test-',dir=os.getenv('MM_TEST_ROOT')))
 project='mmtest-'+uuid.uuid4().hex[:10]
 compose=[os.environ['MM_TEST_COMPOSE_BINARY']] if os.getenv('MM_TEST_COMPOSE_BINARY') else ['docker','compose']
 with socket.socket() as sock:sock.bind(('',0));port=sock.getsockname()[1]
 host=os.getenv('MM_TEST_HOST','127.0.0.1');base=f'http://{host}:{port}'
-password=secrets.token_hex(16)
+password='Integration!A1'+secrets.token_hex(16)
 def request(client,path,body=None,method='GET'):
  data=json.dumps(body).encode() if body is not None else None
  try:
@@ -53,6 +55,14 @@ try:
   time.sleep(1)
  else:raise AssertionError('Application startup failed')
  admin=login('admin@example.com')
+ app_container=stack('ps','-q','mediamanager').strip()
+ network=next(iter(json.loads(run('docker','inspect',app_container))[0]['NetworkSettings']['Networks'].values()))
+ smtp_host=network['Gateway']
+ smtp_values={'notifications.smtp_config.smtp_host':smtp_host,'notifications.smtp_config.smtp_port':mail_sink.port,'notifications.smtp_config.from_email':'sender@example.com','notifications.smtp_config.use_tls':False,'notifications.smtp_config.use_ssl':False,'auth.email_password_resets':True,'auth.admin_emails':['administrator@example.com']}
+ assert request(admin,'/api/v1/settings',{'values':smtp_values},'PUT')[0]==200
+ assert request(admin,'/api/v1/settings/mail-test',{},'POST')[0]==200
+ assert request(admin,'/api/v1/settings/mail-test',{'recipient':'test@example.com'},'POST')[0]==200
+ assert request(client(),'/api/v1/auth/register',{'email':'blocked@example.com','password':password},'POST')[0]==422
  apppass=(root/'state/secrets/app_db_password').read_text()
  # The application role must not be superuser or be able to create other roles/databases.
  assert exec_python("from media_manager.config import MediaManagerConfig;import psycopg;c=MediaManagerConfig().database;conn=psycopg.connect(host=c.host,port=c.port,dbname=c.dbname,user=c.user,password=c.password);assert conn.execute('select rolsuper,rolcreatedb,rolcreaterole from pg_roles where rolname=current_user').fetchone()==(False,False,False);print('least privilege verified')").strip()=='least privilege verified'
@@ -110,19 +120,36 @@ with Session(engine) as db:
  assert exec_python(code.replace('EXPECTED','True')).strip()=='verified'
  (series/'Own.S01E01.mkv').unlink()
  assert exec_python(code.replace('EXPECTED','False')).strip()=='verified'
+ def verify_email(email):
+  token=mail_sink.token(email)
+  status,data=request(client(),'/api/v1/auth/verify',{'token':token},'POST');assert status==200,(status,data)
  def new_user(email):
-  status,data=request(client(),'/api/v1/auth/register',{'email':email,'password':password},'POST');assert status==201,(status,data)
-  uid=data['id'];assert request(admin,'/api/v1/users/'+uid,{'is_active':True,'is_verified':True},'PATCH')[0]==200
+  status,invite=request(admin,'/api/v1/users/invitations',{'email':email},'POST');assert status==201,(status,invite)
+  status,data=request(client(),'/api/v1/auth/register',{'email':email,'password':password,'invitation_code':invite['code']},'POST');assert status==201,(status,data)
+  uid=data['id'];assert data['is_verified'] is False and not data['is_superuser']
+  try:login(email);raise AssertionError('Unverified account could sign in')
+  except urllib.error.HTTPError as error:assert error.code==400
+  verify_email(email)
   return uid,login(email)
  created_status,created_data=request(admin,'/api/v1/users/admin-create',{'email':'created@example.com','password':password,'monthly_request_limit':4,'auto_approve_requests':True},'POST')
  assert created_status==201,(created_status,created_data)
  assert 'password' not in created_data and 'hashed_password' not in created_data
+ assert created_data['is_verified'] is False
+ verify_email('created@example.com')
  created_client=login('created@example.com');created_quota=request(created_client,'/api/v1/requests/quota')[1]
  assert created_quota['limit']==4 and created_quota['auto_approve']
  assert request(admin,'/api/v1/users/admin-create',{'email':'CREATED@example.com','password':password},'POST')[0]==409
  uid,user=new_user('user@example.com')
+ assert request(client(),'/api/v1/auth/forgot-password',{'email':'created@example.com'},'POST')[0]==202
+ reset_token=mail_sink.token('created@example.com','reset-password')
+ assert request(client(),'/api/v1/auth/reset-password',{'token':reset_token,'password':'weak'},'POST')[0]==400
+ assert request(client(),'/api/v1/auth/reset-password',{'token':reset_token,'password':'Recovery!A1'+password},'POST')[0]==200
+ assert request(client(),'/api/v1/auth/reset-password',{'token':reset_token,'password':'Other!A1'+password},'POST')[0]==400
  assert request(user,'/api/v1/users/admin-create',{'email':'blocked@example.com','password':password},'POST')[0]==403
  assert request(client(),'/api/v1/users/admin-create',{'email':'blocked@example.com','password':password},'POST')[0]==401
+ assert request(user,'/api/v1/movies?movie_id=123',method='POST')[0]==403
+ assert request(user,'/api/v1/tv/shows?show_id=123',method='POST')[0]==403
+ assert request(user,'/api/v1/torrent/progress')[0]==403
  assert request(user,'/api/v1/movies/'+movies[0]+'/torrents?public_indexer_result_id='+str(uuid.uuid4()),method='POST')[0]==403
  assert request(user,'/api/v1/tv/torrents?show_id='+show+'&public_indexer_result_id='+str(uuid.uuid4()),method='POST')[0]==403
  policy='/api/v1/users/'+uid+'/request-policy'
@@ -169,7 +196,7 @@ with Session(engine) as db:
  assert secrets_before==[(root/'state/secrets'/n).read_bytes() for n in ['app_db_password','db_admin_password']]
  user=login('user@example.com');assert request(user,'/api/v1/requests/quota')[1]['used']==1
  assert not (root/'state/config/initial-admin.json').exists()
- print(json.dumps({'managed_database_provisioning':'passed','least_privilege':'passed','monthly_combined_quota':'passed','auto_approval':'passed','manual_approval':'passed','deletion_no_refund':'passed','self_escalation_blocked':'passed','concurrent_requests':'one accepted, three blocked','month_reset':'passed','restart_and_secret_persistence':'passed','admin_user_creation_and_login':'passed','duplicate_email_rejected':'passed','creation_admin_only':'passed','catalogue_without_file_changes':'passed','reorganize_explicit_mode':'passed','partial_season_and_missing_files':'passed','import_validation':'passed','bulk_library_async_readonly_idempotence_and_review':'passed','metadata_edit_and_reassignment_preserves_files_and_ids':'passed','production_data_used':False}))
+ print(json.dumps({'managed_database_provisioning':'passed','least_privilege':'passed','monthly_combined_quota':'passed','auto_approval':'passed','manual_approval':'passed','deletion_no_refund':'passed','self_escalation_blocked':'passed','concurrent_requests':'one accepted, three blocked','month_reset':'passed','restart_and_secret_persistence':'passed','admin_user_creation_and_login':'passed','duplicate_email_rejected':'passed','creation_admin_only':'passed','catalogue_without_file_changes':'passed','reorganize_explicit_mode':'passed','partial_season_and_missing_files':'passed','import_validation':'passed','bulk_library_async_readonly_idempotence_and_review':'passed','metadata_edit_and_reassignment_preserves_files_and_ids':'passed','production_data_used':False,'smtp_delivery_verification_and_recovery':'passed','invitation_required':'passed','user_direct_library_add_blocked':'passed'}))
 except Exception:
  try:
   log=stack('logs','--no-color');
@@ -179,6 +206,7 @@ except Exception:
  except Exception:pass
  raise
 finally:
+ mail_sink.close()
  if os.getenv('MM_TEST_KEEP')!='1' or (root/'failure.log').exists():
   try:stack('down','--remove-orphans')
   except Exception:pass

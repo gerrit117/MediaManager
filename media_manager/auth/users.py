@@ -46,60 +46,49 @@ if config.openid_connect.enabled:
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
+    verification_token_lifetime_seconds = 86400
 
-    @override
-    async def on_after_update(
-        self,
-        user: models.UP,
-        update_dict: dict[str, Any],
-        request: Request | None = None,
-    ) -> None:
-        log.info(f"User {user.id} has been updated.")
-        if update_dict.get("is_superuser"):
-            log.info(f"User {user.id} has been granted superuser privileges.")
-        if "email" in update_dict:
-            updated_user = UserUpdate(is_verified=True)
-            await self.update(user=user, user_update=updated_user)
+    async def validate_password(self,password,user):
+        from fastapi_users.exceptions import InvalidPasswordException
+        from media_manager.auth.password_policy import validate_password
+        try:validate_password(password)
+        except ValueError as error:raise InvalidPasswordException(reason=str(error)) from None
 
-    @override
-    async def on_after_register(
-        self, user: User, request: Request | None = None
-    ) -> None:
-        log.info(f"User {user.id} has registered.")
-        if user.email in config.admin_emails:
-            updated_user = UserUpdate(is_superuser=True, is_verified=True)
-            await self.update(user=user, user_update=updated_user)
+    async def on_after_update(self,user,update_dict,request=None):
+        if 'email' in update_dict:
+            await self.user_db.update(user,{'is_verified':False})
+            from media_manager.auth.mail import send_verification
+            send_verification(user)
 
-    @override
-    async def on_after_forgot_password(
-        self, user: User, token: str, request: Request | None = None
-    ) -> None:
-        link = f"{MediaManagerConfig().misc.frontend_url}web/login/reset-password?token={token}"
-        log.info(f"User {user.id} has forgot their password. Reset Link: {link}")
+    async def update(self,user_update,user,safe=False,request=None):
+        from media_manager.auth.mail import mail_ready
+        from fastapi import HTTPException
+        if user_update.email and str(user_update.email).lower()!=user.email.lower() and not mail_ready():
+            raise HTTPException(503,'Configure SMTP before changing an email address.')
+        if user_update.email and str(user_update.email).lower()==user.email.lower():
+            user_update=user_update.__class__(**user_update.model_dump(exclude_unset=True,exclude={'email'}))
+        return await super().update(user_update,user,safe=safe,request=request)
 
-        if not config.email_password_resets:
-            log.info("Email password resets are disabled, not sending email.")
-            return
+    async def on_after_register(self,user,request=None):
+        # Public registration is handled by the invitation router. Never grant
+        # administrator rights merely because an unverified address matches config.
+        log.info('Account created: %s',user.id)
 
-        subject = "MediaManager - Password Reset Request"
-        html = f"""\
-        <html>
-          <body>
-            <p>Hi {user.email},
-            <br>
-            <br>
-            if you forgot your password, <a href=\"{link}\">reset you password here</a>.<br>
-            If you did not request a password reset, you can ignore this email.</p>
-            <br>
-            <br>
-            If the link does not work, copy the following link into your browser: {link}<br>
-          </body>
-        </html>
-        """
-        media_manager.notification.utils.send_email(
-            subject=subject, html=html, addressee=user.email
-        )
-        log.info(f"Sent password reset email to {user.email}")
+    async def on_after_forgot_password(self,user,token,request=None):
+        from media_manager.auth.mail import send_link,mail_ready
+        if mail_ready() and MediaManagerConfig().auth.email_password_resets:send_link(user.email,token,'reset')
+
+    async def on_after_request_verify(self,user,token,request=None):
+        from media_manager.auth.mail import send_link,mail_ready
+        if mail_ready():send_link(user.email,token,'verify')
+
+    async def oauth_callback(self,oauth_name,access_token,account_id,account_email,expires_at=None,refresh_token=None,request=None,*,associate_by_email=False,is_verified_by_default=False):
+        from fastapi import HTTPException
+        try:
+            existing=await self.user_db.get_by_oauth_account(oauth_name,account_id)
+            if existing is None:raise ValueError('No linked account')
+        except Exception:raise HTTPException(403,'New accounts require an invitation or administrator provisioning.') from None
+        return await super().oauth_callback(oauth_name,access_token,account_id,account_email,expires_at,refresh_token,request,associate_by_email=False,is_verified_by_default=False)
 
     @override
     async def on_after_reset_password(
@@ -108,16 +97,10 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         log.info(f"User {user.id} has reset their password.")
 
     @override
-    async def on_after_request_verify(
-        self, user: User, token: str, request: Request | None = None
-    ) -> None:
-        log.info(
-            f"Verification requested for user {user.id}. Verification token: {token}"
-        )
-
-    @override
     async def on_after_verify(self, user: User, request: Request | None = None) -> None:
-        log.info(f"User {user.id} has been verified")
+        from media_manager.auth.mail import notify_admins
+        notify_admins('Account confirmed','Email confirmed: '+user.email)
+        log.info('Account verified: %s',user.id)
 
 
 async def get_user_manager(
@@ -156,7 +139,10 @@ async def create_default_admin_user() -> None:
                         initial_file = config_file().parent / 'initial-admin.json'
                         initial = json.loads(initial_file.read_text()) if initial_file.exists() else {}
                         admin_email = initial.get('email', admin_email)
-                        default_password = initial.get('password', 'admin')
+                        default_password = initial.get('password') or ('Admin!A1'+__import__('secrets').token_urlsafe(18))
+                        if not initial:
+                            from media_manager.configuration import atomic_json
+                            atomic_json(config_file().parent/'bootstrap-admin.json',{'email':admin_email,'password':default_password})
 
                         user_create = UserCreate(
                             email=admin_email,

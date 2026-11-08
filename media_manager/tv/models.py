@@ -1,7 +1,7 @@
 from uuid import UUID
 from datetime import date, datetime
 
-from sqlalchemy import JSON, DateTime, ForeignKey, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy import Boolean, JSON, DateTime, ForeignKey, PrimaryKeyConstraint, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from media_manager.auth.db import User
@@ -14,6 +14,7 @@ class Show(Base):
     __table_args__ = (UniqueConstraint("external_id", "metadata_provider"),)
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
+    request_only: Mapped[bool] = mapped_column(Boolean,default=False,server_default='false')
     external_id: Mapped[int]
     metadata_provider: Mapped[str]
     name: Mapped[str]
@@ -94,7 +95,7 @@ class SeasonFile(Base):
 
 class SeasonRequest(Base):
     __tablename__ = "season_request"
-    __table_args__ = (UniqueConstraint("season_id", "wanted_quality"),)
+    __table_args__ = (UniqueConstraint("season_id", "wanted_quality", "requested_by_id",name="uq_season_request_user_quality"),)
     id: Mapped[UUID] = mapped_column(primary_key=True)
     season_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="season.id", ondelete="CASCADE"),
