@@ -22,8 +22,12 @@ def client():return urllib.request.build_opener(urllib.request.HTTPCookieProcess
 def login(email):
  c=client();r=c.open(base+'/api/v1/auth/cookie/login',urllib.parse.urlencode({'username':email,'password':password}).encode());assert r.status==204;return c
 
-def run(*args,**kw):return subprocess.check_output(args,stderr=subprocess.STDOUT,**kw).decode()
-def stack(*args):return run(*compose,'--env-file',str(root/'state/stack.env'),'-f',str(repo/'compose.managed.yaml'),*args)
+def run(*args,**kw):
+ try:return subprocess.check_output(args,stderr=subprocess.STDOUT,**kw).decode()
+ except subprocess.CalledProcessError as error:
+  path=root/'command-failure.log';path.write_bytes(error.output);path.chmod(0o600)
+  raise RuntimeError('Isolated command failed; see private command-failure.log') from None
+def stack(*args):return run(*compose,'--env-file',str(root/'state/stack.env'),'-f',str(repo/'compose.managed.yaml'),*args,env=env)
 def exec_python(code):
  code='import media_manager.auth.request_policy;import media_manager.movies.models;import media_manager.tv.models;import media_manager.torrent.models;\n'+code
  service=stack('ps','-q','mediamanager').strip()
@@ -186,6 +190,36 @@ with Session(engine) as db:
  discovery_status,discovery_error=request(user,'/api/v1/discover/movie')
  assert discovery_status==503 and 'TMDB API key' in discovery_error['detail']
  assert request(user,'/api/v1/discover/tv?region=invalid')[0]==422
+ # Profile settings are account-local and must not alter verification, roles or quotas.
+ admin_state=request(admin,'/api/v1/users/me')[1];user_state=request(user,'/api/v1/users/me')[1]
+ assert admin_state['preferred_language'] is None and user_state['preferred_language'] is None
+ assert request(client(),'/api/v1/users/me',{'preferred_language':'de'},'PATCH')[0]==401
+ assert request(user,'/api/v1/users/me',{'preferred_language':'fr'},'PATCH')[0]==422
+ assert request(user,'/api/v1/users/me',{'preferred_language':'de'},'PATCH')[0]==200
+ assert request(admin,'/api/v1/users/me',{'preferred_language':'en'},'PATCH')[0]==200
+ assert request(user,'/api/v1/users/me')[1]=={**user_state,'preferred_language':'de'}
+ assert request(admin,'/api/v1/users/me')[1]=={**admin_state,'preferred_language':'en'}
+ dbname=exec_python("from media_manager.config import MediaManagerConfig;print(MediaManagerConfig().database.dbname)").strip()
+ def sql(statement):return stack('exec','-T','database','psql','-U','postgres','-d',dbname,'-At','-c',statement)
+ signature_sql='SELECT id,email,hashed_password,is_active,is_verified,is_superuser,monthly_request_limit,auto_approve_requests FROM "user" ORDER BY id;'
+ signature=sql(signature_sql)
+ # Exercise the additive migration and its rollback with this isolated app stopped.
+ stack('stop','mediamanager')
+ stack('run','--rm','--no-deps','--workdir','/app','--entrypoint','/app/.venv/bin/alembic','mediamanager','downgrade','c7d543ae845e')
+ assert sql("SELECT count(*) FROM information_schema.columns WHERE table_name='user' AND column_name='preferred_language'").strip()=='0'
+ assert sql(signature_sql)==signature
+ stack('run','--rm','--no-deps','--workdir','/app','--entrypoint','/app/.venv/bin/alembic','mediamanager','upgrade','head')
+ assert sql("SELECT version_num FROM alembic_version").strip()=='d8e654bf956f'
+ assert sql(signature_sql)==signature
+ stack('up','-d','--no-deps','mediamanager')
+ for _ in range(90):
+  try:
+   if request(admin,'/api/v1/health')[0]==200:break
+  except Exception:pass
+  time.sleep(1)
+ assert request(user,'/api/v1/users/me')[1]['preferred_language'] is None
+ assert request(user,'/api/v1/users/me',{'preferred_language':'de'},'PATCH')[0]==200
+ assert request(admin,'/api/v1/users/me',{'preferred_language':'en'},'PATCH')[0]==200
  secrets_before=[(root/'state/secrets'/n).read_bytes() for n in ['app_db_password','db_admin_password']]
  stack('down');subprocess.run(command,env=env,stdout=subprocess.DEVNULL,check=True)
  for _ in range(90):
@@ -195,8 +229,12 @@ with Session(engine) as db:
   time.sleep(1)
  assert secrets_before==[(root/'state/secrets'/n).read_bytes() for n in ['app_db_password','db_admin_password']]
  user=login('user@example.com');assert request(user,'/api/v1/requests/quota')[1]['used']==1
+ assert request(user,'/api/v1/users/me')[1]['preferred_language']=='de'
+ assert request(admin,'/api/v1/users/me')[1]['preferred_language']=='en'
+ assert request(user,'/api/v1/users/me',{'preferred_language':None},'PATCH')[0]==200
+ assert request(admin,'/api/v1/users/me',{'preferred_language':None},'PATCH')[0]==200
  assert not (root/'state/config/initial-admin.json').exists()
- print(json.dumps({'managed_database_provisioning':'passed','least_privilege':'passed','monthly_combined_quota':'passed','auto_approval':'passed','manual_approval':'passed','deletion_no_refund':'passed','self_escalation_blocked':'passed','concurrent_requests':'one accepted, three blocked','month_reset':'passed','restart_and_secret_persistence':'passed','admin_user_creation_and_login':'passed','duplicate_email_rejected':'passed','creation_admin_only':'passed','catalogue_without_file_changes':'passed','reorganize_explicit_mode':'passed','partial_season_and_missing_files':'passed','import_validation':'passed','bulk_library_async_readonly_idempotence_and_review':'passed','metadata_edit_and_reassignment_preserves_files_and_ids':'passed','production_data_used':False,'smtp_delivery_verification_and_recovery':'passed','invitation_required':'passed','user_direct_library_add_blocked':'passed'}))
+ print(json.dumps({'managed_database_provisioning':'passed','least_privilege':'passed','monthly_combined_quota':'passed','auto_approval':'passed','manual_approval':'passed','deletion_no_refund':'passed','self_escalation_blocked':'passed','concurrent_requests':'one accepted, three blocked','month_reset':'passed','restart_and_secret_persistence':'passed','admin_user_creation_and_login':'passed','duplicate_email_rejected':'passed','creation_admin_only':'passed','catalogue_without_file_changes':'passed','reorganize_explicit_mode':'passed','partial_season_and_missing_files':'passed','import_validation':'passed','bulk_library_async_readonly_idempotence_and_review':'passed','metadata_edit_and_reassignment_preserves_files_and_ids':'passed','production_data_used':False,'smtp_delivery_verification_and_recovery':'passed','invitation_required':'passed','user_direct_library_add_blocked':'passed','profile_language_isolation_validation_restart_and_migration_roundtrip':'passed'}))
 except Exception:
  try:
   log=stack('logs','--no-color');

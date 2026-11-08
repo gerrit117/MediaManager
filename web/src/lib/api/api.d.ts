@@ -1856,6 +1856,7 @@ export interface components {
 		};
 		/** UserRead */
 		UserRead: {
+			preferred_language?: "de" | "en" | null;
 			/**
 			 * Id
 			 * Format: uuid
@@ -1884,6 +1885,7 @@ export interface components {
 		};
 		/** UserUpdate */
 		UserUpdate: {
+			preferred_language?: "de" | "en" | null;
 			/** Password */
 			password?: string | null;
 			/** Email */
