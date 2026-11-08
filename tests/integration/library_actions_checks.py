@@ -23,7 +23,7 @@ from media_manager.torrent.schemas import Quality
 from pathlib import Path
 engine=init_engine(MediaManagerConfig().database)
 with Session(engine) as db:
- assert db.scalar(text('select version_num from alembic_version'))=='c7d543ae845e'
+ assert db.scalar(text('select version_num from alembic_version'))=='d8e654bf956f'
  keep=Show(id=uuid4(),name='Identity fixture',external_id=111112,metadata_provider='tvdb',imdb_id='tt99901112',overview='',year=2025)
  duplicate=Show(id=uuid4(),name='Same fixture',external_id=222223,metadata_provider='tmdb',imdb_id=keep.imdb_id,overview='',year=2025)
  db.add_all([keep,duplicate]);db.commit()

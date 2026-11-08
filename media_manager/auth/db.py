@@ -22,6 +22,7 @@ class OAuthAccount(SQLAlchemyBaseOAuthAccountTableUUID, Base):
 
 
 class User(SQLAlchemyBaseUserTableUUID, Base):
+    preferred_language: Mapped[str | None] = mapped_column(String(2), nullable=True)
     monthly_request_limit: Mapped[int | None] = mapped_column(Integer, nullable=True)
     auto_approve_requests: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     oauth_accounts: Mapped[list[OAuthAccount]] = relationship(
