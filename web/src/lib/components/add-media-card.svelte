@@ -39,39 +39,36 @@
     }
 </script>
 
-<Card.Root class="min-w-0 flex h-full flex-col overflow-hidden">
-	<Card.Header class="p-3 sm:p-5">
-		<Card.Title class="line-clamp-2 min-h-10 text-sm leading-snug sm:text-base">
-			<button type="button" class="text-left hover:underline focus-visible:underline" onclick={showPreview}>{result.name}</button>
-			{#if result.year != null}
-				({result.year})
-			{/if}
+<Card.Root data-media-card class="min-w-0 flex h-full flex-col overflow-hidden">
+	<Card.Header class="shrink-0 p-3 sm:p-5">
+		<Card.Title class="h-12 text-sm leading-6 sm:text-base">
+			<button type="button" class="line-clamp-2 h-12 w-full text-left leading-6 hover:underline focus-visible:underline" onclick={showPreview}>{result.name}{result.year != null ? ` (${result.year})` : ''}</button>
 		</Card.Title>
-		<Card.Description class="hidden truncate sm:block"
-			>{result.overview !== '' ? result.overview : mmT($mmLocale, "No overview available")}</Card.Description
+		<Card.Description class="hidden h-5 truncate sm:block"
+			>{result.overview ? result.overview : mmT($mmLocale, "No overview available")}</Card.Description
 		>
 	</Card.Header>
-	<Card.Content class="flex flex-1 items-center justify-center px-3 pb-3 sm:px-5 sm:pb-5">
-		<button type="button" class="flex h-full w-full items-center justify-center rounded-lg focus-visible:ring-2 focus-visible:ring-ring" aria-label={mmT($mmLocale,"Show details")+": "+result.name} onclick={showPreview}>
+	<Card.Content class="shrink-0 px-3 pb-3 sm:px-5 sm:pb-5">
+		<button type="button" class="relative block aspect-[2/3] w-full overflow-hidden rounded-lg focus-visible:ring-2 focus-visible:ring-ring" aria-label={mmT($mmLocale,"Show details")+": "+result.name} onclick={showPreview}>
 		{#if result.poster_path != null}
 			<img
-				class="aspect-[2/3] h-full w-full rounded-lg object-cover"
+				class="absolute inset-0 h-full w-full object-cover"
                 loading="lazy" decoding="async"
 				src={result.poster_path}
 				alt="{result.name}'s Poster Image"
 			/>
 		{:else}
-			<div class="flex h-full w-full items-center justify-center">
+			<div class="absolute inset-0 flex items-center justify-center bg-muted">
 				<ImageOff class="h-12 w-12 text-gray-400" />
 			</div>
 		{/if}
 		</button>
 	</Card.Content>
-	<Card.Footer class="flex flex-col items-start gap-2 rounded-b-lg border-t bg-card p-4">
-		<Button variant="outline" class="min-h-11 w-full text-sm" onclick={showPreview}>{mmT($mmLocale,"Show details")}</Button>
+	<Card.Footer class="mt-auto flex flex-col items-start gap-2 rounded-b-lg border-t bg-card p-3 sm:p-4">
+		<Button variant="outline" class="h-11 w-full text-sm" onclick={showPreview}>{mmT($mmLocale,"Show details")}</Button>
 		{#if result.added}
 			<Button
-				class="h-auto min-h-9 w-full whitespace-normal text-center text-xs font-semibold sm:text-sm"
+				class="h-14 min-h-14 w-full whitespace-normal text-center text-xs font-semibold leading-tight sm:text-sm"
 				variant="secondary"
 				href={resolve(
 					isShow ? '/dashboard/tv/[showId]' : '/dashboard/movies/[movieId]',
@@ -81,9 +78,9 @@
 				{mmT($mmLocale, isShow ? "Series already exists" : "Movie already exists")}
 			</Button>
 		{:else if !currentUser?.()?.is_superuser}
-            <RequestMediaDialog {result} {isShow}/>
+            <RequestMediaDialog {result} {isShow} triggerClass="h-14 min-h-14 leading-tight"/>
 		{:else}
-			<Button class="h-auto min-h-9 w-full whitespace-normal text-center text-xs font-semibold sm:text-sm" disabled={loading} onclick={() => addMedia()}>
+			<Button class="h-14 min-h-14 w-full whitespace-normal text-center text-xs font-semibold leading-tight sm:text-sm" disabled={loading} onclick={() => addMedia()}>
 				{#if loading}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
 					<span class="animate-pulse">{mmT($mmLocale, "Loading..." )}</span>
@@ -92,7 +89,7 @@
 				{/if}
 			</Button>
 		{/if}
-		<div class="flex w-full items-center gap-2">
+		<div class="flex h-5 w-full items-center gap-2">
 			{#if result.vote_average != null}
 				<span class="flex items-center text-sm font-medium text-yellow-600">
 					<svg class="mr-1 h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"
@@ -100,7 +97,7 @@
 							d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.561-.955L10 0l2.951 5.955 6.561.955-4.756 4.635 1.122 6.545z"
 						/></svg
 					>
-					{mmT($mmLocale, "Rating:" )} {Math.round(result.vote_average)}/10
+					{mmT($mmLocale, "Rating:" )} {result.vote_average.toLocaleString($mmLocale,{maximumFractionDigits:1})}/10
 				</span>
 			{/if}
 		</div>

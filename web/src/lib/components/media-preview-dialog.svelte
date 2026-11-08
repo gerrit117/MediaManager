@@ -11,6 +11,7 @@
   onAdd:()=>Promise<void>; adding?:boolean; addError?:string|null;
  }=$props();
  const user=getContext<()=>components['schemas']['UserRead']>('user');
+ let titleElement=$state<HTMLHeadingElement|null>(null);
  let metadata=$state<any>(null),error=$state(''),loading=$state(false);
  $effect(()=>{
   if(!open)return;
@@ -25,23 +26,24 @@
  });
 </script>
 <Dialog.Root bind:open>
- <Dialog.Content class="max-h-[calc(100dvh-2rem)] w-[calc(100vw-1rem)] max-w-3xl overflow-y-auto overscroll-contain p-4 sm:p-6">
-  <div class="grid min-w-0 grid-cols-[6rem_minmax(0,1fr)] items-start gap-4 sm:grid-cols-[10rem_minmax(0,1fr)]">
+ <Dialog.Content onOpenAutoFocus={(event)=>{event.preventDefault();titleElement?.focus();}} class="h-[min(40rem,calc(100dvh-2rem))] max-h-[calc(100dvh-2rem)] w-[calc(100vw-1rem)] max-w-3xl overflow-hidden p-4 sm:p-6">
+  <div class="grid h-full min-h-0 min-w-0 grid-cols-[6rem_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] items-start gap-4 sm:grid-cols-[10rem_minmax(0,1fr)]">
    {#if result.poster_path}<img src={result.poster_path} alt={result.name} class="aspect-[2/3] w-full rounded-lg object-cover"/>{:else}<div class="flex aspect-[2/3] items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground">{t($locale,'No poster available')}</div>{/if}
-   <div class="min-w-0 space-y-3 pr-5">
-    <Dialog.Title class="break-words text-xl leading-tight sm:text-2xl">{metadata?.name??result.name}</Dialog.Title>
+   <div class="min-w-0 space-y-3">
+    <Dialog.Title bind:ref={titleElement} tabindex="-1" class="pr-10 outline-none break-words text-xl leading-tight sm:text-2xl">{metadata?.name??result.name}</Dialog.Title>
     <Dialog.Description>{t($locale,isShow?'Series details':'Movie details')}</Dialog.Description>
     <div class="flex flex-wrap gap-2 text-sm">
      {#if metadata?.year??result.year}<span class="rounded-full bg-muted px-3 py-1">{metadata?.year??result.year}</span>{/if}
      {#if result.vote_average!=null}<span class="rounded-full bg-muted px-3 py-1">{t($locale,'Rating:')} {result.vote_average.toLocaleString($locale,{maximumFractionDigits:1})}/10</span>{/if}
     </div>
     {#if result.original_language}<p class="text-sm text-muted-foreground">{t($locale,'Original language')}: {result.original_language.toUpperCase()}</p>{/if}
-    {#if isShow&&metadata?.seasons?.length}<p class="text-sm text-muted-foreground">{metadata.seasons.length} {t($locale,'Seasons')}</p>{/if}
+    {#if isShow&&metadata?.seasons?.length}<p class="text-sm text-muted-foreground">{metadata.seasons.length} {t($locale,metadata.seasons.length===1?'Season':'Seasons')}</p>{/if}
    </div>
-   <section class="col-span-full space-y-2"><h3 class="font-semibold">{t($locale,'Description')}</h3><p class="whitespace-pre-line text-sm leading-relaxed">{metadata?.overview||result.overview||t($locale,'No overview available')}</p></section>
+   <section data-preview-description class="col-span-full min-h-0 self-stretch space-y-2 overflow-y-auto overscroll-contain pr-2"><h3 class="font-semibold">{t($locale,'Description')}</h3><p class="break-words whitespace-pre-line text-sm leading-relaxed">{metadata?.overview||result.overview||t($locale,'No overview available')}</p>
    {#if loading}<p role="status" class="col-span-full text-sm text-muted-foreground">{t($locale,'Loading…')}</p>{/if}
    {#if error}<p role="alert" class="col-span-full text-sm text-destructive">{t($locale,error)}</p>{/if}
-   <div class="col-span-full space-y-3 border-t pt-4">
+   </section>
+   <div data-preview-actions class="col-span-full space-y-3 border-t pt-4">
     {#if addError}<p role="alert" class="text-sm text-destructive">{t($locale,addError)}</p>{/if}
     {#if result.added&&result.id}<Button class="min-h-11 w-full" href={resolve(isShow?'/dashboard/tv/[showId]':'/dashboard/movies/[movieId]',isShow?{showId:result.id}:{movieId:result.id})}>{t($locale,'Open in library')}</Button>
     {:else if !user?.()?.is_superuser}<RequestMediaDialog {result} {isShow}/>

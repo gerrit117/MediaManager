@@ -33,6 +33,7 @@ with sync_playwright() as p:
    page=ctx.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.on('request',lambda r:writes.append(r.url) if r.method=='POST' else None)
    for route in ['/web/dashboard/','/web/dashboard/movies/discover/','/web/dashboard/movies/add-movie/']:
     page.goto(base+route,wait_until='domcontentloaded')
+    if route=='/web/dashboard/':page.wait_for_function('document.querySelectorAll("[data-media-card]").length===2')
     if 'add-movie' in route:page.locator('#search-box').fill('Own');page.get_by_role('button',name='Search',exact=True).click()
     page.get_by_role('button',name='Show details',exact=True).last.click();dialog=page.get_by_role('dialog');dialog.get_by_text(text,exact=True).wait_for()
     assert dialog.get_by_text('7.8/10',exact=False).count()==1
@@ -48,7 +49,7 @@ with sync_playwright() as p:
     dialog.get_by_role('button',name='Close',exact=True).click();dialog.wait_for(state='hidden')
    # Both cover/title triggers open the same preview. A metadata failure keeps the search summary visible.
    failing[0]=True;page.get_by_role('button',name='Show details: Own preview movie',exact=True).click();dialog=page.get_by_role('dialog');dialog.get_by_role('alert').wait_for();dialog.get_by_text('Search summary',exact=True).wait_for();dialog.get_by_role('button',name='Close',exact=True).click();dialog.wait_for(state='hidden');failing[0]=False
-   page.get_by_role('button',name='Own preview movie',exact=True).click();dialog=page.get_by_role('dialog');dialog.get_by_text(text,exact=True).wait_for();page.keyboard.press('Escape');dialog.wait_for(state='hidden')
+   page.get_by_role('button',name=re.compile('^Own preview movie'),exact=False).click();dialog=page.get_by_role('dialog');dialog.get_by_text(text,exact=True).wait_for();page.keyboard.press('Escape');dialog.wait_for(state='hidden')
    page.goto(base+'/web/dashboard/',wait_until='domcontentloaded');page.get_by_role('button',name='Show details',exact=True).first.click();dialog=page.get_by_role('dialog');dialog.get_by_text('Series details',exact=True).wait_for();dialog.get_by_text(text,exact=True).wait_for();assert dialog.get_by_role('button',name='Add series' if role=='admin' else 'Request series',exact=True).count()==1;dialog.get_by_role('button',name='Close',exact=True).click();dialog.wait_for(state='hidden')
    fixture.update(added=True,id=before['/api/v1/movies'][0]);page.goto(base+'/web/dashboard/movies/add-movie/',wait_until='domcontentloaded');page.locator('#search-box').fill('Own');page.get_by_role('button',name='Search',exact=True).click();page.get_by_role('button',name='Show details',exact=True).click();dialog=page.get_by_role('dialog');link=dialog.get_by_role('link',name='Open in library',exact=True);link.wait_for();assert before['/api/v1/movies'][0] in link.get_attribute('href');dialog.get_by_role('button',name='Close',exact=True).click();dialog.wait_for(state='hidden');fixture['added']=False;fixture.pop('id')
    page.evaluate("localStorage.setItem('mediamanager-language','de')");page.reload(wait_until='domcontentloaded');page.locator('#search-box').fill('Own');page.get_by_role('button',name='Suchen',exact=True).click();page.get_by_role('button',name='Details ansehen',exact=True).click();page.get_by_role('dialog').get_by_text('Beschreibung',exact=True).wait_for()
