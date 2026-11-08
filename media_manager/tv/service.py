@@ -574,7 +574,8 @@ class TvService:
         from sqlalchemy import select
         db=self.tv_repository.db
         records=list(db.scalars(select(StoredFile).where(StoredFile.season_id==season_request.season_id)))
-        previous_jobs=[db.get(StoredJob,r.torrent_id) for r in records if r.torrent_id]
+        from media_manager.release_control import active_jobs
+        previous_jobs=active_jobs(db,records)
         if any(j and not j.imported for j in previous_jobs):return False
         torrents = self.get_all_available_torrents_for_a_season(
             season_number=season.number, show_id=show.id

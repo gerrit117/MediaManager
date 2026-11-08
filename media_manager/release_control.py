@@ -87,6 +87,7 @@ def finalize(db,job_id,new_paths):
             archived.append({'source':str(p),'archive':str(target)})
             manifest['archived_files']=archived;row.manifest=dict(manifest);db.commit()
             os.rename(p,target)
+        retire_archived_records(db,row,new_paths,manifest['old_files'])
         row.status='completed';row.manifest=manifest;db.commit()
     except Exception:
         # Restore moved originals on failure; never delete either copy.
@@ -127,3 +128,31 @@ def automatic_manifest(service,kind,media,season=None,episode=None):
         scopes=[('episode',episode.id)]
     else:scopes=[('season',season.id)]+[('episode',ep.id) for ep in season.episodes]
     return plan(db,'show',media.id,paths,True,False,scopes)
+
+def active_jobs(db,records):
+    from media_manager.torrent.models import Torrent
+    result=[]
+    for record in records:
+        job=db.get(Torrent,record.torrent_id) if record.torrent_id else None
+        if job and (not job.imported or record.source_files is None or any(Path(p).is_file() for p in record.source_files)):result.append(job)
+    return result
+
+def retire_archived_records(db,replacement,new_paths,old_files):
+    from media_manager.movies.models import MovieFile
+    from media_manager.tv.models import SeasonFile,Season
+    from media_manager.torrent.models import Torrent
+    if replacement.kind=='movie':records=list(db.scalars(select(MovieFile).where(MovieFile.movie_id==replacement.media_id)))
+    else:records=list(db.scalars(select(SeasonFile).join(Season,SeasonFile.season_id==Season.id).where(Season.show_id==replacement.media_id)))
+    parents={Path(item['path']).parent for item in old_files}
+    for record in records:
+        if record.torrent_id==replacement.job_id:continue
+        job=db.get(Torrent,record.torrent_id) if record.torrent_id else None
+        if job and not job.imported:continue
+        if record.source_files is not None:
+            record.source_files=[p for p in record.source_files if Path(p).is_file()]
+        elif replacement.kind=='movie':record.source_files=[]
+        else:
+            season=db.get(Season,record.season_id)
+            # Older imports have no explicit path manifest. Reconcile surviving files of their season/suffix.
+            remaining=[p for parent in parents for p in video_files(parent) if str(p) not in new_paths and episode_numbers([p],season.number) and (not record.file_path_suffix or Path(p).stem.endswith(record.file_path_suffix))]
+            if any(episode_numbers([item['path']],season.number) for item in old_files):record.source_files=sorted(set(remaining))

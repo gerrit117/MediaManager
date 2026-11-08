@@ -154,3 +154,11 @@ def test_push_without_smtp_signs_and_encrypts_with_a_valid_vapid_contact(tmp_pat
     assert sent['headers']['authorization'].startswith('vapid ')
     assert b'Own private fixture' not in sent['data']
     assert sent['headers']['content-encoding']=='aes128gcm'
+
+def test_archived_release_history_does_not_block_future_upgrades(tmp_path):
+    from media_manager.release_control import active_jobs
+    active=tmp_path/'current.mkv';active.write_bytes(b'own current file')
+    jobs={1:SimpleNamespace(imported=True),2:SimpleNamespace(imported=True),3:SimpleNamespace(imported=False)}
+    records=[SimpleNamespace(torrent_id=1,source_files=[str(tmp_path/'archived.mkv')]),SimpleNamespace(torrent_id=2,source_files=[str(active)]),SimpleNamespace(torrent_id=3,source_files=[])]
+    db=Mock();db.get.side_effect=lambda model,id:jobs[id]
+    assert active_jobs(db,records)==[jobs[2],jobs[3]]
