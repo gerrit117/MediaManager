@@ -123,6 +123,15 @@ def valid_endpoint(endpoint):
     suffixes=('push.services.mozilla.com','fcm.googleapis.com','web.push.apple.com','notify.windows.com','push.microsoft.com','wns.windows.com')
     return u.scheme=='https' and not u.username and not u.password and u.port in (None,443) and not u.fragment and any(host==s or host.endswith('.'+s) for s in suffixes)
 
+def push_contact(config):
+    sender=config.notifications.smtp_config.from_email
+    if sender:return 'mailto:'+sender
+    # The signing library requires an HTTPS contact hostname without an internal service port.
+    host=urlsplit(str(config.misc.frontend_url)).hostname or ''
+    if '.' in host and ':' not in host:return 'https://'+host
+    return 'https://github.com'
+
+
 def deliver(db):
     from media_manager.auth.mail import mail_ready
     from media_manager.notification.utils import send_email
@@ -150,7 +159,7 @@ def deliver(db):
                 for subscription in list(db.scalars(select(PushSubscription).where(PushSubscription.user_id==user.id))):
                     if str(subscription.id) in sent:continue
                     if not valid_endpoint(subscription.subscription['endpoint']):db.delete(subscription);continue
-                    try:webpush(subscription_info=subscription.subscription,data=json.dumps({'title':title,'body':text_body,'url':url,'tag':item.event_key}),vapid_private_key=path,vapid_claims={'sub':'mailto:'+config.notifications.smtp_config.from_email if config.notifications.smtp_config.from_email else str(config.misc.frontend_url)},timeout=15,ttl=86400)
+                    try:webpush(subscription_info=subscription.subscription,data=json.dumps({'title':title,'body':text_body,'url':url,'tag':item.event_key}),vapid_private_key=path,vapid_claims={'sub':push_contact(config)},timeout=15,ttl=86400)
                     except WebPushException as error:
                         if error.response is not None and error.response.status_code in (404,410):db.delete(subscription);continue
                         raise

@@ -133,3 +133,24 @@ def test_emby_old_filename_does_not_confirm_a_new_import():
     from media_manager.emby import path_matches
     assert not path_matches({'Path':'/emby/movies/Old.mkv'},['/data/movies/New-MANUAL-123.mkv'])
     assert path_matches({'Path':'/emby/movies/New-MANUAL-123.mkv'},['/data/movies/New-MANUAL-123.mkv'])
+
+@pytest.mark.parametrize('frontend,expected',[('http://media.example.org:8000','https://media.example.org'),('http://internal-app:8000','https://github.com')])
+def test_push_without_smtp_signs_and_encrypts_with_a_valid_vapid_contact(tmp_path,frontend,expected):
+    import base64,os,json
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from cryptography.hazmat.primitives.serialization import Encoding,PublicFormat
+    from media_manager.account_notifications import push_contact,vapid
+    from pywebpush import webpush
+    config=SimpleNamespace(notifications=SimpleNamespace(smtp_config=SimpleNamespace(from_email='')),misc=SimpleNamespace(frontend_url=frontend))
+    subject=push_contact(config);assert subject==expected
+    private=ec.generate_private_key(ec.SECP256R1())
+    encode=lambda data:base64.urlsafe_b64encode(data).decode().rstrip('=')
+    subscription={'endpoint':'https://web.push.apple.com/own-fixture','keys':{'p256dh':encode(private.public_key().public_bytes(Encoding.X962,PublicFormat.UncompressedPoint)),'auth':encode(os.urandom(16))}}
+    session=Mock();session.post.return_value=SimpleNamespace(status_code=201,text='')
+    with patch('media_manager.account_notifications.config_file',return_value=tmp_path/'config.toml'):
+        path,public=vapid();assert vapid()==(path,public)
+        webpush(subscription_info=subscription,data=json.dumps({'title':'Own private fixture'}),vapid_private_key=path,vapid_claims={'sub':subject},requests_session=session,timeout=1)
+    sent=session.post.call_args.kwargs
+    assert sent['headers']['authorization'].startswith('vapid ')
+    assert b'Own private fixture' not in sent['data']
+    assert sent['headers']['content-encoding']=='aes128gcm'
