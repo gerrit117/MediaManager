@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
+	import MediaPreviewDialog from '$lib/components/media-preview-dialog.svelte';
 	import {getContext} from 'svelte';
     import RequestMediaDialog from '$lib/components/requests/request-media-dialog.svelte';
     const currentUser=getContext<()=>any>('user');
@@ -11,12 +12,15 @@
 	import type { components } from '$lib/api/api';
 	import client from '$lib/api';
 
+	let previewOpen = $state(false);
 	let loading = $state(false);
 	let errorMessage = $state<string | null>(null);
 	let {
 		result,
 		isShow = true
 	}: { result: components['schemas']['MetaDataProviderSearchResult']; isShow: boolean } = $props();
+
+    function showPreview() { errorMessage=null; previewOpen=true; }
 
     async function addMedia() {
         loading=true;errorMessage=null;
@@ -38,7 +42,7 @@
 <Card.Root class="min-w-0 flex h-full flex-col overflow-hidden">
 	<Card.Header class="p-3 sm:p-5">
 		<Card.Title class="line-clamp-2 min-h-10 text-sm leading-snug sm:text-base">
-			{result.name}
+			<button type="button" class="text-left hover:underline focus-visible:underline" onclick={showPreview}>{result.name}</button>
 			{#if result.year != null}
 				({result.year})
 			{/if}
@@ -48,6 +52,7 @@
 		>
 	</Card.Header>
 	<Card.Content class="flex flex-1 items-center justify-center px-3 pb-3 sm:px-5 sm:pb-5">
+		<button type="button" class="flex h-full w-full items-center justify-center rounded-lg focus-visible:ring-2 focus-visible:ring-ring" aria-label={mmT($mmLocale,"Show details")+": "+result.name} onclick={showPreview}>
 		{#if result.poster_path != null}
 			<img
 				class="aspect-[2/3] h-full w-full rounded-lg object-cover"
@@ -60,8 +65,10 @@
 				<ImageOff class="h-12 w-12 text-gray-400" />
 			</div>
 		{/if}
+		</button>
 	</Card.Content>
 	<Card.Footer class="flex flex-col items-start gap-2 rounded-b-lg border-t bg-card p-4">
+		<Button variant="outline" class="min-h-11 w-full text-sm" onclick={showPreview}>{mmT($mmLocale,"Show details")}</Button>
 		{#if result.added}
 			<Button
 				class="h-auto min-h-9 w-full whitespace-normal text-center text-xs font-semibold sm:text-sm"
@@ -102,3 +109,5 @@
 		{/if}
 	</Card.Footer>
 </Card.Root>
+
+<MediaPreviewDialog bind:open={previewOpen} {result} {isShow} onAdd={addMedia} adding={loading} addError={errorMessage}/>
