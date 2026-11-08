@@ -130,32 +130,32 @@
 	{/if}
 	<TorrentTable {torrentsPromise} columns={tableColumnHeadings}>
 		{#snippet rowSnippet(torrent)}
-			<Table.Cell class="font-medium">{torrent.title}</Table.Cell>
-			<Table.Cell>{(torrent.size / 1024 / 1024 / 1024).toFixed(2)}GB</Table.Cell>
-			<Table.Cell>{torrent.usenet ? 'Usenet / NZB' : 'Torrent'}</Table.Cell>
-			<Table.Cell>{torrent.usenet ? 'N/A' : torrent.seeders}</Table.Cell>
-			<Table.Cell
+			<Table.Cell data-label={mmT($mmLocale, "Title")} class="font-medium">{torrent.title}</Table.Cell>
+			<Table.Cell data-label={mmT($mmLocale, "Size")}>{(torrent.size / 1024 / 1024 / 1024).toFixed(2)}GB</Table.Cell>
+			<Table.Cell data-label={mmT($mmLocale, "Download type")}>{torrent.usenet ? 'Usenet / NZB' : 'Torrent'}</Table.Cell>
+			<Table.Cell data-label={mmT($mmLocale, "Seeders")}>{torrent.usenet ? 'N/A' : torrent.seeders}</Table.Cell>
+			<Table.Cell data-label={mmT($mmLocale, "Age")}
 				>{torrent.age
 					? formatSecondsToOptimalUnit(torrent.age)
 					: torrent.usenet
 						? 'N/A'
 						: ''}</Table.Cell
 			>
-			<Table.Cell>{torrent.score}</Table.Cell>
-			<Table.Cell>{torrent.indexer ?? 'unknown'}</Table.Cell>
-			<Table.Cell>
+			<Table.Cell data-label={mmT($mmLocale, "Score")}>{torrent.score}</Table.Cell>
+			<Table.Cell data-label={mmT($mmLocale, "Indexer")}>{torrent.indexer ?? 'unknown'}</Table.Cell>
+			<Table.Cell data-label={mmT($mmLocale, "Indexer Flags")}>
 				{#if torrent.flags}
-					{#each torrent.flags as flag (flag)}
+					{#each (torrent.flags ?? []) as flag (flag)}
 						<Badge variant="outline">{flag}</Badge>
 					{/each}
 				{/if}
 			</Table.Cell>
-			<Table.Cell>
+			<Table.Cell data-label={mmT($mmLocale, "Seasons")}>
 				{#if torrent.season}
 					{convertTorrentSeasonRangeToIntegerRange(torrent.season)}
 				{/if}
 			</Table.Cell>
-			<Table.Cell class="text-right">
+			<Table.Cell data-label={mmT($mmLocale, "Actions")} class="text-right">
 				<SelectFilePathSuffixDialog
 					bind:filePathSuffix
 					media={show}

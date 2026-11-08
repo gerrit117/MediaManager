@@ -19,26 +19,25 @@
 </script>
 
 <div
-	class="grid w-full gap-4 sm:grid-cols-1
-     md:grid-cols-2 lg:grid-cols-3"
+	class="grid w-full grid-cols-2 gap-3 lg:grid-cols-4"
 >
 	{#if isLoading}
-		<Skeleton class="h-[70vh] w-full" />
-		<Skeleton class="h-[70vh] w-full" />
-		<Skeleton class="h-[70vh] w-full" />
+		<Skeleton class="aspect-[2/3] w-full" />
+		<Skeleton class="aspect-[2/3] w-full" />
+		<Skeleton class="aspect-[2/3] w-full" />
 	{:else}
-		{#each media.slice(0, 3) as mediaItem (mediaItem.external_id)}
+		{#each media.slice(0, 4) as mediaItem (mediaItem.external_id)}
 			<AddMediaCard {isShow} result={mediaItem} />
 		{/each}
 	{/if}
 	{#if isShow}
-		<Button class="md:col-start-2" variant="secondary" href={resolve('/dashboard/tv/discover', {})}>
+		<Button class="col-span-full min-h-11" variant="secondary" href={resolve('/dashboard/tv/discover', {})}>
 			{mmT($mmLocale, "Discover more" )}
 			<ChevronRight />
 		</Button>
 	{:else}
 		<Button
-			class="md:col-start-2"
+			class="col-span-full min-h-11"
 			variant="secondary"
 			href={resolve('/dashboard/movies/discover', {})}
 		>

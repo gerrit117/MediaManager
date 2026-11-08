@@ -90,13 +90,13 @@
 		</Breadcrumb.Root>
 	</div>
 </header>
-<h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
+<h1 class="px-4 text-center text-2xl font-bold tracking-tight sm:text-4xl">
 	{getFullyQualifiedMediaName(show)}
 </h1>
 <main class="mx-auto flex w-full flex-1 flex-col gap-4 p-4 md:max-w-[80em]">
 	<MetadataEditor media={show} isTv={true}/>
 	<div class="flex flex-col gap-4 md:flex-row md:items-stretch">
-		<div class="w-full overflow-hidden rounded-xl bg-muted/50 md:w-1/3 md:max-w-sm">
+		<div class="mx-auto w-40 shrink-0 overflow-hidden rounded-xl bg-muted/50 sm:w-52 md:mx-0 md:w-1/3 md:max-w-sm">
 			{#if show.id}
 				<MediaPicture media={show} />
 			{:else}
@@ -107,8 +107,8 @@
 				</div>
 			{/if}
 		</div>
-		<div class="h-full w-full flex-auto rounded-xl md:w-1/4">
-			<Card.Root class="h-full w-full">
+		<div class="w-full flex-auto rounded-xl md:w-1/4">
+			<Card.Root class="w-full">
 				<Card.Header>
 					<Card.Title>{mmT($mmLocale, "Overview" )}</Card.Title>
 				</Card.Header>
@@ -120,10 +120,10 @@
 			</Card.Root>
 		</div>
 		<div
-			class="flex h-full w-full flex-auto flex-col items-center justify-start gap-4 rounded-xl md:w-1/3 md:max-w-[40em]"
+			class="flex w-full flex-auto flex-col items-center justify-start gap-4 rounded-xl md:w-1/3 md:max-w-[40em]"
 		>
 			{#if user().is_superuser}
-				<Card.Root class="w-full  flex-1">
+				<Card.Root class="w-full">
 					<Card.Header>
 						<Card.Title>{mmT($mmLocale, "Administrator Controls" )}</Card.Title>
 					</Card.Header>
@@ -150,15 +150,16 @@
 					</Card.Content>
 				</Card.Root>
 			{/if}
-			<Card.Root class="w-full  flex-1">
+			<Card.Root class="w-full">
 				<Card.Header>
 					<Card.Title>{mmT($mmLocale, "Download Options" )}</Card.Title>
 				</Card.Header>
 				<Card.Content class="flex flex-col items-center gap-4">
 					{#if user().is_superuser}
 						<DownloadSeasonDialog {show} />
+					{:else}
+						<RequestSeasonDialog {show} />
 					{/if}
-					<RequestSeasonDialog {show} />
 				</Card.Content>
 			</Card.Root>
 		</div>

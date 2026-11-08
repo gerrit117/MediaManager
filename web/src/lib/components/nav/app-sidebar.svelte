@@ -95,6 +95,7 @@
 </script>
 
 <script lang="ts">
+	import { afterNavigate } from '$app/navigation';
 	import NavMain from '$lib/components/nav/nav-main.svelte';
 	import NavSecondary from '$lib/components/nav/nav-secondary.svelte';
 	import NavUser from '$lib/components/nav/nav-user.svelte';
@@ -105,6 +106,8 @@
 	import type { ComponentProps } from 'svelte';
 	import logo from '$lib/images/logo.svg';
 
+	const sidebar = Sidebar.useSidebar();
+	afterNavigate(() => { if (sidebar.isMobile) sidebar.setOpenMobile(false); });
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 </script>
 

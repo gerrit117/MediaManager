@@ -60,17 +60,17 @@
 	</div>
 </header>
 <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
-	<h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
+	<h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
 		{mmT($mmLocale, "Overview" )}
 	</h1>
-	<main class="min-h-screen flex-1 items-center justify-center rounded-xl p-4 md:min-h-min">
+	<main class="min-w-0 flex-1">
         <RequestCenter overview={true}/>
 		{#if discoveryError}<p role="alert" class="my-4 rounded-xl border border-destructive p-3 text-sm text-destructive">{mmT($mmLocale,discoveryError)}</p>{/if}
         <div class="mx-auto">
-			<h3 class="my-4 text-center text-2xl font-semibold">{mmT($mmLocale, "This week: series" )}</h3>
+			<h3 class="mb-3 mt-6 text-lg font-semibold">{mmT($mmLocale, "This week: series" )}</h3>
 			<RecommendedMediaCarousel isLoading={showsLoading} isShow={true} media={recommendedShows} />
 
-			<h3 class="my-4 text-center text-2xl font-semibold">{mmT($mmLocale, "This week: movies" )}</h3>
+			<h3 class="mb-3 mt-6 text-lg font-semibold">{mmT($mmLocale, "This week: movies" )}</h3>
 			<RecommendedMediaCarousel
 				isLoading={moviesLoading}
 				isShow={false}

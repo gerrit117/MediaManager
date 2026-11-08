@@ -43,7 +43,7 @@
 			style="--sidebar-width: {SIDEBAR_WIDTH_MOBILE};"
 			{side}
 		>
-			<div class="flex h-full w-full flex-col">
+			<div class="flex h-full w-full flex-col" onclick={(event) => { if ((event.target as Element).closest('a[href]')) sidebar.setOpenMobile(false); }} role="presentation">
 				{@render children?.()}
 			</div>
 		</Sheet.Content>
@@ -91,3 +91,11 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+ @media (max-width: 767px) {
+  :global([data-mobile="true"] [data-sidebar="menu-button"]),
+  :global([data-mobile="true"] [data-sidebar="menu-sub-button"]) { min-height:44px; height:auto; font-size:16px; padding-top:10px; padding-bottom:10px; }
+  :global([data-mobile="true"] [data-sidebar="content"]) { overscroll-behavior:contain; }
+ }
+</style>

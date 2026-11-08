@@ -10,10 +10,8 @@
 	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
 	import * as RadioGroup from '$lib/components/ui/radio-group/index.js';
 	import AddMediaCard from '$lib/components/add-media-card.svelte';
-	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
 	import client from '$lib/api';
-    import {toast} from 'svelte-sonner';
 	import type { components } from '$lib/api/api';
 	import { handleQueryNotificationToast } from '$lib/utils.ts';
 
@@ -22,36 +20,26 @@
 	let data: components['schemas']['MetaDataProviderSearchResult'][] | null = $state(null);
 	let isSearching: boolean = $state(false);
 
-    async function suggestions() {
-        const response=await fetch('/api/v1/discover/tv?mode=trending&window=week&language='+$mmLocale);
-        const payload=await response.json();
-        if(!response.ok){toast.error(mmT($mmLocale,typeof payload.detail==='string'?payload.detail:'Discovery could not be loaded.'));return {data:[]};}
-        return {data:payload.results};
-    }
-	onMount(() => {
-		search('');
-	});
-
 	async function search(query: string) {
+		query = query.trim();
+		if (!query) return;
 		isSearching = true;
 		try {
 			const results =
-				query.length > 0
-					? await client.GET('/api/v1/tv/search', {
+				await client.GET('/api/v1/tv/search', {
 							params: {
 								query: {
 									query: query,
 									metadata_provider: metadataProvider
 								}
 							}
-						})
-					: await suggestions();
+						});
 			if (results.data && results.data.length > 0) {
 				handleQueryNotificationToast(results.data.length, query);
 				data = results.data as components['schemas']['MetaDataProviderSearchResult'][];
 			} else {
 				handleQueryNotificationToast(0, query);
-				data = null;
+				data = [];
 			}
 		} finally {
 			isSearching = false;
@@ -74,11 +62,11 @@
 					<Breadcrumb.Link href={resolve('/dashboard', {})}>MediaManager</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
-				<Breadcrumb.Item>
+				<Breadcrumb.Item class="hidden sm:block">
 					<Breadcrumb.Link href={resolve('/dashboard', {})}>{mmT($mmLocale, "Home" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
-				<Breadcrumb.Item>
+				<Breadcrumb.Item class="hidden sm:block">
 					<Breadcrumb.Link href={resolve('/dashboard/tv', {})}>{mmT($mmLocale, "Shows" )}</Breadcrumb.Link>
 				</Breadcrumb.Item>
 				<Breadcrumb.Separator class="hidden md:block" />
@@ -90,9 +78,9 @@
 	</div>
 </header>
 
-<main class="flex w-full max-w-[90vw] flex-1 flex-col items-center gap-4 p-4 pt-0">
-	<div class="grid w-full max-w-sm items-center gap-12">
-		<h1 class="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
+<main class="mx-auto flex w-full min-w-0 max-w-7xl flex-1 flex-col gap-6 px-4 pb-6 sm:px-6">
+	<div class="mx-auto grid w-full max-w-xl gap-5">
+		<h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
 			{mmT($mmLocale, "Search series" )}
 		</h1>
 		<section>
@@ -112,16 +100,12 @@
 		</section>
 		<section>
 			<Collapsible.Root class="w-full space-y-1">
-				<Collapsible.Trigger>
-					<div class="flex items-center justify-between space-x-4 px-4">
+				<Collapsible.Trigger class="flex min-h-11 w-full items-center justify-between rounded-lg border px-3 text-sm font-medium">
+
 						<h4 class="text-sm font-semibold">{mmT($mmLocale, "Advanced Settings" )}</h4>
-						<Button class="w-9 p-0" size="sm" variant="ghost">
-							<ChevronDown />
-							<span class="sr-only">{mmT($mmLocale, "Toggle" )}</span>
-						</Button>
-					</div>
+						<ChevronDown class="size-4" />
 				</Collapsible.Trigger>
-				<Collapsible.Content class="space-y-1">
+				<Collapsible.Content class="space-y-3 rounded-lg border p-3">
 					<Label for="metadata-provider-selector">{mmT($mmLocale, "Choose which Metadata Provider to query." )}</Label>
 					<RadioGroup.Root bind:value={metadataProvider} id="metadata-provider-selector">
 						<div class="flex items-center space-x-2">
@@ -137,7 +121,7 @@
 			</Collapsible.Root>
 		</section>
 		<section>
-			<Button onclick={() => search(searchTerm)} type="submit" disabled={isSearching}>
+			<Button onclick={() => search(searchTerm)} class="min-h-11 w-full" type="submit" disabled={isSearching || !searchTerm.trim()}>
 				{#if isSearching}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
 					<span class="animate-pulse">{mmT($mmLocale, "Searching..." )}</span>
@@ -148,14 +132,14 @@
 		</section>
 	</div>
 
-	<Separator class="my-8" />
+
 
 	{#if data && data.length === 0}
 		<h3 class="mx-auto">{mmT($mmLocale, "No Shows found." )}</h3>
 	{:else if data}
 		<div
-			class="grid w-full auto-rows-min gap-4 sm:grid-cols-1
-		 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+			class="grid w-full auto-rows-min gap-4 grid-cols-2
+		 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5"
 		>
 			{#each data as dataItem (dataItem.external_id)}
 				<AddMediaCard result={dataItem} isShow={true} />
