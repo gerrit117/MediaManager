@@ -30,7 +30,7 @@
   <div class="grid h-full min-h-0 min-w-0 grid-cols-[6rem_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] items-start gap-4 sm:grid-cols-[10rem_minmax(0,1fr)]">
    {#if result.poster_path}<img src={result.poster_path} alt={result.name} class="aspect-[2/3] w-full rounded-lg object-cover"/>{:else}<div class="flex aspect-[2/3] items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground">{t($locale,'No poster available')}</div>{/if}
    <div class="min-w-0 space-y-3">
-    <Dialog.Title bind:ref={titleElement} tabindex="-1" class="pr-10 outline-none break-words text-xl leading-tight sm:text-2xl">{metadata?.name??result.name}</Dialog.Title>
+    <Dialog.Title bind:ref={titleElement} tabindex={-1} class="pr-10 outline-none break-words text-xl leading-tight sm:text-2xl">{metadata?.name??result.name}</Dialog.Title>
     <Dialog.Description>{t($locale,isShow?'Series details':'Movie details')}</Dialog.Description>
     <div class="flex flex-wrap gap-2 text-sm">
      {#if metadata?.year??result.year}<span class="rounded-full bg-muted px-3 py-1">{metadata?.year??result.year}</span>{/if}

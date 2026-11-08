@@ -184,6 +184,8 @@ with Session(engine) as db:
  assert 'no backfill passed' in exec_python(episode_checks)
  library_checks=(repo/'tests/integration/library_scan_checks.py').read_text().replace('ADMIN_PASSWORD',repr(password))
  assert 'manual review passed' in exec_python(library_checks)
+ delivery_checks=(repo/'tests/integration/media_delivery_checks.py').read_text()
+ assert 'FFprobe replacement passed' in exec_python(delivery_checks)
  actions_checks=(repo/'tests/integration/library_actions_checks.py').read_text()
  assert 'collection checks passed' in exec_python(actions_checks)
  assert request(client(),'/api/v1/discover/movie')[0]==401
@@ -209,7 +211,7 @@ with Session(engine) as db:
  assert sql("SELECT count(*) FROM information_schema.columns WHERE table_name='user' AND column_name='preferred_language'").strip()=='0'
  assert sql(signature_sql)==signature
  stack('run','--rm','--no-deps','--workdir','/app','--entrypoint','/app/.venv/bin/alembic','mediamanager','upgrade','head')
- assert sql("SELECT version_num FROM alembic_version").strip()=='d8e654bf956f'
+ assert sql("SELECT version_num FROM alembic_version").strip()=='e9f765c0a670'
  assert sql(signature_sql)==signature
  stack('up','-d','--no-deps','mediamanager')
  for _ in range(90):

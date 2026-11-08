@@ -5,7 +5,7 @@
  let fields = $state<Field[]>([]); let busy = $state(false); let message = $state(''); let failed = $state(false); let pending = $state(false);
  const groups: Record<string,string> = { misc:'Bibliothek & Pfade',metadata:'Metadaten',torrents:'Downloadmanager — NZB & Torrent',database:'PostgreSQL',auth:'Anmeldung' };
  async function load() {
-  try { const response = await fetch('/api/v1/settings'); if (!response.ok) throw Error('Einstellungen konnten nicht geladen werden.'); const data = await response.json(); fields=data.fields.filter((f:Field)=>!f.key.startsWith('indexers.')&&!f.key.startsWith('misc.library_scan.')&&!f.key.startsWith('notifications.')&&!['auth.admin_emails','auth.email_password_resets','auth.administrator_mail_enabled','misc.frontend_url'].includes(f.key)).map((f: Field) => ({...f,value:f.kind==='secret'?'':f.kind==='list'?(f.value??[]).join(', '):f.value})); pending=data.restart_required; }
+  try { const response = await fetch('/api/v1/settings'); if (!response.ok) throw Error('Einstellungen konnten nicht geladen werden.'); const data = await response.json(); fields=data.fields.filter((f:Field)=>!f.key.startsWith('emby.')&&!f.key.startsWith('indexers.')&&!f.key.startsWith('misc.library_scan.')&&!f.key.startsWith('notifications.')&&!['auth.admin_emails','auth.email_password_resets','auth.administrator_mail_enabled','misc.frontend_url'].includes(f.key)).map((f: Field) => ({...f,value:f.kind==='secret'?'':f.kind==='list'?(f.value??[]).join(', '):f.value})); pending=data.restart_required; }
   catch(e) { message=(e as Error).message; failed=true; }
  }
  onMount(load);

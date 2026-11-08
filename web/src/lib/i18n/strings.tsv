@@ -813,3 +813,52 @@ Language saved.	Sprache gespeichert.
 Language could not be saved. Please try again.	Sprache konnte nicht gespeichert werden. Bitte erneut versuchen.
 Save language in profile	Sprache im Profil speichern
 Your browser language is used until you save a profile preference.	Bis zur Auswahl im Profil wird deine Browsersprache verwendet.
+New requests	Neue Anfragen
+Request approved	Anfrage angenommen
+Request declined	Anfrage abgelehnt
+Available in Emby	In Emby verfügbar
+Email	E-Mail
+Push	Push
+Choose email, push, both or neither for each category. Account security emails are always sent.	Wähle pro Kategorie E-Mail, Push, beides oder keine Benachrichtigung. Sicherheitsmails werden immer versendet.
+Save notification settings	Benachrichtigungen speichern
+Notification settings saved.	Benachrichtigungseinstellungen gespeichert.
+Notification settings could not be loaded.	Benachrichtigungseinstellungen konnten nicht geladen werden.
+Notification settings could not be saved.	Benachrichtigungseinstellungen konnten nicht gespeichert werden.
+Enable push on this device	Push auf diesem Gerät aktivieren
+Disable push on this device	Push auf diesem Gerät deaktivieren
+Push requires HTTPS. On iPhone and iPad, install MediaManager on the Home Screen and enable push from there.	Push benötigt HTTPS. Installiere MediaManager auf iPhone und iPad auf dem Home-Bildschirm und aktiviere Push von dort aus.
+Push registration failed.	Push konnte nicht registriert werden.
+Push permission was not granted.	Die Erlaubnis für Push wurde nicht erteilt.
+Push enabled on this device.	Push ist auf diesem Gerät aktiviert.
+Push disabled on this device.	Push ist auf diesem Gerät deaktiviert.
+Verify availability in Emby	Verfügbarkeit in Emby prüfen
+Emby server URL	Emby-Serveradresse
+Emby API key	Emby-API-Schlüssel
+Read-only availability checks using a server API key. No user accounts or playback history are read. Completion notifications wait for Emby confirmation.	Prüft die Verfügbarkeit mit einem Server-API-Schlüssel, ohne Benutzerkonten oder Wiedergabeverläufe auszulesen. Fertigmeldungen warten auf die Bestätigung durch Emby.
+Emby settings saved.	Emby-Einstellungen gespeichert.
+Emby settings could not be saved.	Emby-Einstellungen konnten nicht gespeichert werden.
+Emby connection successful.	Emby-Verbindung erfolgreich.
+Emby connection failed. Check address and API key.	Emby-Verbindung fehlgeschlagen. Prüfe Adresse und API-Schlüssel.
+Protected from upgrades	Vor Upgrades geschützt
+Protect from automatic upgrades	Vor automatischen Upgrades schützen
+Inherited from series or season	Von Serie oder Staffel übernommen
+Release protection could not be loaded.	Release-Schutz konnte nicht geladen werden.
+Release protection could not be saved.	Release-Schutz konnte nicht gespeichert werden.
+Replace existing version after successful import	Vorhandene Version nach erfolgreichem Import ersetzen
+Explicitly override release protection for this manual download	Release-Schutz für diesen manuellen Download ausdrücklich übergehen
+Original files are retained in a recovery archive. Release rules still apply.	Alte Dateien bleiben in einem Wiederherstellungsarchiv erhalten. Die Release-Regeln gelten weiterhin.
+Replace the selected existing files after successful import? Originals will be archived.	Ausgewählte vorhandene Dateien nach erfolgreichem Import ersetzen? Die Originale werden archiviert.
+Waiting for Emby	Wartet auf Emby
+Declined	Abgelehnt
+Decline request	Anfrage ablehnen
+Reason for declining (optional)	Begründung der Ablehnung (optional)
+Library matching	Bibliotheksabgleich
+Matching…	Wird abgeglichen …
+Match Emby library	Emby-Bibliothek abgleichen
+Matches use TMDB, TVDB and IMDb IDs, followed by episode IDs or season and episode numbers. Conflicting IDs are not matched automatically.	Die Zuordnung erfolgt über TMDB-, TVDB- und IMDb-IDs, danach über Folgen-IDs oder Staffel- und Folgennummern. Widersprüchliche IDs werden nicht automatisch zugeordnet.
+Matching details	Zuordnungen anzeigen
+matched	zugeordnet
+Matched	Zugeordnet
+Not matched	Nicht zugeordnet
+Emby library matching completed.	Emby-Bibliotheksabgleich abgeschlossen.
+Emby library matching failed; existing matches were retained.	Emby-Bibliotheksabgleich fehlgeschlagen; vorhandene Zuordnungen bleiben erhalten.

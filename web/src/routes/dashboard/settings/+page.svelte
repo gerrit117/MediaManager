@@ -1,4 +1,6 @@
 <script lang="ts">
+ import NotificationPreferences from '$lib/components/notification-preferences.svelte';
+ import EmbySettings from '$lib/components/emby-settings.svelte';
  import MailSettings from '$lib/components/mail-settings.svelte';
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
 	import LanguageSelect from '$lib/components/language-select.svelte';
@@ -23,7 +25,7 @@
 
 	let currentUser: () => components['schemas']['UserRead'] = getContext('user');
 	let activeTab=$state('account');
-	const tabs=[{id:'account',name:'Konto'},{id:'system',name:'System & Downloads'},{id:'indexers',name:'Indexer-Dienste'},{id:'library',name:'Library'},{id:'releases',name:'Release rules'},{id:'users',name:'Benutzerverwaltung'},{id:'mail',name:'Email & accounts'}];
+	const tabs=[{id:'account',name:'Konto'},{id:'notifications',name:'Notifications'},{id:'emby',name:'Emby'},{id:'system',name:'System & Downloads'},{id:'indexers',name:'Indexer-Dienste'},{id:'library',name:'Library'},{id:'releases',name:'Release rules'},{id:'users',name:'Benutzerverwaltung'},{id:'mail',name:'Email & accounts'}];
 	onMount(()=>{const section=new URLSearchParams(location.search).get('section');if(tabs.some(t=>t.id===section))activeTab=section!;const handler=(e:Event)=>{const target=(e as CustomEvent).detail;if(tabs.some(t=>t.id===target))activeTab=target;};window.addEventListener('mm-settings-tab',handler);return()=>window.removeEventListener('mm-settings-tab',handler);});
 	let users: components['schemas']['UserRead'][] = $derived(
 		(page.data.users ?? []).filter(
@@ -58,19 +60,21 @@
 <main class="mx-auto flex w-full min-w-0 flex-1 flex-col gap-4 p-4 md:max-w-[80em]">
  <div class="flex flex-wrap items-center justify-between gap-3"><h1 class="my-4 text-3xl font-bold">{mmT($mmLocale, "Settings" )}</h1><LanguageSelect/></div>
  <nav role="tablist" aria-label={mmT($mmLocale, "Settings sections")} class="sticky top-0 z-10 flex flex-wrap gap-2 rounded-xl border bg-background p-2 shadow-sm">
-  {#each tabs.filter(t=>currentUser().is_superuser||t.id==='account') as tab}
+  {#each tabs.filter(t=>currentUser().is_superuser||['account','notifications'].includes(t.id)) as tab}
    <button type="button" role="tab" aria-selected={activeTab===tab.id} aria-controls={'panel-'+tab.id} id={'tab-'+tab.id} class="rounded-lg px-4 py-2 text-sm font-medium aria-selected:bg-primary aria-selected:text-primary-foreground" onclick={()=>activeTab=tab.id}>{mmT($mmLocale, tab.name)}</button>
   {/each}
  </nav>
- <section role="tabpanel" id="panel-account" aria-labelledby="tab-account" hidden={activeTab!=='account'}>
+ <section role="tabpanel" tabindex={0} id="panel-account" aria-labelledby="tab-account" hidden={activeTab!=='account'}>
   <Card.Root><Card.Header><Card.Title>{mmT($mmLocale, "My Account" )}</Card.Title><Card.Description>{mmT($mmLocale, "Change your email or password" )}</Card.Description></Card.Header><Card.Content class="space-y-4"><UserSettings/><RequestQuota/></Card.Content></Card.Root>
  </section>
+ <section role="tabpanel" tabindex={0} id="panel-notifications" hidden={activeTab!=='notifications'}><NotificationPreferences/></section>
  {#if currentUser().is_superuser}
-  <section role="tabpanel" id="panel-system" aria-labelledby="tab-system" hidden={activeTab!=='system'}><ConnectionSetup/><SystemSettings/></section>
-  <section role="tabpanel" id="panel-indexers" aria-labelledby="tab-indexers" hidden={activeTab!=='indexers'}><IndexerServices/></section>
-  <section role="tabpanel" id="panel-library" aria-labelledby="tab-library" hidden={activeTab!=='library'}><LibraryManagement active={activeTab==='library'}/></section>
-  <section role="tabpanel" id="panel-releases" aria-labelledby="tab-releases" hidden={activeTab!=='releases'}><ReleaseRules/></section>
-  <section role="tabpanel" id="panel-mail" aria-labelledby="tab-mail" hidden={activeTab!=='mail'}><MailSettings/></section>
-  <section role="tabpanel" id="panel-users" aria-labelledby="tab-users" hidden={activeTab!=='users'}><Card.Root><Card.Header><Card.Title>{mmT($mmLocale, "Benutzerverwaltung" )}</Card.Title><Card.Description>{mmT($mmLocale, "Konten, Monatskontingente und automatische Genehmigung verwalten" )}</Card.Description></Card.Header><Card.Content><UserTable {users}/></Card.Content></Card.Root></section>
+  <section role="tabpanel" tabindex={0} id="panel-emby" hidden={activeTab!=='emby'}><EmbySettings/></section>
+  <section role="tabpanel" tabindex={0} id="panel-system" aria-labelledby="tab-system" hidden={activeTab!=='system'}><ConnectionSetup/><SystemSettings/></section>
+  <section role="tabpanel" tabindex={0} id="panel-indexers" aria-labelledby="tab-indexers" hidden={activeTab!=='indexers'}><IndexerServices/></section>
+  <section role="tabpanel" tabindex={0} id="panel-library" aria-labelledby="tab-library" hidden={activeTab!=='library'}><LibraryManagement active={activeTab==='library'}/></section>
+  <section role="tabpanel" tabindex={0} id="panel-releases" aria-labelledby="tab-releases" hidden={activeTab!=='releases'}><ReleaseRules/></section>
+  <section role="tabpanel" tabindex={0} id="panel-mail" aria-labelledby="tab-mail" hidden={activeTab!=='mail'}><MailSettings/></section>
+  <section role="tabpanel" tabindex={0} id="panel-users" aria-labelledby="tab-users" hidden={activeTab!=='users'}><Card.Root><Card.Header><Card.Title>{mmT($mmLocale, "Benutzerverwaltung" )}</Card.Title><Card.Description>{mmT($mmLocale, "Konten, Monatskontingente und automatische Genehmigung verwalten" )}</Card.Description></Card.Header><Card.Content><UserTable {users}/></Card.Content></Card.Root></section>
  {/if}
 </main>

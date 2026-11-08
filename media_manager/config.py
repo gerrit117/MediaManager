@@ -11,6 +11,7 @@ from pydantic_settings import (
     JsonConfigSettingsSource,
 )
 
+from media_manager.media_features_config import EmbyConfig
 from media_manager.auth.config import AuthConfig
 from media_manager.library_scan_config import LibraryScanConfig
 from media_manager.database.config import DbConfig
@@ -71,6 +72,7 @@ class MediaManagerConfig(BaseSettings):
     indexers: IndexerConfig = IndexerConfig()
     database: DbConfig = DbConfig()
     auth: AuthConfig = AuthConfig()
+    emby: EmbyConfig = EmbyConfig()
 
     @classmethod
     def settings_customise_sources(

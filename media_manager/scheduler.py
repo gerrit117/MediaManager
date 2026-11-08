@@ -70,5 +70,10 @@ def setup_scheduler(config: MediaManagerConfig) -> BackgroundScheduler:
     scheduler.add_job(automatic_scan, CronTrigger(minute=17),id="automatic_library_scan",replace_existing=True,max_instances=1,coalesce=True)
     from media_manager.episode_requests import run_approved
     scheduler.add_job(run_approved, CronTrigger(minute="*/15"), id="approved_episode_requests", replace_existing=True, max_instances=1, coalesce=True)
+    from media_manager.account_notifications import tick,initialize
+    initialize()
+    scheduler.add_job(tick,CronTrigger(second=20),id='account_notifications',replace_existing=True,max_instances=1,coalesce=True)
+    from media_manager.emby_matching import automatic_scan as scan_emby
+    scheduler.add_job(scan_emby,CronTrigger(minute=11),id='emby_library_matching',replace_existing=True,max_instances=1,coalesce=True)
     scheduler.start()
     return scheduler

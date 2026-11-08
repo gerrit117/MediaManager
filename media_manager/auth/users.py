@@ -76,7 +76,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
 
     async def on_after_forgot_password(self,user,token,request=None):
         from media_manager.auth.mail import send_link,mail_ready
-        if mail_ready() and MediaManagerConfig().auth.email_password_resets:send_link(user.email,token,'reset')
+        if mail_ready() and MediaManagerConfig().auth.email_password_resets:send_link(user.email,token,'reset',getattr(user,'preferred_language',None) or 'de')
 
     async def on_after_request_verify(self,user,token,request=None):
         from media_manager.auth.mail import send_link,mail_ready

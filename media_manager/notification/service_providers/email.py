@@ -12,17 +12,9 @@ class EmailNotificationServiceProvider(AbstractNotificationServiceProvider):
 
     def send_notification(self, message: MessageNotification) -> bool:
         subject = "MediaManager - " + message.title
-        html = f"""\
-                <html>
-                  <body>
-                    <br>
-                    {message.message}
-                    <br>
-                    <br>
-                    This is an automated message from MediaManager.</p>
-                  </body>
-                </html>
-                """
+        from html import escape
+        from media_manager.notification.template import render
+        html=render(message.title,escape(message.message))
 
         for email in self.config.emails:
             media_manager.notification.utils.send_email(

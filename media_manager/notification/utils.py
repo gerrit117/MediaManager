@@ -3,6 +3,9 @@ import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+from pathlib import Path
+from media_manager.notification.template import render
 
 from media_manager.config import MediaManagerConfig
 
@@ -11,11 +14,14 @@ log = logging.getLogger(__name__)
 
 def send_email(subject: str, html: str, addressee: str) -> None:
     email_conf = MediaManagerConfig().notifications.smtp_config
-    message = MIMEMultipart()
+    if "mm-email-layout" not in html:html=render(subject,html)
+    message = MIMEMultipart("related")
     message["From"] = email_conf.from_email
     message["To"] = addressee
     message["Subject"] = str(subject)
-    message.attach(MIMEText(html, "html"))
+    message.attach(MIMEText(html, "html", "utf-8"))
+    logo=MIMEImage((Path(__file__).parent/"logo.png").read_bytes(),_subtype="png")
+    logo.add_header("Content-ID","<mediamanager-logo>");logo.add_header("Content-Disposition","inline",filename="mediamanager.png");message.attach(logo)
 
     transport=smtplib.SMTP_SSL if email_conf.use_ssl else smtplib.SMTP
     options={'timeout':15}

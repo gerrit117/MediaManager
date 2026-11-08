@@ -9,17 +9,18 @@ log=logging.getLogger(__name__)
 def mail_ready():
     c=MediaManagerConfig().notifications.smtp_config
     return bool(c.smtp_host and c.from_email)
-def send_link(email,token,kind):
+def send_link(email,token,kind,language="de"):
     c=MediaManagerConfig();path='web/login/verify' if kind=='verify' else 'web/login/reset-password'
     link=urljoin(str(c.misc.frontend_url).rstrip('/')+'/',path)+'#'+urlencode({'token':token})
-    title='E-Mail bestätigen / Verify email' if kind=='verify' else 'Passwort zurücksetzen / Reset password'
-    html=f'<p>MediaManager: {title}</p><p><a href="{escape(link,quote=True)}">{title}</a></p><p>Falls du dies nicht angefordert hast, ignoriere diese E-Mail. / If you did not request this, ignore this email.</p>'
+    title=('E-Mail bestätigen' if kind=='verify' else 'Passwort zurücksetzen') if language=='de' else ('Verify email' if kind=='verify' else 'Reset password')
+    from media_manager.notification.template import render
+    html=render(title,escape('Öffne den folgenden Link. Falls du dies nicht angefordert hast, ignoriere diese E-Mail.' if language=='de' else 'Open the following link. If you did not request this, ignore this email.'),link,language)
     try:send_email('MediaManager – '+title,html,email);return True
     except Exception as error:log.warning('Account email delivery failed (%s).',type(error).__name__);return False
 def send_verification(user):
     from media_manager.auth.users import SECRET
     token=generate_jwt({'sub':str(user.id),'email':user.email,'aud':'fastapi-users:verify'},SECRET,86400)
-    return send_link(user.email,token,'verify')
+    return send_link(user.email,token,'verify',getattr(user,'preferred_language',None) or 'de')
 def notify_admins(subject,message):
     c=MediaManagerConfig()
     if not c.auth.administrator_mail_enabled or not mail_ready():return

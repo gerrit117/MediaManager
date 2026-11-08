@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine,select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
+import media_manager.media_features_models
 from media_manager.database import Base,get_session
 from media_manager.auth.db import User
 from media_manager.auth.password_policy import validate_password

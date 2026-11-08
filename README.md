@@ -10,6 +10,9 @@ Account setup and the request-first workflow are documented in [Accounts and req
 
 - Separate movie/series discovery with TMDB trends, popular/top-rated/recent lists, and country-specific streaming provider, studio and genre filters.
 - Built-in movie and season requests remain available.
+- Manual release replacement with recovery archives and inherited upgrade protection for movies, series, seasons and episodes.
+- Per-account HTML email and PWA push notifications for request approvals, rejections and Emby-confirmed availability.
+- Read-only Emby library matching using provider IDs and episode identities.
 - Admins can create user accounts directly in web settings.
 - Background library imports use trusted NFO IDs or optional Radarr/Sonarr metadata, with progress, manual review, repeatable scans and an explicit choice of catalogue-in-place or file reorganization.
 - Episode monitoring follows weekly releases within existing seasons, with persistent submission deduplication and targeted imports.
@@ -52,6 +55,8 @@ docker run --env MEDIAMANAGER_METADATA__TMDB__API_KEY \
 For the managed Compose stack, export the same variable before starting it. On Unraid, add a Variable with this exact key and enable masking, or use [the container template](ops/unraid-mediamanager.xml). Leaving the variable unset keeps the web settings option available.
 
 ## Documentation
+
+- [Release replacement, notifications and Emby](docs/media-replacements-and-notifications.md)
 
 - [Movie and series discovery](docs/discovery.md)
 

@@ -1,0 +1,10 @@
+<script lang="ts">
+ import {onMount,getContext} from 'svelte';import {locale,t} from '$lib/i18n';
+ let {kind,mediaId}:{kind:'movie'|'show'|'season'|'episode';mediaId:string}=$props();
+ const user:()=>any=getContext('user');let data=$state<any>(null),busy=$state(false),error=$state(''),visible=$state(false),anchor:HTMLDivElement|undefined=$state();
+ async function load(){const requested=kind+mediaId;const r=await fetch(`/api/v1/media-controls/protection/${kind}/${mediaId}`);if(r.ok){const result=await r.json();if(requested===kind+mediaId)data=result;}else error='Release protection could not be loaded.';}
+ async function change(){busy=true;error='';try{const r=await fetch(`/api/v1/media-controls/protection/${kind}/${mediaId}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({locked:!data.own_lock})});if(!r.ok)throw Error('Release protection could not be saved.');data=await r.json();window.dispatchEvent(new Event('mm-release-protection-changed'));}catch(e){error=(e as Error).message;}finally{busy=false;}}
+ onMount(()=>{if(!user?.().is_superuser||!anchor)return;const observer=new IntersectionObserver(entries=>{visible=entries.some(e=>e.isIntersecting);});observer.observe(anchor);const changed=()=>{data=null;if(visible)void load();};window.addEventListener('mm-release-protection-changed',changed);return()=>{observer.disconnect();window.removeEventListener('mm-release-protection-changed',changed);};});
+ $effect(()=>{void mediaId;void kind;data=null;if(visible)void load();});
+</script>
+{#if user?.().is_superuser}<div bind:this={anchor} class="flex flex-wrap items-center gap-2"><button class="min-h-11 rounded-lg border px-3 text-sm aria-pressed:border-primary aria-pressed:bg-primary/10" aria-pressed={data?.locked??false} disabled={busy||!data} onclick={change}>{t($locale,data?.locked?'Protected from upgrades':'Protect from automatic upgrades')}</button>{#if data?.locked&&!data?.own_lock}<span class="text-xs text-muted-foreground">{t($locale,'Inherited from series or season')}</span>{/if}{#if error}<p role="alert" class="text-sm text-destructive">{t($locale,error)}</p>{/if}</div>{/if}

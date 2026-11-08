@@ -147,6 +147,10 @@ api_app.include_router(movie_collections_router, prefix='/library/collections', 
 from media_manager.discovery import router as discovery_router
 api_app.include_router(discovery_router, prefix='/discover', tags=['discovery'])
 
+from media_manager.account_notifications import router as account_notification_router
+from media_manager.media_features_router import router as media_features_router
+api_app.include_router(account_notification_router,prefix='/account-notifications',tags=['notifications'])
+api_app.include_router(media_features_router,prefix='/media-controls',tags=['library'])
 app.include_router(api_app)
 
 # handle static frontend files

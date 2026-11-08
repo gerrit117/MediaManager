@@ -432,6 +432,8 @@ class MovieService:
         public_indexer_result_id: IndexerQueryResultId,
         movie: Movie,
         override_movie_file_path_suffix: str = "",
+        replace_existing: bool = True,
+        override_lock: bool = False,
     ) -> Torrent:
         """
         Download a torrent for a given indexer result and movie.
@@ -453,8 +455,19 @@ class MovieService:
         from media_manager.release_policy import validate_selection
         if MediaManagerConfig().indexers.release_policy.enabled:
             validate_selection(indexer_result, self.get_all_available_torrents_for_movie(movie))
+        from media_manager.release_control import plan,attach
+        from media_manager.library import video_files as list_videos
+        paths=list_videos(self.get_movie_root_path(movie))
+        from media_manager.movies.models import MovieFile as StoredFile
+        from sqlalchemy import select
+        for record in self.movie_repository.db.scalars(select(StoredFile).where(StoredFile.movie_id==movie.id)):
+            paths.extend(Path(p) for p in (record.source_files or []))
+        manifest=plan(self.movie_repository.db,'movie',movie.id,paths,replace_existing,override_lock,[('movie',movie.id)])
+        # Every manual import gets a distinct staging name; originals stay intact until validation.
+        staging_prefix=override_movie_file_path_suffix
         movie_torrent = self.torrent_service.download(indexer_result=indexer_result)
         self.torrent_service.pause_download(torrent=movie_torrent)
+        override_movie_file_path_suffix=(staging_prefix[:70]+'-' if staging_prefix else '')+'MANUAL-'+str(movie_torrent.id)
         movie_file = MovieFile(
             movie_id=movie.id,
             quality=indexer_result.quality,
@@ -475,6 +488,7 @@ class MovieService:
             log.info(
                 f"Added movie file for movie {movie.name} and torrent {movie_torrent.title}"
             )
+            attach(self.movie_repository.db,movie_torrent.id,'movie',movie.id,manifest)
             self.torrent_service.resume_download(torrent=movie_torrent)
         return movie_torrent
 
@@ -499,6 +513,8 @@ class MovieService:
         from media_manager.torrent.models import Torrent as StoredJob
         from sqlalchemy import select
         db=self.movie_repository.db
+        from media_manager.release_control import locked
+        if locked(db,'movie',movie.id) and self.is_movie_downloaded(movie):return False
         records=list(db.scalars(select(StoredFile).where(StoredFile.movie_id==movie.id)))
         previous_jobs=[db.get(StoredJob,r.torrent_id) for r in records if r.torrent_id]
         if any(j and not j.imported for j in previous_jobs):return False
@@ -536,12 +552,14 @@ class MovieService:
                 old=IndexerQueryResult(title=previous.title,download_url='',seeders=3,flags=[],size=0,usenet=previous.usenet,age=0,indexer=None)
                 if rank(candidate)[:2]<=rank(old)[:2]:return False
 
+        from media_manager.release_control import automatic_manifest,attach
+        manifest=automatic_manifest(self,'movie',movie)
         torrent = self.torrent_service.download(indexer_result=available_torrents[0])
         movie_file = MovieFile(
             movie_id=movie.id,
             quality=torrent.quality,
             torrent_id=torrent.id,
-            file_path_suffix=QualityStrings[torrent.quality.name].value.upper(),
+            file_path_suffix='AUTO-'+str(torrent.id),
         )
         try:
             self.movie_repository.add_movie_file(movie_file=movie_file)
@@ -549,7 +567,9 @@ class MovieService:
             log.warning(
                 f"Movie file for movie {movie.name} and torrent {torrent.title} already exists"
             )
-        self.delete_movie_request(movie_request.id)
+            return False
+        attach(db,torrent.id,'movie',movie.id,manifest)
+        # Keep the request for completion tracking and per-account notifications.
         return True
 
     def get_movie_root_path(self, movie: Movie) -> Path:
@@ -661,6 +681,15 @@ class MovieService:
         ]
 
         if success and all(success):
+            from media_manager.release_control import finalize
+            from media_manager.library import video_files as list_videos
+            from media_manager.movies.models import MovieFile as StoredFile
+            new_paths=[p for p in list_videos(self.get_movie_root_path(movie)) if any(Path(p).stem.endswith(f.file_path_suffix) for f in movie_files)]
+            for f in movie_files:
+                record=self.movie_repository.db.get(StoredFile,(movie.id,f.file_path_suffix))
+                record.source_files=[str(p) for p in new_paths if Path(p).stem.endswith(f.file_path_suffix)]
+            self.movie_repository.db.commit()
+            finalize(self.movie_repository.db,torrent.id,new_paths)
             from media_manager.movies.models import Movie as LibraryModel
             self.movie_repository.db.get(LibraryModel,movie.id).request_only=False
             torrent.imported = True

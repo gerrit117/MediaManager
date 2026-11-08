@@ -471,6 +471,8 @@ class TvService:
         public_indexer_result_id: IndexerQueryResultId,
         show_id: ShowId,
         override_show_file_path_suffix: str = "",
+        replace_existing: bool = True,
+        override_lock: bool = False,
     ) -> Torrent:
         """
         Download a torrent for a given indexer result and show.
@@ -493,8 +495,27 @@ class TvService:
         if MediaManagerConfig().indexers.release_policy.enabled:
             candidates = self.get_all_available_torrents_for_a_season(indexer_result.season[0], show_id) if indexer_result.season else []
             validate_selection(indexer_result, [r for r in candidates if same_coverage(indexer_result,r)])
+        from media_manager.release_control import plan,attach
+        from media_manager.tv.models import Episode as StoredEpisode,SeasonFile as StoredFile
+        from sqlalchemy import select
+        db=self.tv_repository.db;paths=[];scopes=[]
+        for sn in indexer_result.season:
+            sd=self.tv_repository.get_season_by_number(season_number=sn,show_id=show_id)
+            selected=episode_numbers([indexer_result.title],sn)
+            eps=list(db.scalars(select(StoredEpisode).where(StoredEpisode.season_id==sd.id)))
+            scopes.extend(('episode',ep.id) for ep in eps if not selected or ep.number in selected)
+            scopes.append(('season',sd.id))
+            actual=library_video_files(self.get_root_season_directory(self.tv_repository.get_show_by_id(show_id),sn))
+            for record in db.scalars(select(StoredFile).where(StoredFile.season_id==sd.id)):
+                actual.extend(Path(p) for p in (record.source_files or []))
+            from fastapi import HTTPException
+            if replace_existing and selected and any(selected & episode_numbers([p],sn) and episode_numbers([p],sn)-selected for p in actual):raise HTTPException(409,'The existing file contains additional episodes. Select a release covering all of them to replace it safely.')
+            paths.extend(p for p in actual if not selected or selected & episode_numbers([p],sn))
+        manifest=plan(db,'show',show_id,paths,replace_existing,override_lock,scopes)
+        staging_prefix=override_show_file_path_suffix
         show_torrent = self.torrent_service.download(indexer_result=indexer_result)
         self.torrent_service.pause_download(torrent=show_torrent)
+        override_show_file_path_suffix=(staging_prefix[:70]+'-' if staging_prefix else '')+'MANUAL-'+str(show_torrent.id)
 
         try:
             for season_number in indexer_result.season:
@@ -521,6 +542,7 @@ class TvService:
             log.info(
                 f"Successfully added season files for torrent {show_torrent.title} and show ID {show_id}"
             )
+            attach(db,show_torrent.id,'show',show_id,manifest)
             self.torrent_service.resume_download(torrent=show_torrent)
 
         return show_torrent
@@ -543,6 +565,10 @@ class TvService:
         log.info(f"Downloading approved season request {season_request.id}")
 
         season = self.get_season(season_id=season_request.season_id)
+        from media_manager.release_control import locked
+        from media_manager.library_availability import season_presence
+        present=season_presence(self,show,season)
+        if present and (locked(self.tv_repository.db,'season',season.id) or any(locked(self.tv_repository.db,'episode',ep.id) for ep in season.episodes if ep.number in present)):return False
         from media_manager.tv.models import SeasonFile as StoredFile
         from media_manager.torrent.models import Torrent as StoredJob
         from sqlalchemy import select
@@ -590,12 +616,14 @@ class TvService:
                 old=IndexerQueryResult(title=previous.title,download_url='',seeders=3,flags=[],size=0,usenet=previous.usenet,age=0,indexer=None)
                 if rank(candidate)[:2]<=rank(old)[:2]:return False
 
+        from media_manager.release_control import automatic_manifest,attach
+        manifest=automatic_manifest(self,'show',show,season)
         torrent = self.torrent_service.download(indexer_result=available_torrents[0])
         season_file = SeasonFile(
             season_id=season.id,
             quality=torrent.quality,
             torrent_id=torrent.id,
-            file_path_suffix=QualityStrings[torrent.quality.name].value.upper(),
+            file_path_suffix='AUTO-'+str(torrent.id),
         )
         try:
             self.tv_repository.add_season_file(season_file=season_file)
@@ -603,7 +631,9 @@ class TvService:
             log.warning(
                 f"Season file for season {season.id} and quality {torrent.quality} already exists, skipping."
             )
-        self.delete_season_request(season_request.id)
+            return False
+        attach(db,torrent.id,'show',show.id,manifest)
+        # Keep the request for completion tracking and per-account notifications.
         return True
 
     def get_root_show_directory(self, show: Show) -> Path:
@@ -756,13 +786,13 @@ class TvService:
                 file_path_suffix=season_file.file_path_suffix,
                 wanted_episodes=season_file.episode_numbers,
             )
-            if season_import_success and season_file.episode_numbers:
+            if season_import_success:
                 from media_manager.tv.models import SeasonFile as FileModel, EpisodeDownload, Episode as EpisodeModel
                 from sqlalchemy import select
                 paths = library_video_files(self.get_root_season_directory(show, season.number))
-                paths = [p for p in paths if Path(p).stem.endswith(season_file.file_path_suffix) and set(season_file.episode_numbers) & episode_numbers([p],season.number)]
+                paths = [p for p in paths if Path(p).stem.endswith(season_file.file_path_suffix) and (not season_file.episode_numbers or set(season_file.episode_numbers) & episode_numbers([p],season.number))]
                 record = self.tv_repository.db.get(FileModel,(season.id,season_file.file_path_suffix))
-                record.source_files = paths
+                record.source_files = [str(p) for p in paths]
                 for job in self.tv_repository.db.scalars(select(EpisodeDownload).where(EpisodeDownload.torrent_id==torrent.id)):
                     job.status = 'imported'; job.error = None
                 self.tv_repository.db.commit()
@@ -781,6 +811,13 @@ class TvService:
         )
 
         if success and all(success):
+            from media_manager.release_control import finalize
+            from media_manager.tv.models import SeasonFile as StoredFile
+            new_paths=[]
+            for f in season_files:
+                record=self.tv_repository.db.get(StoredFile,(f.season_id,f.file_path_suffix))
+                new_paths.extend(record.source_files or [])
+            finalize(self.tv_repository.db,torrent.id,new_paths)
             from media_manager.tv.models import Show as LibraryModel
             self.tv_repository.db.get(LibraryModel,show.id).request_only=False
             torrent.imported = True

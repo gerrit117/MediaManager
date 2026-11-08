@@ -235,7 +235,7 @@ def create_movie_request(
 
     created=movie_service.add_movie_request(movie_request=movie_request)
     from media_manager.auth.mail import notify_admins
-    tasks.add_task(notify_admins,'New movie request',str(user.email)+': '+str(movie_request.movie_id))
+    # Durable request observer handles per-account notifications.
     return created
 
 
@@ -393,6 +393,8 @@ def download_torrent_for_movie(
     movie: movie_dep,
     public_indexer_result_id: IndexerQueryResultId,
     override_file_path_suffix: str = "",
+    replace_existing: bool = True,
+    override_lock: bool = False,
 ) -> Torrent:
     """
     Trigger a download for a specific torrent for a movie.
@@ -401,4 +403,5 @@ def download_torrent_for_movie(
         public_indexer_result_id=public_indexer_result_id,
         movie=movie,
         override_movie_file_path_suffix=override_file_path_suffix,
+        replace_existing=replace_existing,override_lock=override_lock,
     )

@@ -65,7 +65,7 @@ try:
  # A new process/session must retain the claim and avoid submitting the same episode again.
  with Session(engine) as db:
   svc=service(db);run_show(svc,svc.get_show_by_id(series_id));assert len(calls)==1
-  source=Path(tempfile.mkdtemp())/'Own.S01E02.mkv';source.write_bytes(b'own synthetic media')
+  source=Path(tempfile.mkdtemp())/'Own.S01E02.mkv';__import__('subprocess').run(['ffmpeg','-loglevel','error','-f','lavfi','-i','color=c=black:s=32x32:d=0.1','-c:v','ffv1',str(source)],check=True)
   module=importlib.import_module('media_manager.tv.service');original_files=module.get_files_for_import
   module.get_files_for_import=lambda **kwargs:([source],[],[source])
   try:svc.import_torrent_files(svc.torrent_service.torrent_repository.get_torrent_by_id(torrent_id),svc.get_show_by_id(series_id))

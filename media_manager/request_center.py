@@ -21,6 +21,8 @@ from media_manager.tv.dependencies import tv_service_dep
 from media_manager.movies.dependencies import movie_service_dep
 from media_manager.metadataProvider.dependencies import get_metadata_provider
 from media_manager.auth.mail import notify_admins
+from media_manager.media_features_models import RequestState
+from media_manager.config import MediaManagerConfig
 router=APIRouter()
 
 class Selection(BaseModel):
@@ -83,7 +85,7 @@ def submit(body:Selection,db:DbSessionDependency,tv:tv_service_dep,movies:movie_
         db.commit()
     except IntegrityError:db.rollback();raise HTTPException(409,'This title has already been requested. Refresh your requests.') from None
     except Exception:db.rollback();raise
-    tasks.add_task(notify_admins,'New media request',f'{user.email}: {media.name}')
+    # Request lifecycle notifications are emitted by the durable observer for every submission route.
     return {'request_ids':created,'authorized':bool(user.is_superuser or user.auto_approve_requests),'used':usage_count(db,user.id)}
 
 
@@ -114,8 +116,12 @@ def center(db:DbSessionDependency,tv:tv_service_dep,movies:movie_service_dep,use
                 required={e.number for e in db.scalars(select(Episode).where(Episode.season_id==season.id)) if e.air_date is None or e.air_date<=datetime.now(ZoneInfo('Europe/Berlin')).date()}
                 done=bool(required) and required<=presence[season.id]
         active=[t for t in associated if not t.imported]
-        state='finished' if done else 'running' if active else 'approved' if request.authorized else 'pending'
-        rows.append({'id':str(request.id),'kind':typ,'media_id':str(media.id),'name':media.name,'year':media.year,'season_number':season.number if season else None,'episode_number':episode.number if episode else None,'authorized':request.authorized,'requested_by_id':str(request.requested_by_id) if request.requested_by_id else None,'requested_by':db.get(User,request.requested_by_id).email if user.is_superuser and request.requested_by_id else None,'status':state,'job_ids':[str(t.id) for t in active],'percent':100 if done else None})
+        from media_manager.media_features_models import RequestState
+        delivery=db.get(RequestState,(typ,request.id))
+        rejected=bool(delivery and delivery.rejected and not request.authorized)
+        emby_available=delivery.emby_available if delivery else None
+        state='rejected' if rejected else 'finished' if done and (emby_available is True or not MediaManagerConfig().emby.enabled) else 'waiting_emby' if done else 'running' if active else 'approved' if request.authorized else 'pending'
+        rows.append({'id':str(request.id),'kind':typ,'media_id':str(media.id),'name':media.name,'year':media.year,'season_number':season.number if season else None,'episode_number':episode.number if episode else None,'authorized':request.authorized,'requested_by_id':str(request.requested_by_id) if request.requested_by_id else None,'requested_by':db.get(User,request.requested_by_id).email if user.is_superuser and request.requested_by_id else None,'status':state,'rejection_reason':delivery.reason if rejected else None,'emby_available':emby_available,'job_ids':[str(t.id) for t in active],'percent':100 if done else None})
     q=select(MovieRequest,Movie).join(Movie,MovieRequest.movie_id==Movie.id)
     if not user.is_superuser:q=q.where(MovieRequest.requested_by_id==user.id)
     for request,media in db.execute(q):add(request,media,'movie')
@@ -131,14 +137,30 @@ def center(db:DbSessionDependency,tv:tv_service_dep,movies:movie_service_dep,use
         row['progress']=[progress[j] for j in row['job_ids'] if j in progress]
         values=[p['percent'] for p in row['progress'] if p.get('percent') is not None]
         if values:row['percent']=min(values)
-    counts={s:sum(r['status']==s for r in rows) for s in ['pending','approved','running','finished']}
+    counts={s:sum(r['status']==s for r in rows) for s in ['pending','approved','running','waiting_emby','finished','rejected']}
     quota={'limit':None if user.is_superuser else user.monthly_request_limit,'used':usage_count(db,user.id),'resets_at':month_bounds()[1]}
     return {'requests':rows,'counts':counts,'quota':quota,'is_admin':user.is_superuser,'downloads':[dict(v,id=k,title=jobs[k].title) for k,v in progress.items()] if user.is_superuser else []}
 
 class Approval(BaseModel):
     authorized:bool
+    reason:str|None=Field(default=None,max_length=2000)
 @router.put('/center/{kind}/{request_id}',dependencies=[Depends(current_superuser)])
 def approve(kind:Literal['movie','season','episode'],request_id:UUID,body:Approval,db:DbSessionDependency,user:Annotated[User,Depends(current_superuser)]):
     model={'movie':MovieRequest,'season':SeasonRequest,'episode':EpisodeRequest}[kind];row=db.get(model,request_id)
     if not row:raise HTTPException(404,'Request not found.')
-    row.authorized=body.authorized;row.authorized_by_id=user.id if body.authorized else None;db.commit();return {'saved':True}
+    from media_manager.media_features_models import RequestState
+    from media_manager.account_notifications import enqueue,describe,now
+    from media_manager.tv.models import Season,Episode
+    if kind=='movie':media=db.get(Movie,row.movie_id);season=episode=None
+    elif kind=='season':season=db.get(Season,row.season_id);media=db.get(Show,season.show_id);episode=None
+    else:episode=db.get(Episode,row.episode_id);season=db.get(Season,episode.season_id);media=db.get(Show,season.show_id)
+    state=db.get(RequestState,(kind,row.id))
+    if state is None:state=RequestState(kind=kind,request_id=row.id,state='pending',rejected=False,reason=None,emby_available=None,first_seen=now());db.add(state)
+    changed=(row.authorized!=body.authorized) or (not body.authorized and not state.rejected)
+    row.authorized=body.authorized;row.authorized_by_id=user.id if body.authorized else None
+    state.rejected=not body.authorized;state.reason=(body.reason or '').strip() or None;state.state='approved' if body.authorized else 'rejected'
+    recipient=db.get(User,row.requested_by_id) if row.requested_by_id else None
+    if changed and recipient:
+        category='request_approved' if body.authorized else 'request_rejected';details=describe(db,media,row,season,episode);details['reason']=state.reason or ''
+        enqueue(db,f'{kind}:{row.id}:'+('approved' if body.authorized else 'rejected'),recipient,category,details)
+    db.commit();return {'saved':True}

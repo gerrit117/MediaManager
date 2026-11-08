@@ -58,7 +58,7 @@
 	{#await data.movies}
 		<LoadingBar />
 	{:then movies}
-		<MediaLibrary items={movies} isTv={false}/>
+		<MediaLibrary items={movies??[]} isTv={false}/>
 	{/await}
 	{#if importableMovies().length > 0}
 		<details open={!!match} class="rounded-xl border bg-card p-4"><summary class="cursor-pointer font-medium">{mmT($mmLocale,'Directories needing review')} ({importableMovies().length})</summary>
