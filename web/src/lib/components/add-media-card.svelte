@@ -22,12 +22,12 @@
 
     function showPreview() { errorMessage=null; previewOpen=true; }
 
-    async function addMedia() {
+    async function addMedia(searchMissing = false) {
         loading=true;errorMessage=null;
         try {
             let response;
             if(isShow){
-                response=await client.POST('/api/v1/tv/shows',{params:{query:{show_id:result.external_id,metadata_provider:result.metadata_provider as 'tmdb'|'tvdb',language:$mmLocale}}});
+                response=await client.POST('/api/v1/tv/shows',{params:{query:{show_id:result.external_id,metadata_provider:result.metadata_provider as 'tmdb'|'tvdb',language:$mmLocale,search_missing:searchMissing}}});
             }else{
                 response=await client.POST('/api/v1/movies',{params:{query:{movie_id:result.external_id,metadata_provider:result.metadata_provider as 'tmdb'|'tvdb',language:$mmLocale}}});
             }
@@ -80,7 +80,7 @@
 		{:else if !currentUser?.()?.is_superuser}
             <RequestMediaDialog {result} {isShow} triggerClass="h-14 min-h-14 leading-tight"/>
 		{:else}
-			<Button class="h-14 min-h-14 w-full whitespace-normal text-center text-xs font-semibold leading-tight sm:text-sm" disabled={loading} onclick={() => addMedia()}>
+			<Button class="h-14 min-h-14 w-full whitespace-normal text-center text-xs font-semibold leading-tight sm:text-sm" disabled={loading} onclick={isShow ? showPreview : () => addMedia()}>
 				{#if loading}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
 					<span class="animate-pulse">{mmT($mmLocale, "Loading..." )}</span>

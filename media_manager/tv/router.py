@@ -149,7 +149,9 @@ def add_a_show(
     tv_service: tv_service_dep,
     metadata_provider: metadata_provider_dep,
     show_id: int,
+    tasks: BackgroundTasks,
     language: str | None = None,
+    search_missing: bool = False,
 ) -> Show:
     """
     Add a new show to the library.
@@ -166,6 +168,14 @@ def add_a_show(
         )
         if not show:
             raise NotFoundError from MediaAlreadyExistsError
+    if search_missing:
+        from media_manager.tv.backfill import start
+
+        try:
+            start(show.id, None, tasks)
+        except HTTPException as error:
+            if error.status_code != 409:
+                raise
     return show
 
 
@@ -247,15 +257,35 @@ def update_shows_metadata(
     dependencies=[Depends(current_superuser)],
 )
 def set_continuous_download(
-    show: show_dep, tv_service: tv_service_dep, continuous_download: bool
+    show: show_dep, tv_service: tv_service_dep, continuous_download: bool,
+    tasks: BackgroundTasks, include_history: bool | None = None,
 ) -> PublicShow:
     """
     Toggle monitoring of newly aired episodes and seasons from activation.
     """
-    tv_service.set_show_continuous_download(
-        show=show, continuous_download=continuous_download
-    )
-    return tv_service.get_public_show_by_id(show=show)
+    from datetime import date, datetime
+    from zoneinfo import ZoneInfo
+
+    from media_manager.tv.backfill import start
+    from media_manager.tv.models import Show as StoredShow
+
+    db = tv_service.tv_repository.db
+    row = db.get(StoredShow, show.id)
+    was_enabled = row.continuous_download
+    had_history = row.monitor_from == date.min
+    row.continuous_download = continuous_download
+    if include_history is True:
+        row.monitor_from = date.min
+    elif include_history is False and (had_history or not was_enabled):
+        row.monitor_from = datetime.now(ZoneInfo("Europe/Berlin")).date()
+    db.commit()
+    if continuous_download and include_history and (not had_history or not was_enabled):
+        try:
+            start(show.id, None, tasks)
+        except HTTPException as error:
+            if error.status_code != 409:
+                raise
+    return tv_service.get_public_show_by_id(show=tv_service.get_show_by_id(show.id))
 
 
 @router.post(
@@ -492,12 +522,44 @@ def get_total_count_of_downloaded_episodes(tv_service: tv_service_dep) -> int:
     return tv_service.get_total_downloaded_episoded_count()
 
 
+@router.get("/shows/{show_id}/backfill", dependencies=[Depends(current_superuser)])
+def get_backfill_status(tv_show: show_dep) -> dict:
+    from media_manager.tv.backfill import status as backfill_status
+
+    return backfill_status(tv_show.id)
+
+
+@router.post("/shows/{show_id}/backfill", status_code=202, dependencies=[Depends(current_superuser)])
+def start_backfill(
+    tv_show: show_dep, tasks: BackgroundTasks,
+    season_number: int | None = None, episode_number: int | None = None,
+) -> dict:
+    from media_manager.tv.backfill import start
+
+    if season_number is not None or episode_number is not None:
+        season = next(
+            (item for item in tv_show.seasons if item.number == season_number and item.number > 0),
+            None,
+        )
+        if season is None:
+            raise HTTPException(422, "Season not found.")
+        if episode_number is not None and not any(
+            episode.number == episode_number for episode in season.episodes
+        ):
+            raise HTTPException(422, "Episode not found.")
+    start(tv_show.id, season_number, tasks, episode_number)
+    return {"status": "running"}
+
+
 @router.get('/shows/{show_id}/monitor', dependencies=[Depends(current_active_user)])
 def get_episode_monitor_status(tv_service: tv_service_dep, tv_show: show_dep):
     from sqlalchemy import select
     from media_manager.tv.models import EpisodeDownload, Episode, Season
     jobs=tv_service.tv_repository.db.scalars(select(EpisodeDownload).join(Episode).join(Season).where(Season.show_id==tv_show.id)).all()
-    return {'enabled':tv_show.continuous_download,'since':tv_show.monitor_from,
+    from datetime import date
+    include_history = tv_show.monitor_from == date.min
+    return {'enabled':tv_show.continuous_download,'since':None if include_history else tv_show.monitor_from,
+            'include_history':include_history,
             'submitted':sum(j.status=='submitted' for j in jobs),
             'imported':sum(j.status=='imported' for j in jobs),
             'uncertain':sum(j.status in {'submitting','uncertain'} for j in jobs),

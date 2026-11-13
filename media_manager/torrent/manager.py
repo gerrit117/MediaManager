@@ -88,6 +88,10 @@ class DownloadManager:
             raise InvalidConfigError(msg)
         return self._torrent_client
 
+    def supports_download(self, indexer_result: IndexerQueryResult) -> bool:
+        client = self._usenet_client if indexer_result.usenet else self._torrent_client
+        return client is not None
+
     def download(self, indexer_result: IndexerQueryResult) -> Torrent:
         """
         Download content using the appropriate client

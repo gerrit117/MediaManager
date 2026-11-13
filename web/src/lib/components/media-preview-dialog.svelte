@@ -8,15 +8,16 @@
  import type { components } from '$lib/api/api';
  let { open=$bindable(false), result, isShow, onAdd, adding=false, addError=null }: {
   open?:boolean; result:components['schemas']['MetaDataProviderSearchResult']; isShow:boolean;
-  onAdd:()=>Promise<void>; adding?:boolean; addError?:string|null;
+  onAdd:(searchMissing?:boolean)=>Promise<void>; adding?:boolean; addError?:string|null;
  }=$props();
  const user=getContext<()=>components['schemas']['UserRead']>('user');
+ let searchMissing = $state(false);
  let titleElement=$state<HTMLHeadingElement|null>(null);
  let metadata=$state<any>(null),error=$state(''),loading=$state(false);
  $effect(()=>{
   if(!open)return;
   const controller=new AbortController();
-  metadata=null;error='';loading=true;
+  metadata=null;error='';loading=true;searchMissing=false;
   fetch(`/api/v1/requests/preview/${isShow?'tv':'movie'}/${result.metadata_provider}/${result.external_id}?language=${$locale}`,{signal:controller.signal})
    .then(async response=>{const data=await response.json();if(!response.ok)throw Error(typeof data.detail==='string'?data.detail:'Could not load title metadata. Please try again.');return data;})
    .then(data=>{if(!controller.signal.aborted)metadata=data;})
@@ -47,7 +48,15 @@
     {#if addError}<p role="alert" class="text-sm text-destructive">{t($locale,addError)}</p>{/if}
     {#if result.added&&result.id}<Button class="min-h-11 w-full" href={resolve(isShow?'/dashboard/tv/[showId]':'/dashboard/movies/[movieId]',isShow?{showId:result.id}:{movieId:result.id})}>{t($locale,'Open in library')}</Button>
     {:else if !user?.()?.is_superuser}<RequestMediaDialog {result} {isShow}/>
-    {:else}<Button class="min-h-11 w-full" disabled={adding} onclick={onAdd}>{t($locale,adding?'Loading…':isShow?'Add series':'Add movie')}</Button>{/if}
+    {:else}
+     {#if isShow}
+      <label class="flex items-start gap-2 text-sm">
+       <input type="checkbox" class="mt-0.5 size-4" bind:checked={searchMissing} disabled={adding}/>
+       {t($locale, 'Search for missing episodes after adding')}
+      </label>
+     {/if}
+     <Button class="min-h-11 w-full" disabled={adding} onclick={() => onAdd(searchMissing)}>{t($locale,adding?'Loading…':isShow?'Add series':'Add movie')}</Button>
+    {/if}
    </div>
   </div>
  </Dialog.Content>

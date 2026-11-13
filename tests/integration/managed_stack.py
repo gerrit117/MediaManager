@@ -182,6 +182,13 @@ with Session(engine) as db:
  assert request(user,'/api/v1/requests/quota')[1]['used']==1
  episode_checks=(repo/'tests/integration/episode_checks.py').read_text().replace('SHOW_ID',repr(show))
  assert 'no backfill passed' in exec_python(episode_checks)
+ backfill_url='/api/v1/tv/shows/'+show+'/backfill'
+ assert request(user,backfill_url)[0]==403
+ assert request(user,backfill_url,method='POST')[0]==403
+ assert request(admin,backfill_url)[1]['status']=='idle'
+ assert request(admin,backfill_url+'?season_number=1&episode_number=9999',method='POST')[0]==422
+ backfill_checks=(repo/'tests/integration/backfill_checks.py').read_text()
+ assert 'concurrent jobs passed' in exec_python(backfill_checks)
  library_checks=(repo/'tests/integration/library_scan_checks.py').read_text().replace('ADMIN_PASSWORD',repr(password))
  assert 'manual review passed' in exec_python(library_checks)
  delivery_checks=(repo/'tests/integration/media_delivery_checks.py').read_text()
