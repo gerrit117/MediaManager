@@ -2795,6 +2795,7 @@ export interface operations {
 		parameters: {
 			query: {
 				show_id: number;
+				search_missing?: boolean;
 				language?: string | null;
 				metadata_provider?: 'tmdb' | 'tvdb';
 			};
@@ -2967,6 +2968,7 @@ export interface operations {
 		parameters: {
 			query: {
 				continuous_download: boolean;
+				include_history?: boolean;
 			};
 			header?: never;
 			path: {

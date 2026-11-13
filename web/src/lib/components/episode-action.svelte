@@ -17,7 +17,7 @@
  async function request(){busy=true;message='';try{await api('requests','POST',{episode_id:episode.id,min_quality:Number(min),wanted_quality:Number(wanted)});toast.success(t($locale,'Request submitted'));open=false;await invalidateAll();}catch(e){message=(e as Error).message;}finally{busy=false;}}
 </script>
 <Dialog.Root bind:open>
- <Dialog.Trigger class={buttonVariants({variant:'outline',size:'sm'})} onclick={()=>{message='';releases=null;}} disabled={episode.requested&&!user().is_superuser}>{t($locale,episode.requested&&!user().is_superuser?'Requested':user().is_superuser?'Search':'Request')}</Dialog.Trigger>
+ <Dialog.Trigger class={buttonVariants({variant:'outline',size:'sm'})} onclick={()=>{message='';releases=null;}} disabled={episode.requested&&!user().is_superuser}>{t($locale,episode.requested&&!user().is_superuser?'Requested':user().is_superuser?'Interactive search':'Request')}</Dialog.Trigger>
  <Dialog.Content class="max-h-[90vh] w-[calc(100vw-2rem)] max-w-4xl overflow-y-auto">
   <Dialog.Header><Dialog.Title>{showName} · S{String(seasonNumber).padStart(2,'0')}E{String(episode.number).padStart(2,'0')}</Dialog.Title><Dialog.Description>{episode.title} · {t($locale,'Release rules and monthly request policies apply.')}</Dialog.Description></Dialog.Header>
   {#if user().is_superuser}

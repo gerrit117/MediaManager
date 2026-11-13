@@ -1,7 +1,7 @@
 """Persistent episode monitoring. Network ambiguity never causes an automatic resubmission."""
 import hashlib
 import logging
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from sqlalchemy import select, text
@@ -48,7 +48,8 @@ def run_show(service, show):
     if not row.continuous_download:return
     if row.monitor_from is None:
         row.monitor_from=current.date();db.commit()
-    since=row.monitor_from
+    include_history = row.monitor_from == date.min
+    since = current.date() - timedelta(days=7) if include_history else row.monitor_from
     # Refresh airing dates every six hours, independently of the weekly library refresh.
     if row.monitor_checked_at is None or current-row.monitor_checked_at > timedelta(hours=6):
         from media_manager.metadataProvider.tmdb import TmdbMetadataProvider
@@ -58,6 +59,12 @@ def run_show(service, show):
         if updated is None:return
         show=updated
         row=db.get(Show,show.id);row.monitor_checked_at=current;db.commit()
+    if include_history:
+        from media_manager.tv.backfill import run_history
+
+        db.commit()
+        run_history(show.id)
+        db.expire_all()
     for season in show.seasons:
         if season.number<=0 or not any(e.air_date is not None and since<=e.air_date<=current.date() for e in season.episodes):continue
         season_results=None

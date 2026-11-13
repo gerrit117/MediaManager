@@ -862,3 +862,19 @@ Matched	Zugeordnet
 Not matched	Nicht zugeordnet
 Emby library matching completed.	Emby-Bibliotheksabgleich abgeschlossen.
 Emby library matching failed; existing matches were retained.	Emby-Bibliotheksabgleich fehlgeschlagen; vorhandene Zuordnungen bleiben erhalten.
+Search for missing episodes after adding	Nach dem Hinzufügen nach fehlenden Folgen suchen
+Find and download missing episodes	Fehlende Folgen suchen und laden
+Searching indexers…	Indexer werden durchsucht …
+Search interrupted. Start it again to check the remaining episodes.	Suche unterbrochen. Starte sie erneut, um die übrigen Folgen zu prüfen.
+Episodes queued	Folgen vorgemerkt
+Episodes without a suitable release	Folgen ohne passendes Release
+No missing aired episodes to queue.	Keine fehlenden ausgestrahlten Folgen zum Laden.
+Missing episode search failed. Check the server logs.	Die Suche nach fehlenden Folgen ist fehlgeschlagen. Prüfe die Serverprotokolle.
+A missing episode search is already running.	Es läuft bereits eine Suche nach fehlenden Folgen.
+Submission could not be confirmed. Check Downloads before retrying.	Der Downloadauftrag konnte nicht bestätigt werden. Prüfe die Downloads vor einem erneuten Versuch.
+Configure an indexer before searching for missing episodes.	Richte zuerst einen Indexer ein, um nach fehlenden Folgen zu suchen.
+Automatic search	Automatisch suchen
+Interactive search	Interaktiv suchen
+Checks for new episodes every 30 minutes.	Prüft alle 30 Minuten auf neue Folgen.
+Include previously aired missing episodes	Ältere fehlende Folgen einbeziehen
+Starts a search now and checks older gaps every six hours.	Startet jetzt eine Suche und prüft ältere Lücken alle sechs Stunden erneut.

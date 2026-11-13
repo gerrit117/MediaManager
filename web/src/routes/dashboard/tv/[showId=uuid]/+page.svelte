@@ -1,8 +1,9 @@
 <script lang="ts">
  import ReleaseProtection from '$lib/components/release-protection.svelte';
     import {onMount} from 'svelte';
+    import MissingEpisodesSearch from '$lib/components/missing-episodes-search.svelte';
     import SeriesSeasons from '$lib/components/series-seasons.svelte';
-    let monitorStatus = $state<any>(null);
+    let monitorStatus = $state<{since?: string; include_history?: boolean; uncertain?: number; missing_dates?: number} | null>(null);
     onMount(async()=>{try{const r=await fetch('/api/v1/tv/shows/'+show.id+'/monitor');if(r.ok)monitorStatus=await r.json();}catch{}});
 
 	import {locale as mmLocale,t as mmT} from '$lib/i18n';
@@ -38,21 +39,27 @@
 	let continuousDownloadEnabled = $derived(show.continuous_download);
 
 	let monitorBusy=$state(false);
-    async function toggle_continuous_download() {
-        if(monitorBusy)return;
-        monitorBusy=true;
-        const desired=!continuousDownloadEnabled;
+    async function updateMonitoring(enabled: boolean, includeHistory?: boolean) {
+        if (monitorBusy) return;
+        monitorBusy = true;
         try {
-            const {response}=await client.POST('/api/v1/tv/shows/{show_id}/continuousDownload',{
-                params:{path:{show_id:show.id},query:{continuous_download:desired}}
+            const { response } = await client.POST('/api/v1/tv/shows/{show_id}/continuousDownload', {
+                params: { path: { show_id: show.id }, query: {
+                    continuous_download: enabled, include_history: includeHistory,
+                } },
             });
-            if(!response.ok)throw new Error();
-            continuousDownloadEnabled=desired;
-            try{const r=await fetch('/api/v1/tv/shows/'+show.id+'/monitor');if(r.ok)monitorStatus=await r.json();}catch{}
-            toast.success(mmT($mmLocale,'Monitoring updated.'));
-        }catch{toast.error(mmT($mmLocale,'Monitoring could not be updated.'));}
-        finally{monitorBusy=false;}
+            if (!response.ok) throw new Error();
+            continuousDownloadEnabled = enabled;
+            const result = await fetch('/api/v1/tv/shows/' + show.id + '/monitor');
+            if (result.ok) monitorStatus = await result.json();
+            toast.success(mmT($mmLocale, 'Monitoring updated.'));
+        } catch {
+            toast.error(mmT($mmLocale, 'Monitoring could not be updated.'));
+        } finally {
+            monitorBusy = false;
+        }
     }
+
 
 </script>
 
@@ -131,11 +138,10 @@
 						<Card.Title>{mmT($mmLocale, "Administrator Controls" )}</Card.Title>
 					</Card.Header>
 					<Card.Content class="flex flex-col items-center gap-4">
-						{#if !show.ended}
 							<div class="flex items-center gap-3">
 								<Switch
                                     disabled={monitorBusy}
-									bind:checked={() => continuousDownloadEnabled, toggle_continuous_download}
+									bind:checked={() => continuousDownloadEnabled, (enabled) => updateMonitoring(enabled)}
 									id="continuous-download-checkbox"
 								/>
 								<Label for="continuous-download-checkbox">
@@ -144,10 +150,20 @@
                                     {#if monitorStatus?.uncertain}<span role="alert" class="block text-xs text-destructive">{mmT($mmLocale,'A submission could not be confirmed. Check the downloader before retrying; automatic resubmission is blocked.')}</span>{/if}
                                     {#if monitorStatus?.missing_dates}<span class="block text-xs text-muted-foreground">{mmT($mmLocale,'Episodes without an air date are skipped until metadata is available.')}</span>{/if}
 
-                                    <span class="block text-xs text-muted-foreground">{mmT($mmLocale,"Searches every 30 minutes for aired episodes from activation onward, including weekly releases. Existing files and active downloads are skipped; improved language/resolution can be upgraded.")}</span>
+                                    <span class="block text-xs text-muted-foreground">{mmT($mmLocale, "Checks for new episodes every 30 minutes.")}</span>
 								</Label>
 							</div>
-						{/if}
+                            {#if continuousDownloadEnabled}
+                                <label class="flex w-full items-start gap-2 text-sm">
+                                    <input type="checkbox" class="mt-0.5 size-4" checked={!!monitorStatus?.include_history}
+                                        disabled={monitorBusy || !monitorStatus}
+                                        onchange={(event) => updateMonitoring(true, event.currentTarget.checked)} />
+                                    <span>
+                                        {mmT($mmLocale, 'Include previously aired missing episodes')}
+                                        <span class="block text-xs text-muted-foreground">{mmT($mmLocale, 'Starts a search now and checks older gaps every six hours.')}</span>
+                                    </span>
+                                </label>
+                            {/if}
 						<LibraryCombobox media={show} mediaType="tv" />
 						<DeleteMediaDialog isShow={true} media={show} />
 					</Card.Content>
@@ -159,7 +175,8 @@
 				</Card.Header>
 				<Card.Content class="flex flex-col items-center gap-4">
 					{#if user().is_superuser}
-						<DownloadSeasonDialog {show} />
+						<MissingEpisodesSearch showId={show.id} />
+						<DownloadSeasonDialog {show} triggerText="Interactive search" />
 					{:else}
 						<RequestSeasonDialog {show} />
 					{/if}
