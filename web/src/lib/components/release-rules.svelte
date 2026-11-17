@@ -16,6 +16,9 @@
      {#if field.kind==='bool'}<input id={'release-'+field.key} type="checkbox" class="size-5" bind:checked={field.value} disabled={busy||field.environment}/>{/if}
      {t($locale,field.label)}
     </label>
+    {#if field.key.endsWith('exclude_dolby_vision_without_hdr')}
+     <p class="text-sm text-muted-foreground">{t($locale,'Checks release names for DV or Dolby Vision and an HDR/HDR10 fallback. Release names cannot guarantee the actual video format.')}</p>
+    {/if}
     {#if field.kind==='list'}
      {#if !field.key.endsWith('excluded_tags')}
       <ol class="space-y-2">

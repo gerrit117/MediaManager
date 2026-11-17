@@ -65,6 +65,7 @@ FIELDS: list[tuple[str, str, str]] = [
  ('indexers.release_policy.resolutions','Resolution priority (2160p, 1080p, 720p, 480p)','list'),
  ('indexers.release_policy.excluded_tags','Excluded release tags','list'),
  ('indexers.release_policy.allow_unknown_language','Allow releases with unidentified language','bool'),
+ ('indexers.release_policy.exclude_dolby_vision_without_hdr','Exclude Dolby Vision releases without HDR fallback','bool'),
  ('misc.movie_directory','Filme','path'),('misc.tv_directory','Serien','path'),('misc.torrent_directory','Abgeschlossene Downloads (Containerpfad)','path'),('misc.image_directory','Vorschaubilder','path'),('misc.frontend_url','Public WebUI URL (email links)','text'),
  ('metadata.tmdb.api_key','TMDB API key (optional)','secret'),
  ('metadata.tmdb.default_language','Metadaten: Standardsprache','text'),('metadata.tmdb.primary_languages','Metadaten: bevorzugte Sprachen (z. B. de,en)','list'),

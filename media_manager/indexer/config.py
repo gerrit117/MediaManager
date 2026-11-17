@@ -43,6 +43,7 @@ class ReleasePolicyConfig(BaseSettings):
     resolutions: list[str] = ["2160p", "1080p", "720p", "480p"]
     excluded_tags: list[str] = ["remux", "cam", "camrip", "hdcam", "telesync", "ts", "hdts", "telecine", "tc", "md", "micdubbed", "bdremux", "uhdremux"]
     allow_unknown_language: bool = False
+    exclude_dolby_vision_without_hdr: bool = True
 
     @model_validator(mode="after")
     def valid_preferences(self):

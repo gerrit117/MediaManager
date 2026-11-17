@@ -509,6 +509,9 @@ Enforce release rules for every download	Release-Regeln bei jedem Download durch
 Language priority (de, en)	Sprachpriorität (de, en)
 Resolution priority (2160p, 1080p, 720p, 480p)	Auflösungspriorität (2160p, 1080p, 720p, 480p)
 Excluded release tags	Ausgeschlossene Release-Tags
+Exclude Dolby Vision releases without HDR fallback	Dolby-Vision-Releases ohne HDR-Fallback ausschließen
+Checks release names for DV or Dolby Vision and an HDR/HDR10 fallback. Release names cannot guarantee the actual video format.	Prüft Release-Namen auf DV oder Dolby Vision und einen HDR-/HDR10-Fallback. Der Name garantiert das tatsächliche Videoformat nicht.
+Dolby Vision release has no HDR fallback in its title.	Dolby-Vision-Release enthält keinen HDR-Fallback im Namen.
 Allow releases with unidentified language	Releases mit nicht erkennbarer Sprache zulassen
 Monitor new episodes and seasons	Neue Folgen und Staffeln überwachen
 Searches every 30 minutes for aired episodes from activation onward, including weekly releases. Existing files and active downloads are skipped; improved language/resolution can be upgraded.	Sucht alle 30 Minuten nach ausgestrahlten Folgen ab der Aktivierung, auch bei wöchentlichen Veröffentlichungen. Vorhandene Dateien und laufende Downloads werden berücksichtigt; bessere Sprache oder Auflösung kann ein Upgrade auslösen.

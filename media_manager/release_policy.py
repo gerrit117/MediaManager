@@ -7,6 +7,12 @@ from media_manager.library import episode_numbers
 
 QUALITY = {1: '2160p', 2: '1080p', 3: '720p', 4: '480p', 5: 'unknown'}
 
+def dolby_vision_without_hdr(title):
+    # Match standalone tags, not e.g. DVDRip, HDRip or an unrelated word.
+    dv = re.search(r'(?i)(?<![a-z0-9])(?:dv|dovi|dolby[ ._-]*vision)(?![a-z0-9])', title)
+    hdr = re.search(r'(?i)(?<![a-z0-9])hdr(?:10(?:\+)?)?(?![a-z0-9])', title)
+    return bool(dv and not hdr)
+
 def language(title):
     if re.search(r'(?i)(?<![a-z0-9])(german|ger|deu|de)(?![a-z0-9])', title): return 'de'
     if re.search(r'(?i)(?<![a-z0-9])(english|eng|en)(?![a-z0-9])', title): return 'en'
@@ -16,6 +22,8 @@ def language(title):
 def rejection(result, config=None):
     cfg = config or MediaManagerConfig().indexers.release_policy
     if not cfg.enabled: return None
+    if cfg.exclude_dolby_vision_without_hdr and dolby_vision_without_hdr(result.title):
+        return 'Dolby Vision release has no HDR fallback in its title.'
     for tag in cfg.excluded_tags:
         pattern = r'(?i)(?<![a-z0-9])'+re.escape(tag).replace(r'\ ',r'[ ._-]*')+r'(?![a-z0-9])'
         if re.search(pattern,result.title): return 'Excluded release tag: '+tag

@@ -48,6 +48,21 @@ def test_web_preference_order_changes_selection(policy):
  choices=[release('Own.German.2160p'),release('Own.English.2160p'),release('Own.English.1080p')]
  assert allowed_results(choices)[0].title==choices[2].title
 
+@pytest.mark.parametrize('name,blocked', [
+ ('Own.German.2160p.DV.WEB', True), ('Own.German.2160p.DOVI.WEB', True),
+ ('Own.German.2160p.Dolby.Vision.WEB', True), ('Own.German.2160p.DV.HDR10.WEB', False),
+ ('Own.German.2160p.DV.HDR.WEB', False), ('Own.German.2160p.DV.HDR10+.WEB', False),
+ ('Own.German.2160p.DV.HDRip', True), ('Own.German.1080p.DVDRip', False),
+])
+def test_dolby_vision_fallback_filter(policy, name, blocked):
+ r=release(name)
+ assert (rejection(r) is not None) == blocked
+ assert bool(allowed_results([r])) != blocked
+ if blocked:
+  with pytest.raises(HTTPException): validate_selection(r,[])
+ policy.exclude_dolby_vision_without_hdr=False
+ assert rejection(r) is None
+
 
 def test_usenet_has_no_seeder_requirement(policy):
  assert len(allowed_results([release('Own.German.1080p',True),release('Own.German.1080p',False)]))==2
